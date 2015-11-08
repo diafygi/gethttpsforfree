@@ -14,13 +14,15 @@ Released under MIT License. Enjoy!
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style>
         *{box-sizing:border-box;}
-        div{margin:10px 0px;}
+        div{margin:15px 0px;}
         .field{width:100%;max-width:600px;}
+        li{margin-bottom:10px;}
         input[type="text"]{width:100%;}
         textarea{width:100%;height:120px;}
         .help{float:right;font-size:12px;}
         .help-content{display:inline-block;width:100%;max-width:600px;margin:5px 0px 10px 0px;padding:10px;background-color:#eeeeee;}
-        code{display:inline-block;margin:5px 0px;padding: 5px;background-color:#ffffff;}
+        code{display:inline-block;margin:5px 0px;padding:5px;background-color:#ffffff;}
+        pre{margin:5px 0px;padding:5px;overflow:auto;background-color:#ffffff;}
         .footer{font-size:12px;}
     </style>
     <script src="js/asn1js/int10.js"></script>
@@ -155,8 +157,25 @@ Released under MIT License. Enjoy!
 
         <div class="field">
             <a id="howto_sign" class="help" href="#">(how do I do this?)</a>
-            <label>Run these signatures in your terminal:</label><br/>
-            <span id="howto_sign_content" class="help-content" style="display:none;"></span>
+            <label>Run these signature commands in your terminal:</label><br/>
+            <span id="howto_sign_content" class="help-content" style="display:none;">
+                How to generate the needed signatures:<br/>
+                <ol>
+                    <li>
+                        Navigate in the terminal to the directory with account private
+                        key ("account.key" or whatever you named it).
+                    </li>
+                    <li>
+                        Copy and paste each command below into your terminal (if your
+                        account private key isn't named "account.key", change "account.key"
+                        in the command to whatever you named it).
+                    </li>
+                    <li>
+                        Copy and paste the base64 encoded signature output from the command
+                        into the text field below that command.
+                    </li>
+                </ol>
+            </span>
             <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
             <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input><br/><br/>
             <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
@@ -196,51 +215,62 @@ Released under MIT License. Enjoy!
         <h3>Domain: foobar.com</h3>
 
         <div class="field">
+            <a id="howto_sign2" class="help" href="#">(how do I do this?)</a>
+            <label>Run this signature command in your terminal:</label><br/>
+            <span id="howto_sign2_content" class="help-content" style="display:none;">
+                How to generate the needed signatures:<br/>
+                <ol>
+                    <li>
+                        Navigate in the terminal to the directory with account private
+                        key ("account.key" or whatever you named it).
+                    </li>
+                    <li>
+                        Copy and paste each command below into your terminal (if your
+                        account private key isn't named "account.key", change "account.key"
+                        in the command to whatever you named it).
+                    </li>
+                    <li>
+                        Copy and paste the base64 encoded signature output from the command
+                        into the text field below that command.
+                    </li>
+                </ol>
+            </span>
+            <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
+            <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
+        </div>
+
+        <div class="field">
             <a id="howto_serve2" class="help" href="#">(how do I do this?)</a>
             <label for="challenge_foobarcom">Run this command on <span>foobar.com</span>:</label><br/>
-            <span id="howto_serve2_content" class="help-content" style="display:none;"></span>
+            <span id="howto_serve2_content" class="help-content" style="display:none;">
+                How to serve the challenge response on your domain:<br/>
+                <ol>
+                    <li>
+                        SSH into your domain as someone with sudo permissions:<br/>
+                        <code>ssh ubuntu@foo.com</code>
+                    </li>
+                    <li>
+                        Stop any webserver running on port 80, if any. If you had previously
+                        been running another python command, you can kill it with Ctrl+C):<br/>
+                        <code>sudo service nginx stop</code> &lt;-- example for nginx<br/>
+                        <code>sudo apachectl -k graceful-stop</code> &lt;-- example for apache
+                    </li>
+                    <li>
+                        Copy and paste the python command below into your terminal. This
+                        command starts a temporary webserver that serves nothing but the
+                        challenge response. You only need to keep this running briefly.
+                    </li>
+                    <li>
+                        Click "I'm now running this command..." when the file is being
+                        served on your domain.
+                    </li>
+                </ol>
+            </span>
             <textarea readonly>sudo python ...</textarea>
         </div>
 
         <div class="field">
             <input type="submit" value="I'm now running this command on foobar.com"/>
-        </div>
-
-        <div class="field">
-            <a id="howto_sign2" class="help" href="#">(how do I do this?)</a>
-            <label>Run this signature in your terminal:</label><br/>
-            <span id="howto_sign2_content" class="help-content" style="display:none;"></span>
-            <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
-            <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
-        </div>
-
-        <div class="field">
-            <input type="submit" value="Verify ownership for foobar.com"/>
-        </div>
-
-        <h3>Domain: www.foobar.com</h3>
-
-        <div class="field">
-            <a id="howto_serve3" class="help" href="#">(how do I do this?)</a>
-            <label for="challenge_wwwfoobarcom">Run this command on <span>www.foobar.com</span>:</label><br/>
-            <span id="howto_serve3_content" class="help-content" style="display:none;"></span>
-            <textarea readonly>sudo python ...</textarea>
-        </div>
-
-        <div class="field">
-            <input type="submit" value="I'm now running this command on www.foobar.com"/>
-        </div>
-
-        <div class="field">
-            <a id="howto_sign3" class="help" href="#">(how do I do this?)</a>
-            <label>Run this signature in your terminal:</label><br/>
-            <span id="howto_sign3_content" class="help-content" style="display:none;"></span>
-            <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
-            <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
-        </div>
-
-        <div class="field">
-            <input type="submit" value="Verify ownership for www.foobar.com"/>
         </div>
     </div>
 
@@ -259,7 +289,53 @@ Released under MIT License. Enjoy!
         <div class="field">
             <a id="howto_install" class="help" href="#">(how do I install this?)</a>
             <label for="csr">Signed Certificate:</label><br/>
-            <span id="howto_install_content" class="help-content" style="display:none;"></span>
+            <span id="howto_install_content" class="help-content" style="display:none;">
+                How to install https on nginx:<br/>
+                <ol>
+                    <li>
+                        Copy and paste both the below domain certificate and the below
+                        intermediate certificate into the same text file called "chained.pem".
+                    </li>
+                    <li>
+                        If not done already, generate non-default dhparams.<br/>
+                        <code>openssl dhparam -out dhparam.pem 4096</code>
+                    </li>
+                    <li>
+                        Copy "chained.pem" and "dhparam.pem" to /etc/ssl/certs/.<br/>
+                        <pre>
+scp chained.pem root@foo.com:/etc/ssl/certs/chained.pem
+scp dhparam.pem root@foo.com:/etc/ssl/certs/dhparam.pem
+</pre>
+                    </li>
+                    <li>
+                        Copy "domain.key" /etc/ssl/private/.<br/>
+                        <code>scp chained.pem root@foo.com:/etc/ssl/private/domain.key</code><br/>
+                    </li>
+                    <li>
+                        Update your nginx config to use https (below is an example).
+                        <pre>
+server {
+    listen 443;
+    server_name foo.com;
+    ssl on;
+    ssl_certificate /etc/ssl/certs/chained.pem;
+    ssl_certificate_key /etc/ssl/private/domain.key;
+    ssl_session_timeout 5m;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA;
+    ssl_session_cache shared:SSL:50m;
+    ssl_dhparam /etc/ssl/certs/dhparam.pem;
+    ssl_prefer_server_ciphers on;
+
+    location / {
+        return 200 'Hello world!';
+        add_header Content-Type text/plain;
+    }
+}
+</pre>
+                    </li>
+                </ol>
+            </span>
             <textarea readonly>
             -----BEGIN CERTIFICATE-----
             AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA

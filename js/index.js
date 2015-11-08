@@ -3,22 +3,23 @@
 var CONTACT_EMAIL, // "bar@foo.com"
     CONTACT_PUBKEY, // {
                     //   "pubkey": "-----BEGIN PUBLIC KEY...",
-                    //   "sig": "deadbeef...",
-                    //   "jwk": {...}
+                    //   "jwk": {...},
+                    //   "data": "deadbeef...",
+                    //   "sig": "deadbeef..."
                     // }
     CSR, // {
          //   "csr": "-----BEGIN CERTIFICATE REQUEST...",
-         //   "nonce": "deadbeef...",
+         //   "data": "deadbeef...",
          //   "sig": "deadbeef...",
          // }
     DOMAINS, // {
              //   "www.foo.com": {
-             //     "request_nonce": "deadbeef...",
+             //     "request_data": "deadbeef...",
              //     "request_sig": "deadbeef...",
-             //     "response_nonce": "deadbeef...",
+             //     "response_data": "deadbeef...",
              //     "response_sig": "deadbeef...",
              //     "confirm": True,
-             //     "verify_nonce": "deadbeef...",
+             //     "verify_data": "deadbeef...",
              //     "verify_sig": "deadbeef...",
              //   },
              //   ...
@@ -28,7 +29,6 @@ var CONTACT_EMAIL, // "bar@foo.com"
 // hide/show the help content
 function helpContent(e){
     e.preventDefault();
-    console.log(e.target.id + "_content");
     var help = document.getElementById(e.target.id + "_content");
     help.style.display = help.style.display === "none" ? "" : "none";
 }
