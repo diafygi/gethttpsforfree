@@ -111,148 +111,154 @@ Released under MIT License. Enjoy!
     <!--#####################-->
     <!--##  Sign Requests  ##-->
     <!--#####################-->
-    <h2>Step 3: Sign API Requests</h2>
-    <p>
-        Let's Encrypt requires that you sign all of your requests to them with your
-        contact private key. Below are the requests that you will need to sign. The
-        commands to do this are generated below so you can copy-and-paste them into your
-        terminal. <i>Be sure to change the contact private key location so it points to
-        your real private key.</i>
-    </p>
+    <h2>Step 3: Sign API Requests<span id="step3_pending"> (waiting...)</span></h2>
+    <div id="step3" style="display:none;">
+        <p>
+            Let's Encrypt requires that you sign all of your requests to them with your
+            contact private key. Below are the requests that you will need to sign. The
+            commands to do this are generated below so you can copy-and-paste them into your
+            terminal. <i>Be sure to change the contact private key location so it points to
+            your real private key.</i>
+        </p>
 
-    <p class="field">
-        <a id="howto_sign1" class="help" href="#">(how do I do this?)</a>
-        <label>Run these signatures in your terminal:</label><br/>
-        <span id="howto_sign1_content" class="help-content" style="display:none;"></span>
-        <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
-        <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input><br/><br/>
-        <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
-        <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input><br/><br/>
-        <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
-        <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input><br/><br/>
-        <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
-        <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
-    </p>
+        <p class="field">
+            <a id="howto_sign1" class="help" href="#">(how do I do this?)</a>
+            <label>Run these signatures in your terminal:</label><br/>
+            <span id="howto_sign1_content" class="help-content" style="display:none;"></span>
+            <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
+            <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input><br/><br/>
+            <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
+            <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input><br/><br/>
+            <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
+            <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input><br/><br/>
+            <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
+            <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
+        </p>
 
-    <p class="field">
-        <input type="submit" value="Validate Signatures"/>
-    </p>
+        <p class="field">
+            <input type="submit" value="Validate Signatures"/>
+        </p>
+    </div>
 
     <hr/>
 
     <!--##################-->
     <!--##  Challenges  ##-->
     <!--##################-->
-    <h2>Step 4: Verify Ownership</h2>
-    <p>
-        Let's Encrypt requires you prove you own the domains you have in your CSR. You
-        can do this by serving a specific file at a specific url under your domains.
-        Below are the files you need to serve along with some copy-and-paste commands
-        you can run on your website to start serving the file. Once you are serving
-        the file on your website, click "I'm now running this on...". After that, you
-        need to tell Let's Encrypt to check the above files to verify ownership of your
-        domains. This request needs to be signed with your contact private key. Below
-        are the verification requests that you will need to sign. The commands to do
-        this are generated below so you can copy-and-paste them into your terminal.
-        <i>Be sure to change the contact private key location so it points to your real
-        private key.</i>
-    </p>
+    <h2>Step 4: Verify Ownership<span id="step4_pending"> (waiting...)</span></h2>
+    <div id="step4" style="display:none;">
+        <p>
+            Let's Encrypt requires you prove you own the domains you have in your CSR. You
+            can do this by serving a specific file at a specific url under your domains.
+            Below are the files you need to serve along with some copy-and-paste commands
+            you can run on your website to start serving the file. Once you are serving
+            the file on your website, click "I'm now running this on...". After that, you
+            need to tell Let's Encrypt to check the above files to verify ownership of your
+            domains. This request needs to be signed with your contact private key. Below
+            are the verification requests that you will need to sign. The commands to do
+            this are generated below so you can copy-and-paste them into your terminal.
+            <i>Be sure to change the contact private key location so it points to your real
+            private key.</i>
+        </p>
 
-    <h3>Domain: foobar.com</h3>
+        <h3>Domain: foobar.com</h3>
 
-    <p class="field">
-        <a id="howto_serve2" class="help" href="#">(how do I do this?)</a>
-        <label for="challenge_foobarcom">Run this command on <span>foobar.com</span>:</label><br/>
-        <span id="howto_serve2_content" class="help-content" style="display:none;"></span>
-        <textarea readonly>sudo python ...</textarea>
-    </p>
+        <p class="field">
+            <a id="howto_serve2" class="help" href="#">(how do I do this?)</a>
+            <label for="challenge_foobarcom">Run this command on <span>foobar.com</span>:</label><br/>
+            <span id="howto_serve2_content" class="help-content" style="display:none;"></span>
+            <textarea readonly>sudo python ...</textarea>
+        </p>
 
-    <p class="field">
-        <input type="submit" value="I'm now running this command on foobar.com"/>
-    </p>
+        <p class="field">
+            <input type="submit" value="I'm now running this command on foobar.com"/>
+        </p>
 
-    <p class="field">
-        <a id="howto_sign2" class="help" href="#">(how do I do this?)</a>
-        <label>Run this signature in your terminal:</label><br/>
-        <span id="howto_sign2_content" class="help-content" style="display:none;"></span>
-        <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
-        <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
-    </p>
+        <p class="field">
+            <a id="howto_sign2" class="help" href="#">(how do I do this?)</a>
+            <label>Run this signature in your terminal:</label><br/>
+            <span id="howto_sign2_content" class="help-content" style="display:none;"></span>
+            <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
+            <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
+        </p>
 
-    <p class="field">
-        <input type="submit" value="Verify ownership for foobar.com"/>
-    </p>
+        <p class="field">
+            <input type="submit" value="Verify ownership for foobar.com"/>
+        </p>
 
-    <h3>Domain: www.foobar.com</h3>
+        <h3>Domain: www.foobar.com</h3>
 
-    <p class="field">
-        <a id="howto_serve3" class="help" href="#">(how do I do this?)</a>
-        <label for="challenge_wwwfoobarcom">Run this command on <span>www.foobar.com</span>:</label><br/>
-        <span id="howto_serve3_content" class="help-content" style="display:none;"></span>
-        <textarea readonly>sudo python ...</textarea>
-    </p>
+        <p class="field">
+            <a id="howto_serve3" class="help" href="#">(how do I do this?)</a>
+            <label for="challenge_wwwfoobarcom">Run this command on <span>www.foobar.com</span>:</label><br/>
+            <span id="howto_serve3_content" class="help-content" style="display:none;"></span>
+            <textarea readonly>sudo python ...</textarea>
+        </p>
 
-    <p class="field">
-        <input type="submit" value="I'm now running this command on www.foobar.com"/>
-    </p>
+        <p class="field">
+            <input type="submit" value="I'm now running this command on www.foobar.com"/>
+        </p>
 
-    <p class="field">
-        <a id="howto_sign3" class="help" href="#">(how do I do this?)</a>
-        <label>Run this signature in your terminal:</label><br/>
-        <span id="howto_sign3_content" class="help-content" style="display:none;"></span>
-        <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
-        <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
-    </p>
+        <p class="field">
+            <a id="howto_sign3" class="help" href="#">(how do I do this?)</a>
+            <label>Run this signature in your terminal:</label><br/>
+            <span id="howto_sign3_content" class="help-content" style="display:none;"></span>
+            <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
+            <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
+        </p>
 
-    <p class="field">
-        <input type="submit" value="Verify ownership for www.foobar.com"/>
-    </p>
+        <p class="field">
+            <input type="submit" value="Verify ownership for www.foobar.com"/>
+        </p>
+    </div>
 
     <hr/>
 
     <!--#########################-->
     <!--##  Issue Certificate  ##-->
     <!--#########################-->
-    <h2>Step 5: Install Certificate</h2>
-    <p>
-        Congratulations! Let's Encrypt has issued you a certificate for your domains!
-        Below is the signed certificate you can use on your website to
-    </p>
+    <h2>Step 5: Install Certificate<span id="step5_pending"> (waiting...)</span></h2>
+    <div id="step5" style="display:none;">
+        <p>
+            Congratulations! Let's Encrypt has issued you a certificate for your domains!
+            Below is the signed certificate you can use on your website to
+        </p>
 
-    <p class="field">
-        <a id="howto_install" class="help" href="#">(how do I install this?)</a>
-        <label for="csr">Signed Certificate:</label><br/>
-        <span id="howto_install_content" class="help-content" style="display:none;"></span>
-        <textarea readonly>
-        -----BEGIN CERTIFICATE-----
-        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        -----END CERTIFICATE-----
-        </textarea>
-    </p>
+        <p class="field">
+            <a id="howto_install" class="help" href="#">(how do I install this?)</a>
+            <label for="csr">Signed Certificate:</label><br/>
+            <span id="howto_install_content" class="help-content" style="display:none;"></span>
+            <textarea readonly>
+            -----BEGIN CERTIFICATE-----
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            -----END CERTIFICATE-----
+            </textarea>
+        </p>
 
-    <p class="field">
-        <label for="csr">Intermediate Certificate:</label><br/>
-        <textarea readonly>
-        -----BEGIN CERTIFICATE-----
-        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        -----END CERTIFICATE-----
-        </textarea>
-    </p>
+        <p class="field">
+            <label for="csr">Intermediate Certificate:</label><br/>
+            <textarea readonly>
+            -----BEGIN CERTIFICATE-----
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            -----END CERTIFICATE-----
+            </textarea>
+        </p>
 
-    <p class="field">
-        <form action="https://www.ssllabs.com/ssltest/analyze.html">
-        <input type="hidden" name="d" value="foobar.com">
-        <input type="submit" value="Test my install"/>
-        </form>
-    </p>
+        <p class="field">
+            <form action="https://www.ssllabs.com/ssltest/analyze.html">
+            <input type="hidden" name="d" value="foobar.com">
+            <input type="submit" value="Test my install"/>
+            </form>
+        </p>
+    </div>
 
     <hr/>
 
