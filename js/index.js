@@ -39,42 +39,36 @@ function bindHelps(elems){
 }
 bindHelps(document.querySelectorAll(".help"));
 
-// validate contact info
-function validateContact(e){
-    e.preventDefault();
-    console.log("validateContact");
+// validate account info
+function validateAccount(e){
+    console.log("validateAccount");
 }
-document.getElementById("validate_contact").addEventListener("click", validateContact);
+document.getElementById("validate_account").addEventListener("click", validateAccount);
 
 // validate CSR
 function validateCSR(e){
-    e.preventDefault();
     console.log("validateCSR");
 }
 document.getElementById("validate_csr").addEventListener("click", validateCSR);
 
 // validate initial signatures
 function validateInitialSigs(e){
-    e.preventDefault();
     console.log("validateInitialSigs");
 }
 document.getElementById("validate_initial_sigs").addEventListener("click", validateInitialSigs);
 
 // confirm domain check is running
 function confirmDomainCheckIsRunning(e){
-    e.preventDefault();
     console.log("confirmDomainCheckIsRunning");
 }
 
 // verify ownership
 function verifyOwnership(e){
-    e.preventDefault();
     console.log("verifyOwnership");
 }
 
 // request to sign certificate
 function signCertificate(e){
-    e.preventDefault();
     console.log("signCertificate");
 }
 

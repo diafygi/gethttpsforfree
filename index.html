@@ -14,11 +14,13 @@ Released under MIT License. Enjoy!
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style>
         *{box-sizing:border-box;}
+        div{margin:10px 0px;}
         .field{width:100%;max-width:600px;}
         input[type="text"]{width:100%;}
         textarea{width:100%;height:120px;}
         .help{float:right;font-size:12px;}
-        .help-content{display:inline-block;width:100%;max-width:600px;padding:10px;}
+        .help-content{display:inline-block;width:100%;max-width:600px;margin:5px 0px 10px 0px;padding:10px;background-color:#eeeeee;}
+        code{display:inline-block;margin:5px 0px;padding: 5px;background-color:#ffffff;}
         .footer{font-size:12px;}
     </style>
     <script src="js/asn1js/int10.js"></script>
@@ -30,7 +32,7 @@ Released under MIT License. Enjoy!
     <!--##  Intro  ##-->
     <!--#############-->
     <h1>How to get free HTTPS!</h1>
-    <p>
+    <div>
         You can now get free https certificates from the non-profit certificate
         authority <a href="https://letsencrypt.org/">Let's Encrypt</a>!
         This is a website that will take you through the manual steps to get your free
@@ -38,49 +40,62 @@ Released under MIT License. Enjoy!
         <a href="https://github.com/diafygi/howtogetfreehttps">open source</a> and never
         asks for your private keys. <a href="renew.html">Click here</a> to renew certs.
         <a href="revoke.html">Click here</a> to revoke certs.
-    </p>
+    </div>
 
-    <p>
+    <div>
         <b>NOTE: This website is for people who know how to generate certificate signing
         requests (CSRs)!</b> If you're not familiar with how to do this, please use the
         official Let's Encrypt <a href="https://github.com/letsencrypt/letsencrypt">client</a>
         that can automatically issue and install https certificates for you. This
         website is designed for people who know what they are doing and just want to get
         their free https certificate.
-    </p>
+    </div>
 
     <hr/>
 
     <!--####################-->
-    <!--##  Contact Info  ##-->
+    <!--##  Account Info  ##-->
     <!--####################-->
-    <h2>Step 1: Contact Info</h2>
-    <p>
-        Let's Encrypt requires that you register a contact email and public key before
-        issuing a certificate. The email is so that they can contact you if needed, and
+    <h2>Step 1: Account Info</h2>
+    <div>
+        Let's Encrypt requires that you register a account email and public key before
+        issuing a certificate. The email is so that they can account you if needed, and
         the public key is so you can securely sign your requests to issue/revoke/renew
-        your certificates. <i>Keep your contact private key secret! Anyone who has it
+        your certificates. <i>Keep your account private key secret! Anyone who has it
         can impersonate you when making requests to Let's Encrypt!</i>
-    </p>
+    </div>
 
-    <p class="field">
-        <label for="email">Contact Email:</label><br/>
+    <div class="field">
+        <label for="email">Account Email:</label><br/>
         <input id="email" type="text" placeholder="(e.g. webmaster@yourdomain.com)"/>
-    </p>
+    </div>
 
-    <p class="field">
+    <div class="field">
         <a id="howto_pubkey" class="help" href="#">(how do I generate this?)</a>
-        <label for="pubkey">Contact Public Key:</label><br/>
+        <label for="pubkey">Account Public Key:</label><br/>
         <span id="howto_pubkey_content" class="help-content" style="display:none;">
-            asdfa<br/>
-            asdfa<br/>
+            How to generate a new account keypair using openssl:<br/>
+            <ol>
+                <li>
+                    Generate a account private key if you don't have one:<br/>
+                    (KEEP USER.KEY SECRET!)</br>
+                    <code>openssl genrsa 4096 > user.key</code>
+                </li>
+                <li>
+                    Print your public key:</br>
+                    <code>openssl rsa -in user.key -pubout</code>
+                </li>
+                <li>
+                    Copy and paste the public key in to the box below.</br>
+                </li>
+            </ol>
         </span>
         <textarea id="pubkey" placeholder="-----BEGIN PUBLIC KEY----- ..."></textarea>
-    </p>
+    </div>
 
-    <p class="field">
-        <input id="validate_contact" type="submit" value="Validate Contact Info"/>
-    </p>
+    <div class="field">
+        <input id="validate_account" type="submit" value="Validate Account Info"/>
+    </div>
 
     <hr/>
 
@@ -88,23 +103,40 @@ Released under MIT License. Enjoy!
     <!--##  Certificate Signing Request  ##-->
     <!--###################################-->
     <h2>Step 2: Certificate Signing Request</h2>
-        <p>
+    <div>
         This is the certificate signing request (CSR) that you send to Let's Encrypt
         in order issue you a signed certificate. It contains the website domains you
         want to issue certs for and the public key of your TLS private key. <i>Keep your
         TLS private key secret! Anyone who has it can man-in-the-middle your websites!</i>
-    </p>
+    </div>
 
-    <p class="field">
+    <div class="field">
         <a id="howto_csr" class="help" href="#">(how do I generate this?)</a>
         <label for="csr">Certificate Signing Request:</label><br/>
-        <span id="howto_csr_content" class="help-content" style="display:none;"></span>
+        <span id="howto_csr_content" class="help-content" style="display:none;">
+            How to generate a new Certificate Signing Request (CSR):<br/>
+            <ol>
+                <li>
+                    Generate a domain private key if you don't have one:<br/>
+                    (KEEP DOMAIN.KEY SECRET!)</br>
+                    <code>openssl genrsa 4096 > domain.key</code>
+                </li>
+                <li>
+                    Generate a CSR for your the domains you want certs for:</br>
+                    (replace "foo.com" with your domain)</br>
+                    <code>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))</code>
+                </li>
+                <li>
+                    Copy and paste the CSR in to the box below.</br>
+                </li>
+            </ol>
+        </span>
         <textarea id="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..."></textarea>
-    </p>
+    </div>
 
-    <p class="field">
+    <div class="field">
         <input id="validate_csr" type="submit" value="Validate CSR"/>
-    </p>
+    </div>
 
     <hr/>
 
@@ -113,15 +145,15 @@ Released under MIT License. Enjoy!
     <!--#####################-->
     <h2>Step 3: Sign API Requests<span id="step3_pending"> (waiting...)</span></h2>
     <div id="step3" style="display:none;">
-        <p>
+        <div>
             Let's Encrypt requires that you sign all of your requests to them with your
             contact private key. Below are the requests that you will need to sign. The
             commands to do this are generated below so you can copy-and-paste them into your
             terminal. <i>Be sure to change the contact private key location so it points to
             your real private key.</i>
-        </p>
+        </div>
 
-        <p class="field">
+        <div class="field">
             <a id="howto_sign" class="help" href="#">(how do I do this?)</a>
             <label>Run these signatures in your terminal:</label><br/>
             <span id="howto_sign_content" class="help-content" style="display:none;"></span>
@@ -133,11 +165,11 @@ Released under MIT License. Enjoy!
             <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input><br/><br/>
             <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
             <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
-        </p>
+        </div>
 
-        <p class="field">
+        <div class="field">
             <input id="validate_initial_sigs" type="submit" value="Validate Signatures"/>
-        </p>
+        </div>
     </div>
 
     <hr/>
@@ -147,69 +179,69 @@ Released under MIT License. Enjoy!
     <!--##################-->
     <h2>Step 4: Verify Ownership<span id="step4_pending"> (waiting...)</span></h2>
     <div id="step4" style="display:none;">
-        <p>
+        <div>
             Let's Encrypt requires you prove you own the domains you have in your CSR. You
             can do this by serving a specific file at a specific url under your domains.
             Below are the files you need to serve along with some copy-and-paste commands
             you can run on your website to start serving the file. Once you are serving
             the file on your website, click "I'm now running this on...". After that, you
             need to tell Let's Encrypt to check the above files to verify ownership of your
-            domains. This request needs to be signed with your contact private key. Below
+            domains. This request needs to be signed with your account private key. Below
             are the verification requests that you will need to sign. The commands to do
             this are generated below so you can copy-and-paste them into your terminal.
-            <i>Be sure to change the contact private key location so it points to your real
+            <i>Be sure to change the account private key location so it points to your real
             private key.</i>
-        </p>
+        </div>
 
         <h3>Domain: foobar.com</h3>
 
-        <p class="field">
+        <div class="field">
             <a id="howto_serve2" class="help" href="#">(how do I do this?)</a>
             <label for="challenge_foobarcom">Run this command on <span>foobar.com</span>:</label><br/>
             <span id="howto_serve2_content" class="help-content" style="display:none;"></span>
             <textarea readonly>sudo python ...</textarea>
-        </p>
+        </div>
 
-        <p class="field">
+        <div class="field">
             <input type="submit" value="I'm now running this command on foobar.com"/>
-        </p>
+        </div>
 
-        <p class="field">
+        <div class="field">
             <a id="howto_sign2" class="help" href="#">(how do I do this?)</a>
             <label>Run this signature in your terminal:</label><br/>
             <span id="howto_sign2_content" class="help-content" style="display:none;"></span>
             <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
             <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
-        </p>
+        </div>
 
-        <p class="field">
+        <div class="field">
             <input type="submit" value="Verify ownership for foobar.com"/>
-        </p>
+        </div>
 
         <h3>Domain: www.foobar.com</h3>
 
-        <p class="field">
+        <div class="field">
             <a id="howto_serve3" class="help" href="#">(how do I do this?)</a>
             <label for="challenge_wwwfoobarcom">Run this command on <span>www.foobar.com</span>:</label><br/>
             <span id="howto_serve3_content" class="help-content" style="display:none;"></span>
             <textarea readonly>sudo python ...</textarea>
-        </p>
+        </div>
 
-        <p class="field">
+        <div class="field">
             <input type="submit" value="I'm now running this command on www.foobar.com"/>
-        </p>
+        </div>
 
-        <p class="field">
+        <div class="field">
             <a id="howto_sign3" class="help" href="#">(how do I do this?)</a>
             <label>Run this signature in your terminal:</label><br/>
             <span id="howto_sign3_content" class="help-content" style="display:none;"></span>
             <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
             <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
-        </p>
+        </div>
 
-        <p class="field">
+        <div class="field">
             <input type="submit" value="Verify ownership for www.foobar.com"/>
-        </p>
+        </div>
     </div>
 
     <hr/>
@@ -219,12 +251,12 @@ Released under MIT License. Enjoy!
     <!--#########################-->
     <h2>Step 5: Install Certificate<span id="step5_pending"> (waiting...)</span></h2>
     <div id="step5" style="display:none;">
-        <p>
+        <div>
             Congratulations! Let's Encrypt has issued you a certificate for your domains!
             Below is the signed certificate you can use on your website to
-        </p>
+        </div>
 
-        <p class="field">
+        <div class="field">
             <a id="howto_install" class="help" href="#">(how do I install this?)</a>
             <label for="csr">Signed Certificate:</label><br/>
             <span id="howto_install_content" class="help-content" style="display:none;"></span>
@@ -237,9 +269,9 @@ Released under MIT License. Enjoy!
             AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             -----END CERTIFICATE-----
             </textarea>
-        </p>
+        </div>
 
-        <p class="field">
+        <div class="field">
             <label for="csr">Intermediate Certificate:</label><br/>
             <textarea readonly>
             -----BEGIN CERTIFICATE-----
@@ -250,22 +282,22 @@ Released under MIT License. Enjoy!
             AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             -----END CERTIFICATE-----
             </textarea>
-        </p>
+        </div>
 
-        <p class="field">
+        <div class="field">
             <form action="https://www.ssllabs.com/ssltest/analyze.html">
                 <input type="hidden" name="d" value="foobar.com">
                 <input type="submit" value="Test my install"/>
             </form>
-        </p>
+        </div>
     </div>
 
     <hr/>
 
-    <p class="footer">
+    <div class="footer">
         This website is released under the MIT license and the source code is available
         here: https://github.com/diafygi/howtogetfreehttps
-    </p>
+    </div>
     <script src="js/index.js"></script>
 </body>
 </html>
