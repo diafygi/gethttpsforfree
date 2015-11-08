@@ -11,12 +11,14 @@ Released under MIT License. Enjoy!
 -->
 <head>
     <title>How to get free HTTPS!</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style>
         *{box-sizing:border-box;}
         .field{width:100%;max-width:600px;}
         input[type="text"]{width:100%;}
         textarea{width:100%;height:120px;}
         .help{float:right;font-size:12px;}
+        .help-content{display:inline-block;width:100%;max-width:600px;padding:10px;}
         .footer{font-size:12px;}
     </style>
     <script src="js/asn1js/int10.js"></script>
@@ -67,8 +69,12 @@ Released under MIT License. Enjoy!
     </p>
 
     <p class="field">
-        <a class="help" href="#">(how do I generate this?)</a>
+        <a id="howto_pubkey" class="help" href="#">(how do I generate this?)</a>
         <label for="pubkey">Contact Public Key:</label><br/>
+        <span id="howto_pubkey_content" class="help-content" style="display:none;">
+            asdfa<br/>
+            asdfa<br/>
+        </span>
         <textarea id="pubkey" placeholder="-----BEGIN PUBLIC KEY----- ..."></textarea>
     </p>
 
@@ -90,8 +96,9 @@ Released under MIT License. Enjoy!
     </p>
 
     <p class="field">
-        <a class="help" href="#">(how do I generate this?)</a>
+        <a id="howto_csr" class="help" href="#">(how do I generate this?)</a>
         <label for="csr">Certificate Signing Request:</label><br/>
+        <span id="howto_csr_content" class="help-content" style="display:none;"></span>
         <textarea id="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..."></textarea>
     </p>
 
@@ -114,8 +121,9 @@ Released under MIT License. Enjoy!
     </p>
 
     <p class="field">
-        <a class="help" href="#">(how do I do this?)</a>
+        <a id="howto_sign1" class="help" href="#">(how do I do this?)</a>
         <label>Run these signatures in your terminal:</label><br/>
+        <span id="howto_sign1_content" class="help-content" style="display:none;"></span>
         <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
         <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input><br/><br/>
         <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
@@ -153,8 +161,9 @@ Released under MIT License. Enjoy!
     <h3>Domain: foobar.com</h3>
 
     <p class="field">
-        <a class="help" href="#">(how do I do this?)</a>
+        <a id="howto_serve2" class="help" href="#">(how do I do this?)</a>
         <label for="challenge_foobarcom">Run this command on <span>foobar.com</span>:</label><br/>
+        <span id="howto_serve2_content" class="help-content" style="display:none;"></span>
         <textarea readonly>sudo python ...</textarea>
     </p>
 
@@ -163,8 +172,9 @@ Released under MIT License. Enjoy!
     </p>
 
     <p class="field">
-        <a class="help" href="#">(how do I do this?)</a>
+        <a id="howto_sign2" class="help" href="#">(how do I do this?)</a>
         <label>Run this signature in your terminal:</label><br/>
+        <span id="howto_sign2_content" class="help-content" style="display:none;"></span>
         <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
         <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
     </p>
@@ -176,8 +186,9 @@ Released under MIT License. Enjoy!
     <h3>Domain: www.foobar.com</h3>
 
     <p class="field">
-        <a class="help" href="#">(how do I do this?)</a>
+        <a id="howto_serve3" class="help" href="#">(how do I do this?)</a>
         <label for="challenge_wwwfoobarcom">Run this command on <span>www.foobar.com</span>:</label><br/>
+        <span id="howto_serve3_content" class="help-content" style="display:none;"></span>
         <textarea readonly>sudo python ...</textarea>
     </p>
 
@@ -186,8 +197,9 @@ Released under MIT License. Enjoy!
     </p>
 
     <p class="field">
-        <a class="help" href="#">(how do I do this?)</a>
+        <a id="howto_sign3" class="help" href="#">(how do I do this?)</a>
         <label>Run this signature in your terminal:</label><br/>
+        <span id="howto_sign3_content" class="help-content" style="display:none;"></span>
         <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
         <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
     </p>
@@ -208,8 +220,9 @@ Released under MIT License. Enjoy!
     </p>
 
     <p class="field">
-        <a class="help" href="#">(how do I install this?)</a>
+        <a id="howto_install" class="help" href="#">(how do I install this?)</a>
         <label for="csr">Signed Certificate:</label><br/>
+        <span id="howto_install_content" class="help-content" style="display:none;"></span>
         <textarea readonly>
         -----BEGIN CERTIFICATE-----
         AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -247,6 +260,6 @@ Released under MIT License. Enjoy!
         This website is released under the MIT license and the source code is available
         here: https://github.com/diafygi/howtogetfreehttps
     </p>
-
+    <script src="js/index.js"></script>
 </body>
 </html>
