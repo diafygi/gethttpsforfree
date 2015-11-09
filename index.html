@@ -15,6 +15,7 @@ Released under MIT License. Enjoy!
     <style>
         *{box-sizing:border-box;}
         div{margin:15px 0px;}
+        .error{color:#ff1111;}
         .field{width:100%;max-width:600px;}
         li{margin-bottom:10px;}
         input[type="text"]{width:100%;}
@@ -26,6 +27,8 @@ Released under MIT License. Enjoy!
         .footer{font-size:12px;}
     </style>
     <script src="js/asn1js/int10.js"></script>
+    <script src="js/asn1js/base64.js"></script>
+    <script src="js/asn1js/hex.js"></script>
     <script src="js/asn1js/asn1.js"></script>
 </head>
 <body>
@@ -97,6 +100,7 @@ Released under MIT License. Enjoy!
 
     <div class="field">
         <input id="validate_account" type="submit" value="Validate Account Info"/>
+        <span id="validate_account_status" style="display:none;"></span>
     </div>
 
     <hr/>

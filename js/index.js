@@ -1,7 +1,10 @@
+/*
+ * This file contains the functions needed to run index.html
+ */
 
 // global variables
-var CONTACT_EMAIL, // "bar@foo.com"
-    CONTACT_PUBKEY, // {
+var ACCOUNT_EMAIL, // "bar@foo.com"
+    ACCOUNT_PUBKEY, // {
                     //   "pubkey": "-----BEGIN PUBLIC KEY...",
                     //   "jwk": {...},
                     //   "data": "deadbeef...",
@@ -41,7 +44,85 @@ bindHelps(document.querySelectorAll(".help"));
 
 // validate account info
 function validateAccount(e){
-    console.log("validateAccount");
+    var status = document.getElementById("validate_account_status");
+    function fail(msg){
+        ACCOUNT_EMAIL = undefined;
+        ACCOUNT_PUBKEY = undefined;
+        status.style.display = "inline";
+        status.className = "error";
+        status.innerHTML = "";
+        status.appendChild(document.createTextNode("Error: " + msg));
+    }
+
+    // clear previous status
+    status.style.display = "inline";
+    status.className = "";
+    status.innerHTML = "validating...";
+
+    // validate email
+    var email_re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+    var email = document.getElementById("email").value;
+    if(!email_re.test(email)){
+        return fail("Account email doesn't look valid.");
+    }
+
+    // parse account public key
+    var pubkey = document.getElementById("pubkey").value;
+    if(pubkey === ""){
+        return fail("You need to include an account public key.");
+    }
+    var unarmor = /-----BEGIN PUBLIC KEY-----([A-Za-z0-9+\/=\s]+)-----END PUBLIC KEY-----/;
+    if(!unarmor.test(pubkey)){
+        return fail("Your public key isn't formatted correctly.");
+    }
+
+    // find RSA modulus and exponent
+    try{
+        var pubkeyAsn1 = ASN1.decode(Base64.decode(unarmor.exec(pubkey)[1]));
+        var modulusRaw = pubkeyAsn1.sub[1].sub[0].sub[0];
+        var modulusStart = modulusRaw.header + modulusRaw.stream.pos + 1;
+        var modulusEnd = modulusRaw.length + modulusRaw.stream.pos + modulusRaw.header;
+        var modulusHex = modulusRaw.stream.hexDump(modulusStart, modulusEnd);
+        var modulus = Hex.decode(modulusHex);
+        var exponentRaw = pubkeyAsn1.sub[1].sub[0].sub[1];
+        var exponentStart = exponentRaw.header + exponentRaw.stream.pos;
+        var exponentEnd = exponentRaw.length + exponentRaw.stream.pos + exponentRaw.header;
+        var exponentHex = exponentRaw.stream.hexDump(exponentStart, exponentEnd);
+        var exponent = Hex.decode(exponentHex);
+    }
+    catch(err){
+        console.error(err);
+        // TODO: also try reading GPG public key
+        return fail("Failed validating RSA public key.");
+    }
+
+
+    // generate the jwk header
+    var modulus64 = window.btoa(String.fromCharCode.apply(null, new Uint8Array(modulus)));
+    var modulusJWK = modulus64.replace("/", "_").replace("+", "+").replace("=", "");
+    var exponent64 = window.btoa(String.fromCharCode.apply(null, new Uint8Array(exponent)));
+    var exponentJWK = exponent64.replace("/", "_").replace("+", "+").replace("=", "");
+
+    // update the globals
+    ACCOUNT_EMAIL = email;
+    ACCOUNT_PUBKEY = {
+        pubkey: pubkey,
+        jwk: {
+            alg: "RS256",
+            jwk: {
+                "e": exponentJWK,
+                "kty": "RSA",
+                "n": modulusJWK,
+            }
+        }
+    };
+
+    // show the success text (simulate a delay so it looks like we thought hard)
+    window.setTimeout(function(){
+        status.style.display = "inline";
+        status.className = "";
+        status.innerHTML = "Looks good! Proceed to Step 2!";
+    }, 500);
 }
 document.getElementById("validate_account").addEventListener("click", validateAccount);
 
