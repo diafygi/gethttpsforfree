@@ -91,11 +91,8 @@ function validateAccount(e){
         var exponent = Hex.decode(exponentHex);
     }
     catch(err){
-        console.error(err);
-        // TODO: also try reading GPG public key
         return fail("Failed validating RSA public key.");
     }
-
 
     // generate the jwk header
     var modulus64 = window.btoa(String.fromCharCode.apply(null, new Uint8Array(modulus)));
@@ -121,14 +118,131 @@ function validateAccount(e){
     window.setTimeout(function(){
         status.style.display = "inline";
         status.className = "";
-        status.innerHTML = "Looks good! Proceed to Step 2!";
-    }, 500);
+        status.innerHTML = "";
+        status.appendChild(document.createTextNode("Looks good! Proceed to Step 2!"));
+    }, 300);
 }
 document.getElementById("validate_account").addEventListener("click", validateAccount);
 
 // validate CSR
 function validateCSR(e){
-    console.log("validateCSR");
+    var status = document.getElementById("validate_csr_status");
+    function fail(msg){
+        CSR = undefined;
+        DOMAINS = undefined;
+        status.style.display = "inline";
+        status.className = "error";
+        status.innerHTML = "";
+        status.appendChild(document.createTextNode("Error: " + msg));
+    }
+
+    // clear previous status
+    status.style.display = "inline";
+    status.className = "";
+    status.innerHTML = "validating...";
+
+    // make sure there's an account public key and email
+    if(!(ACCOUNT_EMAIL && ACCOUNT_PUBKEY)){
+        return fail("Need to complete Step 1 first.");
+    }
+
+    // parse csr
+    var csr = document.getElementById("csr").value;
+    if(csr === ""){
+        return fail("You need to include a CSR.");
+    }
+    var unarmor = /-----BEGIN CERTIFICATE REQUEST-----([A-Za-z0-9+\/=\s]+)-----END CERTIFICATE REQUEST-----/;
+    if(!unarmor.test(csr)){
+        return fail("Your CSR isn't formatted correctly.");
+    }
+
+    // find domains in the csr
+    var domains = [];
+    try{
+        var csrAsn1 = ASN1.decode(Base64.decode(unarmor.exec(csr)[1]));
+
+        // look for commonName in attributes
+        if(csrAsn1.sub[0].sub[1].sub){
+            var csrIds = csrAsn1.sub[0].sub[1].sub;
+            for(var i = 0; i < csrIds.length; i++){
+                var oidRaw = csrIds[i].sub[0].sub[0];
+                var oidStart = oidRaw.header + oidRaw.stream.pos;
+                var oidEnd = oidRaw.length + oidRaw.stream.pos + oidRaw.header;
+                var oid = oidRaw.stream.parseOID(oidStart, oidEnd, Infinity);
+                if(oid === "2.5.4.3"){
+                    var cnRaw = csrIds[i].sub[0].sub[1];
+                    var cnStart = cnRaw.header + cnRaw.stream.pos;
+                    var cnEnd = cnRaw.length + cnRaw.stream.pos + cnRaw.header;
+                    domains.push(cnRaw.stream.parseStringUTF(cnStart, cnEnd));
+                }
+            }
+        }
+
+        // look for subjectAltNames
+        if(csrAsn1.sub[0].sub[3].sub){
+
+            // find the PKCS#9 ExtensionRequest
+            var xtns = csrAsn1.sub[0].sub[3].sub;
+            for(var i = 0; i < xtns.length; i++){
+                var oidRaw = xtns[i].sub[0];
+                var oidStart = oidRaw.header + oidRaw.stream.pos;
+                var oidEnd = oidRaw.length + oidRaw.stream.pos + oidRaw.header;
+                var oid = oidRaw.stream.parseOID(oidStart, oidEnd, Infinity);
+                if(oid === "1.2.840.113549.1.9.14"){
+
+                    // find any subjectAltNames
+                    for(var j = 0; j < xtns[i].sub[1].sub.length ? xtns[i].sub[1].sub : 0; j++){
+                        for(var k = 0; k < xtns[i].sub[1].sub[j].sub.length ? xtns[i].sub[1].sub[j].sub : 0; k++){
+                            var oidRaw = xtns[i].sub[1].sub[j].sub[k].sub[0];
+                            var oidStart = oidRaw.header + oidRaw.stream.pos;
+                            var oidEnd = oidRaw.length + oidRaw.stream.pos + oidRaw.header;
+                            var oid = oidRaw.stream.parseOID(oidStart, oidEnd, Infinity);
+                            if(oid === "2.5.29.17"){
+
+                                // add each subjectAltName
+                                var sans = xtns[i].sub[1].sub[j].sub[k].sub[1].sub[0].sub;
+                                for(var s = 0; s < sans.length; s++){
+                                    var sanRaw = sans[s];
+                                    var sanStart = sanRaw.header + sanRaw.stream.pos;
+                                    var sanEnd = sanRaw.length + sanRaw.stream.pos + sanRaw.header;
+                                    domains.push(sanRaw.stream.parseStringUTF(sanStart, sanEnd));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    catch(err){
+        return fail("Failed validating CSR.");
+    }
+
+    // update the globals
+    CSR = {csr: csr};
+    DOMAINS = {};
+    var domainString = "";
+    for(var d = 0; d < domains.length; d++){
+        DOMAINS[domains[d]] = {};
+        domainString += (d === 0 ? "" : ", ") + domains[d];
+    }
+
+    // TODO: Request nonces for all the signatures and build the data payloads
+
+    //Wait for all the data payloads to finish building
+    window.setTimeout(function(){
+
+        // TODO: check to see if all the data payloads are built
+
+        // TODO: show step 3
+
+        // show the success text (simulate a delay so it looks like we thought hard)
+        status.style.display = "inline";
+        status.className = "";
+        status.innerHTML = "";
+        status.appendChild(document.createTextNode(
+            "Found domains! Proceed to Step 3! (" + domainString + ")"));
+    }, 300);
 }
 document.getElementById("validate_csr").addEventListener("click", validateCSR);
 
