@@ -45,7 +45,7 @@ function sha256(bytes, callback){
     // IE11
     if(!hash.then){
         hash.oncomplete = function(e){
-            callback(new Uint8Array(e.target.result));
+            callback(new Uint8Array(e.target.result), undefined);
         };
         hash.onerror = function(e){
             callback(undefined, e);
@@ -54,7 +54,7 @@ function sha256(bytes, callback){
     // standard promise-based
     else{
         hash.then(function(result){
-            callback(new Uint8Array(result));
+            callback(new Uint8Array(result), undefined);
         })
         .catch(function(error){
             callback(undefined, error);
@@ -75,16 +75,14 @@ function bindHelps(elems){
 }
 bindHelps(document.querySelectorAll(".help"));
 
-// helper function to get a nonce
+// helper function to get a nonce via an ajax request to the ACME directory
 function getNonce(callback){
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function(){
-        if(xhr.readyState !== XMLHttpRequest.DONE) return;
-        console.log(xhr);
+    xhr.onload = function(){
+        callback(xhr.getResponseHeader("Replay-Nonce"), undefined);
     };
-    xhr.onerror = function(err){
-        console.log("error", err);
-        console.log("error-xhr", xhr);
+    xhr.onerror = function(){
+        callback(undefined, xhr);
     };
     xhr.open("GET", CA + "/directory");
     xhr.send();
