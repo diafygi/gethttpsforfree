@@ -3,7 +3,9 @@
  */
 
 // global variables
-var ACCOUNT_EMAIL, // "bar@foo.com"
+var CA = "https://acme-staging.api.letsencrypt.org",
+    TERMS = "https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf",
+    ACCOUNT_EMAIL, // "bar@foo.com"
     ACCOUNT_PUBKEY, // {
                     //   "pubkey": "-----BEGIN PUBLIC KEY...",
                     //   "jwk": {...},
@@ -41,7 +43,7 @@ document.getElementById("digest_error").style.display = DIGEST ? "none" : "block
 function sha256(bytes, callback){
     var hash = window.crypto.subtle.digest({name: "SHA-256"}, bytes);
     // IE11
-    if(hash.oncomplete){
+    if(!hash.then){
         hash.oncomplete = function(e){
             callback(new Uint8Array(e.target.result));
         };
@@ -72,6 +74,21 @@ function bindHelps(elems){
     }
 }
 bindHelps(document.querySelectorAll(".help"));
+
+// helper function to get a nonce
+function getNonce(callback){
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState !== XMLHttpRequest.DONE) return;
+        console.log(xhr);
+    };
+    xhr.onerror = function(err){
+        console.log("error", err);
+        console.log("error-xhr", xhr);
+    };
+    xhr.open("GET", CA + "/directory");
+    xhr.send();
+}
 
 // validate account info
 function validateAccount(e){
@@ -258,7 +275,8 @@ function validateCSR(e){
         domainString += (d === 0 ? "" : ", ") + domains[d];
     }
 
-    // TODO: Request nonces for all the signatures and build the data payloads
+    //TODO build account registration payload
+
 
     //Wait for all the data payloads to finish building
     window.setTimeout(function(){
@@ -273,7 +291,7 @@ function validateCSR(e){
         status.innerHTML = "";
         status.appendChild(document.createTextNode(
             "Found domains! Proceed to Step 3! (" + domainString + ")"));
-    }, 300);
+    }, 1000);
 }
 document.getElementById("validate_csr").addEventListener("click", validateCSR);
 
