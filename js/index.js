@@ -29,6 +29,37 @@ var ACCOUNT_EMAIL, // "bar@foo.com"
              // }
     SIGNED_CERT; // "-----BEGIN CERTIFICATE..."
 
+// show warning if no webcrypto digest
+window.crypto = window.crypto || window.msCrypto; //for IE11
+if(window.crypto && window.crypto.webkitSubtle){
+    window.crypto.subtle = window.crypto.webkitSubtle; //for Safari
+}
+var DIGEST = window.crypto ? (window.crypto.subtle ? window.crypto.subtle.digest : undefined) : undefined;
+document.getElementById("digest_error").style.display = DIGEST ? "none" : "block";
+
+// SHA-256 shim for standard promise-based and IE11 event-based
+function sha256(bytes, callback){
+    var hash = window.crypto.subtle.digest({name: "SHA-256"}, bytes);
+    // IE11
+    if(hash.oncomplete){
+        hash.oncomplete = function(e){
+            callback(new Uint8Array(e.target.result));
+        };
+        hash.onerror = function(e){
+            callback(undefined, e);
+        };
+    }
+    // standard promise-based
+    else{
+        hash.then(function(result){
+            callback(new Uint8Array(result));
+        })
+        .catch(function(error){
+            callback(undefined, error);
+        });
+    }
+}
+
 // hide/show the help content
 function helpContent(e){
     e.preventDefault();
