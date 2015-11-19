@@ -28,12 +28,13 @@ var CA = "https://acme-staging.api.letsencrypt.org",
              //     "request_protected": "deadbeef...",
              //     "request_sig": "deadbeef...",
              //
+             //     "challenge_uri": "https://...",
              //     "challenge_payload": "deadbeef...",
              //     "challenge_protected": "deadbeef...",
              //     "challenge_sig": "deadbeef...",
              //
              //     "server_data": "deadbeef...",
-             //     "server_uri": "deadbeef...",
+             //     "server_uri": ".well-known/acme-challenge/...",
              //     "confirmed": True,
              //
              //   },
@@ -354,7 +355,7 @@ function validateCSR(e){
             // build the account registration signature command
             var account_template = "" +
                 "<input type='text' value='" +
-                    "PRIV_KEY=./user.key; " +
+                    "PRIV_KEY=./account.key; " +
                     "echo -n \"" + ACCOUNT_PUBKEY['protected'] + "." + ACCOUNT_PUBKEY['payload'] + "\" | " +
                     "openssl dgst -sha256 -sign $PRIV_KEY | " +
                     "base64 -w 685" +
@@ -368,7 +369,7 @@ function validateCSR(e){
             for(var d in DOMAINS){
                 domain_templates += "" +
                     "<input type='text' value='" +
-                        "PRIV_KEY=./user.key; " +
+                        "PRIV_KEY=./account.key; " +
                         "echo -n \"" + DOMAINS[d]['request_protected'] + "." + DOMAINS[d]['request_payload'] + "\" | " +
                         "openssl dgst -sha256 -sign $PRIV_KEY | " +
                         "base64 -w 685" +
@@ -381,7 +382,7 @@ function validateCSR(e){
             // build the csr registration signature command
             var csr_template = "" +
                 "<input type='text' value='" +
-                    "PRIV_KEY=./user.key; " +
+                    "PRIV_KEY=./account.key; " +
                     "echo -n \"" + CSR['protected'] + "." + CSR['payload'] + "\" | " +
                     "openssl dgst -sha256 -sign $PRIV_KEY | " +
                     "base64 -w 685" +
@@ -414,7 +415,144 @@ document.getElementById("validate_csr").addEventListener("click", validateCSR);
 
 // validate initial signatures
 function validateInitialSigs(e){
-    console.log("validateInitialSigs");
+    var status = document.getElementById("validate_initial_sigs_status");
+    function fail(msg, fail_all){
+        if(fail_all){
+            ACCOUNT_EMAIL = undefined;
+            ACCOUNT_PUBKEY = undefined;
+            CSR = undefined;
+            DOMAINS = undefined;
+        }
+        status.style.display = "inline";
+        status.className = "error";
+        status.innerHTML = "";
+        status.appendChild(document.createTextNode("Error: " + msg));
+    }
+
+    // clear previous status
+    status.style.display = "inline";
+    status.className = "";
+    status.innerHTML = "validating...";
+
+    // if anything is missing, start over
+    if(!(ACCOUNT_EMAIL && ACCOUNT_PUBKEY && CSR && DOMAINS)){
+        return fail("Something went wrong. Please go back to Step 1.", true);
+    }
+
+    // parse account registration signature
+    var missing_msg = "You need to run the above commands and paste the output in the text boxes below each command.";
+    var account_sig = document.getElementById("account_sig").value;
+    if(account_sig === ""){
+        return fail(missing_msg);
+    }
+    ACCOUNT_PUBKEY['sig'] = account_sig.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
+
+    // parse new-authz signatures
+    for(var d in DOMAINS){
+        var domain_sig = document.getElementById("domain_sig_" + d.replace(/\./g, "_")).value;
+        if(domain_sig === ""){
+            return fail(missing_msg);
+        }
+        DOMAINS[d]['request_sig'] = domain_sig.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
+    }
+
+    // parse csr signature
+    var csr_sig = document.getElementById("csr_sig").value;
+    if(csr_sig === ""){
+        return fail(missing_msg);
+    }
+    CSR['sig'] = csr_sig.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
+
+    // register the account
+    status.innerHTML = "registering...";
+    var account_xhr = new XMLHttpRequest();
+    account_xhr.onreadystatechange = function(){
+        if(account_xhr.readyState === 4){
+            if(account_xhr.status === 200 || account_xhr.status === 409){
+                status.innerHTML = "account registered...";
+            }
+            else{
+                fail("Account registration failed. Please start back at Step 1. " +
+                    account_xhr.responseText, true);
+            }
+        }
+    };
+    account_xhr.open("POST", CA + "/acme/new-reg");
+    account_xhr.send(JSON.stringify({
+        "header": ACCOUNT_PUBKEY['jwk'],
+        "protected": ACCOUNT_PUBKEY['protected'],
+        "payload": ACCOUNT_PUBKEY['payload'],
+        "signature": ACCOUNT_PUBKEY['sig'],
+    }));
+
+    // request challenges for each domain
+    var domains = []
+    for(var d in DOMAINS){
+        domains.push(d);
+    }
+    var i = 0;
+    function requestChallenges(){
+        var d = domains[i];
+        var domain_xhr = new XMLHttpRequest();
+        domain_xhr.onreadystatechange = function(){
+            if(domain_xhr.readyState === 4){
+                if(domain_xhr.status === 201){
+
+                    // compile the challenge payloads
+                    var resp = JSON.parse(domain_xhr.responseText);
+                    for(var c = 0; c < resp['challenges'].length; c++){
+                        if(resp['challenges'][c]['type'] === "http-01"){
+                            var keyAuthorization = resp['challenges'][c]['token'] + "." + ACCOUNT_PUBKEY['thumbprint'];
+                            DOMAINS[d]['challenge_uri'] = resp['challenges'][c]['uri'];
+                            DOMAINS[d]['server_data'] = keyAuthorization;
+                            DOMAINS[d]['server_uri'] = ".well-known/acme-challenge/" + resp['challenges'][c]['token'];
+                            DOMAINS[d]['challenge_payload'] = b64(JSON.stringify({
+                                resource: "challenge",
+                                keyAuthorization: keyAuthorization,
+                            }));
+                            DOMAINS[d]['challenge_protected'] = b64(JSON.stringify({
+                                nonce: domain_xhr.getResponseHeader("Replay-Nonce"),
+                            }));
+                            break;
+                        }
+                    }
+
+                    // move onto the next domain if any
+                    status.innerHTML = "";
+                    status.appendChild(document.createTextNode(d + " initialized..."));
+                    if((i + 1) < domains.length){
+                        i += 1;
+                        requestChallenges();
+                    }
+
+                    // done with domains, so populate step 4
+                    else{
+                        // TODO populate step 4
+
+                        // close out step 3
+                        status.style.display = "inline";
+                        status.className = "";
+                        status.innerHTML = "Step 3 complete! Please proceed to Step 4.";
+                        document.getElementById("step4").style.display = null;
+                        document.getElementById("step4_pending").innerHTML = "";
+                    }
+                }
+                else{
+                    console.log(domain_xhr);
+                    fail("Domain failed. Please start back at Step 1. " +
+                        domain_xhr.responseText, true);
+                }
+            }
+        };
+        domain_xhr.open("POST", CA + "/acme/new-authz");
+        domain_xhr.send(JSON.stringify({
+            "header": ACCOUNT_PUBKEY['jwk'],
+            "protected": DOMAINS[domains[i]]['request_protected'],
+            "payload": DOMAINS[domains[i]]['request_payload'],
+            "signature": DOMAINS[domains[i]]['request_sig'],
+        }));
+    }
+    requestChallenges();
 }
 document.getElementById("validate_initial_sigs").addEventListener("click", validateInitialSigs);
 
