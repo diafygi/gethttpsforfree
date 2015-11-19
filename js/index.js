@@ -4,28 +4,38 @@
 
 // global variables
 var CA = "https://acme-staging.api.letsencrypt.org",
+    //CA = "https://acme-v01.api.letsencrypt.org",
     TERMS = "https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf",
     ACCOUNT_EMAIL, // "bar@foo.com"
     ACCOUNT_PUBKEY, // {
                     //   "pubkey": "-----BEGIN PUBLIC KEY...",
                     //   "jwk": {...},
-                    //   "data": "deadbeef...",
-                    //   "sig": "deadbeef..."
+                    //   "thumbprint": "deadbeef...",
+                    //   "payload": "deadbeef...",
+                    //   "protected": "deadbeef...",
+                    //   "sig": "deadbeef...",
                     // }
     CSR, // {
-         //   "csr": "-----BEGIN CERTIFICATE REQUEST...",
-         //   "data": "deadbeef...",
+         //   "csr": "deadbeef...", //DER encoded
+         //   "payload": "deadbeef...",
+         //   "protected": "deadbeef...",
          //   "sig": "deadbeef...",
          // }
     DOMAINS, // {
              //   "www.foo.com": {
-             //     "request_data": "deadbeef...",
+             //
+             //     "request_payload": "deadbeef...",
+             //     "request_protected": "deadbeef...",
              //     "request_sig": "deadbeef...",
-             //     "response_data": "deadbeef...",
-             //     "response_sig": "deadbeef...",
-             //     "confirm": True,
-             //     "verify_data": "deadbeef...",
-             //     "verify_sig": "deadbeef...",
+             //
+             //     "challenge_payload": "deadbeef...",
+             //     "challenge_protected": "deadbeef...",
+             //     "challenge_sig": "deadbeef...",
+             //
+             //     "server_data": "deadbeef...",
+             //     "server_uri": "deadbeef...",
+             //     "confirmed": True,
+             //
              //   },
              //   ...
              // }
@@ -60,6 +70,12 @@ function sha256(bytes, callback){
             callback(undefined, error);
         });
     }
+}
+
+// url-safe base64 encoding
+function b64(bytes){
+    var str64 = typeof(bytes) === "string" ? window.btoa(bytes) : window.btoa(String.fromCharCode.apply(null, bytes));
+    return str64.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
 }
 
 // hide/show the help content
@@ -140,33 +156,40 @@ function validateAccount(e){
         return fail("Failed validating RSA public key.");
     }
 
-    // generate the jwk header
-    var modulus64 = window.btoa(String.fromCharCode.apply(null, new Uint8Array(modulus)));
-    var modulusJWK = modulus64.replace("/", "_").replace("+", "+").replace("=", "");
-    var exponent64 = window.btoa(String.fromCharCode.apply(null, new Uint8Array(exponent)));
-    var exponentJWK = exponent64.replace("/", "_").replace("+", "+").replace("=", "");
+    // generate the jwk header and bytes
+    var jwk = {
+        "e": b64(new Uint8Array(exponent)),
+        "kty": "RSA",
+        "n": b64(new Uint8Array(modulus)),
+    }
+    var jwk_json = JSON.stringify(jwk);
+    var jwk_bytes = [];
+    for(var i = 0; i < jwk_json.length; i++){
+        jwk_bytes.push(jwk_json.charCodeAt(i));
+    }
 
-    // update the globals
-    ACCOUNT_EMAIL = email;
-    ACCOUNT_PUBKEY = {
-        pubkey: pubkey,
-        jwk: {
-            alg: "RS256",
+    // calculate thumbprint
+    sha256(new Uint8Array(jwk_bytes), function(hash, err){
+
+        // update the globals
+        ACCOUNT_EMAIL = email;
+        ACCOUNT_PUBKEY = {
+            pubkey: pubkey,
             jwk: {
-                "e": exponentJWK,
-                "kty": "RSA",
-                "n": modulusJWK,
-            }
-        }
-    };
+                alg: "RS256",
+                jwk: jwk,
+            },
+            thumbprint: b64(hash),
+        };
 
-    // show the success text (simulate a delay so it looks like we thought hard)
-    window.setTimeout(function(){
-        status.style.display = "inline";
-        status.className = "";
-        status.innerHTML = "";
-        status.appendChild(document.createTextNode("Looks good! Proceed to Step 2!"));
-    }, 300);
+        // show the success text (simulate a delay so it looks like we thought hard)
+        window.setTimeout(function(){
+            status.style.display = "inline";
+            status.className = "";
+            status.innerHTML = "";
+            status.appendChild(document.createTextNode("Looks good! Proceed to Step 2!"));
+        }, 300);
+    });
 }
 document.getElementById("validate_account").addEventListener("click", validateAccount);
 
@@ -265,31 +288,127 @@ function validateCSR(e){
     }
 
     // update the globals
-    CSR = {csr: csr};
+    CSR = {csr: b64(new Uint8Array(Base64.decode(unarmor.exec(csr)[1])))};
     DOMAINS = {};
-    var domainString = "";
     for(var d = 0; d < domains.length; d++){
         DOMAINS[domains[d]] = {};
-        domainString += (d === 0 ? "" : ", ") + domains[d];
     }
 
-    //TODO build account registration payload
+    //build account registration payload
+    getNonce(function(nonce, err){
+        ACCOUNT_PUBKEY['protected'] = b64(JSON.stringify({nonce: nonce}));
+        ACCOUNT_PUBKEY['payload'] = b64(JSON.stringify({
+            resource: "new-reg",
+            contact: ["mailto:" + ACCOUNT_EMAIL],
+            agreement: TERMS,
+        }));
+    });
 
+    //build csr payload
+    getNonce(function(nonce, err){
+        CSR['protected'] = b64(JSON.stringify({nonce: nonce}));
+        CSR['payload'] = b64(JSON.stringify({
+            resource: "new-cert",
+            csr: CSR['csr'],
+        }));
+    });
+
+    //build domain payloads
+    function buildDomain(domain){
+        getNonce(function(nonce, err){
+            DOMAINS[domain]['request_protected'] = b64(JSON.stringify({nonce: nonce}));
+            DOMAINS[domain]['request_payload'] = b64(JSON.stringify({
+                resource: "new-authz",
+                identifier: {
+                    type: "dns",
+                    value: domain,
+                },
+            }));
+        });
+    }
+    for(var i = 0; i < domains.length; i++){
+        buildDomain(domains[i]);
+    }
 
     //Wait for all the data payloads to finish building
-    window.setTimeout(function(){
+    function waitForPayloads(){
 
-        // TODO: check to see if all the data payloads are built
+        // check to see if account, csr, and domain new-authz are built
+        var still_waiting = false;
+        if(ACCOUNT_PUBKEY['payload'] === undefined || CSR['payload'] === undefined){
+            still_waiting = true;
+        }
+        for(var d in DOMAINS){
+            if(DOMAINS[d]['request_payload'] === undefined){
+                still_waiting = true;
+            }
+        }
 
-        // TODO: show step 3
+        // wait another period for nonces to load
+        if(still_waiting){
+            window.setTimeout(waitForPayloads, 1000);
+        }
 
         // show the success text (simulate a delay so it looks like we thought hard)
-        status.style.display = "inline";
-        status.className = "";
-        status.innerHTML = "";
-        status.appendChild(document.createTextNode(
-            "Found domains! Proceed to Step 3! (" + domainString + ")"));
-    }, 1000);
+        else{
+            // build the account registration signature command
+            var account_template = "" +
+                "<input type='text' value='" +
+                    "PRIV_KEY=./user.key; " +
+                    "echo -n \"" + ACCOUNT_PUBKEY['protected'] + "." + ACCOUNT_PUBKEY['payload'] + "\" | " +
+                    "openssl dgst -sha256 -sign $PRIV_KEY | " +
+                    "base64 -w 685" +
+                    "' readonly/><br/>" +
+                "<input id='account_sig' type='text' " +
+                    "placeholder='Paste the base64 output here (e.g. \"34QuzDI6cn...\")'></input>" +
+                "<br/><br/>";
+
+            // build the domain signature commands
+            domain_templates = "";
+            for(var d in DOMAINS){
+                domain_templates += "" +
+                    "<input type='text' value='" +
+                        "PRIV_KEY=./user.key; " +
+                        "echo -n \"" + DOMAINS[d]['request_protected'] + "." + DOMAINS[d]['request_payload'] + "\" | " +
+                        "openssl dgst -sha256 -sign $PRIV_KEY | " +
+                        "base64 -w 685" +
+                        "' readonly/><br/>" +
+                    "<input id='domain_sig_" + d.replace(/\./g, "_") + "' type='text' " +
+                        "placeholder='Paste the base64 output here (e.g. \"34QuzDI6cn...\")'></input>" +
+                    "<br/><br/>";
+            }
+
+            // build the csr registration signature command
+            var csr_template = "" +
+                "<input type='text' value='" +
+                    "PRIV_KEY=./user.key; " +
+                    "echo -n \"" + CSR['protected'] + "." + CSR['payload'] + "\" | " +
+                    "openssl dgst -sha256 -sign $PRIV_KEY | " +
+                    "base64 -w 685" +
+                    "' readonly/><br/>" +
+                "<input id='csr_sig' type='text' " +
+                    "placeholder='Paste the base64 output here (e.g. \"34QuzDI6cn...\")'></input>";
+
+            // insert the commands
+            document.getElementById("step3_commands").innerHTML = "" +
+                account_template + domain_templates + csr_template;
+
+            // show the success text and step 3
+            var domainString = "";
+            for(var d in DOMAINS){
+                domainString += d + ", ";
+            }
+            domainString = domainString.substr(0, domainString.length - 2);
+            status.style.display = "inline";
+            status.classNsame = "";
+            status.innerHTML = "";
+            status.appendChild(document.createTextNode(
+                "Found domains! Proceed to Step 3! (" + domainString + ")"));
+            document.getElementById("step3").style.display = null;
+            document.getElementById("step3_pending").innerHTML = "";
+        }
+    }
+    window.setTimeout(waitForPayloads, 1000);
 }
 document.getElementById("validate_csr").addEventListener("click", validateCSR);
 
