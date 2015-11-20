@@ -19,7 +19,7 @@ Released under MIT License. Enjoy!
         .field{width:100%;max-width:600px;}
         li{margin-bottom:10px;}
         input[type="text"]{width:100%;}
-        textarea{width:100%;height:120px;}
+        textarea{width:100%;height:120px;white-space:pre;}
         .help{float:right;font-size:12px;}
         .help-content{display:inline-block;width:100%;max-width:600px;margin:5px 0px 10px 0px;padding:10px;background-color:#eeeeee;}
         code{display:inline-block;margin:5px 0px;padding:5px;background-color:#ffffff;}
@@ -166,9 +166,9 @@ Released under MIT License. Enjoy!
         </div>
 
         <div class="field">
-            <a id="howto_sign" class="help" href="#">(how do I do this?)</a>
+            <a id="howto_sign1" class="help" href="#">(how do I do this?)</a>
             <label>Run these signature commands in your terminal:</label><br/>
-            <span id="howto_sign_content" class="help-content" style="display:none;">
+            <span id="howto_sign1_content" class="help-content" style="display:none;">
                 How to generate the needed signatures:<br/>
                 <ol>
                     <li>
@@ -217,65 +217,70 @@ Released under MIT License. Enjoy!
             private key.</i>
         </div>
 
-        <h3>Domain: foobar.com</h3>
-
-        <div class="field">
-            <a id="howto_sign2" class="help" href="#">(how do I do this?)</a>
-            <label>Run this signature command in your terminal:</label><br/>
-            <span id="howto_sign2_content" class="help-content" style="display:none;">
-                How to generate the needed signatures:<br/>
-                <ol>
-                    <li>
-                        Navigate in the terminal to the directory with account private
-                        key ("account.key" or whatever you named it).
-                    </li>
-                    <li>
-                        Copy and paste each command below into your terminal (if your
-                        account private key isn't named "account.key", change "account.key"
-                        in the command to whatever you named it).
-                    </li>
-                    <li>
-                        Copy and paste the base64 encoded signature output from the command
-                        into the text field below that command.
-                    </li>
-                </ol>
-            </span>
-            <input type="text" value="echo '' | openssl sign... | base64" readonly/><br/>
-            <input type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'></input>
+        <div id="challenge_domains">
         </div>
 
-        <div class="field">
-            <a id="howto_serve2" class="help" href="#">(how do I do this?)</a>
-            <label for="challenge_foobarcom">Run this command on <span>foobar.com</span>:</label><br/>
-            <span id="howto_serve2_content" class="help-content" style="display:none;">
-                How to serve the challenge response on your domain:<br/>
-                <ol>
-                    <li>
-                        SSH into your domain as someone with sudo permissions:<br/>
-                        <code>ssh ubuntu@foo.com</code>
-                    </li>
-                    <li>
-                        Stop any webserver running on port 80, if any. If you had previously
-                        been running another python command, you can kill it with Ctrl+C):<br/>
-                        <code>sudo service nginx stop</code> &lt;-- example for nginx<br/>
-                        <code>sudo apachectl -k graceful-stop</code> &lt;-- example for apache
-                    </li>
-                    <li>
-                        Copy and paste the python command below into your terminal. This
-                        command starts a temporary webserver that serves nothing but the
-                        challenge response. You only need to keep this running briefly.
-                    </li>
-                    <li>
-                        Click "I'm now running this command..." when the file is being
-                        served on your domain.
-                    </li>
-                </ol>
-            </span>
-            <textarea readonly>sudo python ...</textarea>
-        </div>
+        <div id="challenge_template" style="display:none;">
+            <h3>Domain: <span class="domain">foobar.com</span></h3>
 
-        <div class="field">
-            <input type="submit" value="I'm now running this command on foobar.com"/>
+            <div class="field">
+                <a class="howto_sign help" href="#">(how do I do this?)</a>
+                <label>Run this signature command in your terminal:</label><br/>
+                <span class="howto_sign_content help-content" style="display:none;">
+                    How to generate the needed signatures:<br/>
+                    <ol>
+                        <li>
+                            Navigate in the terminal to the directory with account private
+                            key ("account.key" or whatever you named it).
+                        </li>
+                        <li>
+                            Copy and paste each command below into your terminal (if your
+                            account private key isn't named "account.key", change "account.key"
+                            in the command to whatever you named it).
+                        </li>
+                        <li>
+                            Copy and paste the base64 encoded signature output from the command
+                            into the text field below that command.
+                        </li>
+                    </ol>
+                </span>
+                <div class="step4_commands">
+                </div>
+            </div>
+
+            <div class="field">
+                <a class="howto_serve help" href="#">(how do I do this?)</a>
+                <label>Run this command on <span class="domain">foobar.com</span>'s server:</label><br/>
+                <span class="howto_serve_content help-content" style="display:none;">
+                    How to serve the challenge response on your domain:<br/>
+                    <ol>
+                        <li>
+                            SSH into your domain as someone with sudo permissions:<br/>
+                            <code>ssh ubuntu@foo.com</code>
+                        </li>
+                        <li>
+                            Stop any webserver running on port 80, if any. If you had previously
+                            been running another python command, you can kill it with Ctrl+C):<br/>
+                            <code>sudo service nginx stop</code> &lt;-- example for nginx<br/>
+                            <code>sudo apachectl -k graceful-stop</code> &lt;-- example for apache
+                        </li>
+                        <li>
+                            Copy and paste the python command below into your terminal. This
+                            command starts a temporary webserver that serves nothing but the
+                            challenge response. You only need to keep this running briefly.
+                        </li>
+                        <li>
+                            Click "I'm now running this command..." when the file is being
+                            served on your domain.
+                        </li>
+                    </ol>
+                </span>
+                <textarea readonly>sudo python ...</textarea>
+            </div>
+
+            <div class="field">
+                <input type="submit" value="I'm now running this command on foobar.com"/>
+            </div>
         </div>
     </div>
 
@@ -366,7 +371,7 @@ server {
         </div>
 
         <div class="field">
-            <form action="https://www.ssllabs.com/ssltest/analyze.html">
+            <form action="https://www.ssllabs.com/ssltest/analyze.html" target="_blank">
                 <input type="hidden" name="d" value="foobar.com">
                 <input type="submit" value="Test my install"/>
             </form>

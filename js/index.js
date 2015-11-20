@@ -527,7 +527,49 @@ function validateInitialSigs(e){
 
                     // done with domains, so populate step 4
                     else{
-                        // TODO populate step 4
+
+                        // populate step 4 template for this domain
+                        var template = document.getElementById("challenge_template").cloneNode(true);
+                        var names = template.querySelectorAll(".domain");
+                        for(var j = 0; j < names.length; j++){
+                            names[j].innerHTML = "";
+                            names[j].appendChild(document.createTextNode(d));
+                        }
+                        template.querySelector(".howto_sign").id = "howto_sign_" + d.replace(/\./g, "_");
+                        template.querySelector(".howto_sign_content").id = "howto_sign_" + d.replace(/\./g, "_") + "_content";
+                        template.querySelector(".howto_serve").id = "howto_serve_" + d.replace(/\./g, "_");
+                        template.querySelector(".howto_serve_content").id = "howto_serve_" + d.replace(/\./g, "_") + "_content";
+
+                        // build step 4 commands for this domain
+                        var challenge_cmd = "" +
+                            "<input type='text' value='" +
+                                "PRIV_KEY=./account.key; " +
+                                "echo -n \"" + DOMAINS[d]['challenge_protected'] + "." + DOMAINS[d]['challenge_payload'] + "\" | " +
+                                "openssl dgst -sha256 -sign $PRIV_KEY | " +
+                                "base64 -w 685" +
+                                "' readonly/><br/>" +
+                            "<input id='challenge_sig_" + d.replace(/\./g, "_") + "' type='text' " +
+                                "placeholder='Paste the base64 output here (e.g. \"34QuzDI6cn...\")'></input>";
+
+                        // build python server command for this domain
+                        template.querySelector(".step4_commands").innerHTML = challenge_cmd;
+                        var py_server = "" +
+                            "sudo python -c \"import BaseHTTPServer; \\\n" +
+                            "    h = BaseHTTPServer.BaseHTTPRequestHandler; \\\n" +
+                            "    h.do_GET = lambda r: r.send_response(200) or r.end_headers() " +
+                                    "or r.wfile.write('" + DOMAINS[d]['server_data'] + "'); \\\n" +
+                            "    s = BaseHTTPServer.HTTPServer(('0.0.0.0', 80), h); \\\n" +
+                            "    s.serve_forever()";
+                        template.querySelector("textarea").value = py_server;
+
+                        // append this domain to step 4
+                        template.id = "challenge_" + d.replace(/\./g, "_");
+                        template.style.display = null;
+                        document.getElementById("challenge_domains").appendChild(template);
+                        bindHelps([
+                            document.getElementById("howto_sign_" + d.replace(/\./g, "_")),
+                            document.getElementById("howto_serve_" + d.replace(/\./g, "_")),
+                        ]);
 
                         // close out step 3
                         status.style.display = "inline";
