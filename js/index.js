@@ -3,8 +3,8 @@
  */
 
 // global variables
-var CA = "https://acme-staging.api.letsencrypt.org",
-    //CA = "https://acme-v01.api.letsencrypt.org",
+var //CA = "https://acme-staging.api.letsencrypt.org",
+    CA = "https://acme-v01.api.letsencrypt.org",
     TERMS = "https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf",
     ACCOUNT_EMAIL, // "bar@foo.com"
     ACCOUNT_PUBKEY, // {
@@ -21,7 +21,7 @@ var CA = "https://acme-staging.api.letsencrypt.org",
          //   "protected": "deadbeef...",
          //   "sig": "deadbeef...",
          // }
-    DOMAINS, // {
+    DOMAINS; // {
              //   "www.foo.com": {
              //
              //     "request_payload": "deadbeef...",
@@ -40,7 +40,6 @@ var CA = "https://acme-staging.api.letsencrypt.org",
              //   },
              //   ...
              // }
-    SIGNED_CERT; // "-----BEGIN CERTIFICATE..."
 
 // show warning if no webcrypto digest
 window.crypto = window.crypto || window.msCrypto; //for IE11

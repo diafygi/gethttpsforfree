@@ -4,8 +4,18 @@
 Welcome to the source code for howtogetfreehttps.com!
 
 This is an open source website that is meant to be auditable. Please read
-through the code here to see what's going on! All of the source code is on this
-page, so you don't have to worry about any dependencies or other libraries.
+through the code to see what's going on!
+
+Original files:
+    /index.html - This page
+    /js/index.js - The interaction behavior for this page
+
+Third-party libraries (all from asn1.js package):
+    /js/asn1js/int10.js - Needed for asn1.js
+    /js/asn1js/hex.js - Convert hex to binary array
+    /js/asn1js/base64.js - Convert base64 to binary array
+    /js/asn1js/asn1.js - Parse ASN.1 format used in x.509 certificates
+    /js/asn1js/LICENSE - The license for the above asn1.js files
 
 Released under MIT License. Enjoy!
 -->
@@ -37,6 +47,10 @@ Released under MIT License. Enjoy!
     <!--##  Intro  ##-->
     <!--#############-->
     <h1>Get HTTPS for free!</h1>
+    <h2 class="error">
+        NOTE: Let's Encrypt is still in beta. You must have a whitelisted
+        domain to use this website before official launch in December.
+    </h2>
     <h2 id="digest_error" class="error" style="display:none;">
         ERROR: Your browser is not compatible with this website (this website
         needs WebCryptoAPI's crypto.subtle.digest()). Please upgrade to a modern
@@ -44,18 +58,21 @@ Released under MIT License. Enjoy!
     </h2>
     <div>
         You can now get free https certificates from the non-profit certificate
-        authority <a href="https://letsencrypt.org/">Let's Encrypt</a>!
+        authority <a href="https://letsencrypt.org/" target="_blank">Let's Encrypt</a>!
         This is a website that will take you through the manual steps to get your free
         https certificate so you can make your own website use https! This website is
-        <a href="https://github.com/diafygi/howtogetfreehttps">open source</a> and never
-        asks for your private keys. <a href="renew.html">Click here</a> to renew certs.
-        <a href="revoke.html">Click here</a> to revoke certs.
+        <a href="https://github.com/diafygi/howtogetfreehttps" target="_blank">open source</a>
+        and <strong>NEVER</strong> asks for your private keys. Never trust a website
+        that asks for your private keys!
+        <!--TODO-->
+        <!--<a href="renew.html">Click here</a> to renew certs.-->
+        <!--<a href="revoke.html">Click here</a> to revoke certs.-->
     </div>
 
     <div>
         <b>NOTE: This website is for people who know how to generate certificate signing
         requests (CSRs)!</b> If you're not familiar with how to do this, please use the
-        official Let's Encrypt <a href="https://github.com/letsencrypt/letsencrypt">client</a>
+        official Let's Encrypt <a href="https://github.com/letsencrypt/letsencrypt" target="_blank">client</a>
         that can automatically issue and install https certificates for you. This
         website is designed for people who know what they are doing and just want to get
         their free https certificate.
@@ -69,9 +86,9 @@ Released under MIT License. Enjoy!
     <h2>Step 1: Account Info</h2>
     <div>
         Let's Encrypt requires that you register a account email and public key before
-        issuing a certificate. The email is so that they can account you if needed, and
+        issuing a certificate. The email is so that they can contact you if needed, and
         the public key is so you can securely sign your requests to issue/revoke/renew
-        your certificates. <i>Keep your account private key secret! Anyone who has it
+        your certificates. <i><b>Keep your account private key secret!</b> Anyone who has it
         can impersonate you when making requests to Let's Encrypt!</i>
     </div>
 
@@ -117,8 +134,8 @@ Released under MIT License. Enjoy!
     <div>
         This is the certificate signing request (CSR) that you send to Let's Encrypt
         in order issue you a signed certificate. It contains the website domains you
-        want to issue certs for and the public key of your TLS private key. <i>Keep your
-        TLS private key secret! Anyone who has it can man-in-the-middle your websites!</i>
+        want to issue certs for and the public key of your TLS private key. <i><b>Keep your
+        TLS private key secret!</b> Anyone who has it can man-in-the-middle your website!</i>
     </div>
 
     <div class="field">
@@ -128,7 +145,7 @@ Released under MIT License. Enjoy!
             How to generate a new Certificate Signing Request (CSR):<br/>
             <ol>
                 <li>
-                    Generate a domain private key if you don't have one:<br/>
+                    Generate a TLS private key if you don't have one:<br/>
                     (KEEP DOMAIN.KEY SECRET!)</br>
                     <code>openssl genrsa 4096 > domain.key</code>
                 </li>
@@ -172,13 +189,9 @@ Released under MIT License. Enjoy!
                 How to generate the needed signatures:<br/>
                 <ol>
                     <li>
-                        Navigate in the terminal to the directory with account private
-                        key ("account.key" or whatever you named it).
-                    </li>
-                    <li>
                         Copy and paste each command below into your terminal (if your
-                        account private key isn't named "account.key", change "account.key"
-                        in the command to whatever you named it).
+                        account private key isn't at "./account.key", change "./account.key"
+                        in the command to wherever it exists).
                     </li>
                     <li>
                         Copy and paste the base64 encoded signature output from the command
@@ -324,7 +337,7 @@ scp dhparam.pem root@foo.com:/etc/ssl/certs/dhparam.pem
                     </li>
                     <li>
                         Update your nginx config to use https (below is an example).
-                        <pre>
+<pre>
 server {
     listen 443;
     server_name foo.com;
@@ -352,7 +365,7 @@ server {
 
         <div class="field">
             <label for="csr">Intermediate Certificate:</label><br/>
-            <textarea readonly>
+<textarea readonly>
 -----BEGIN CERTIFICATE-----
 MIIEqDCCA5CgAwIBAgIRAJgT9HUT5XULQ+dDHpceRL0wDQYJKoZIhvcNAQELBQAw
 PzEkMCIGA1UEChMbRGlnaXRhbCBTaWduYXR1cmUgVHJ1c3QgQ28uMRcwFQYDVQQD
@@ -380,7 +393,7 @@ ZnupyxpsEUlEaFb+/SCI4KCSBdAsYxAcsHYI5xxEI4LutHp6s3OT2FuO90WfdsIk
 6q78OMSdn875bNjdBYAqxUp2/LEIHfDBkLoQz0hFJmwAbYahqKaLn73PAAm1X2kj
 f1w8DdnkabOLGeOVcj9LQ+s67vBykx4anTjURkbqZslUEUsn2k5xeua2zUk=
 -----END CERTIFICATE-----
-            </textarea>
+</textarea>
         </div>
 
         <div class="field">
