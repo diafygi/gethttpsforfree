@@ -35,7 +35,7 @@ var CA = "https://acme-staging.api.letsencrypt.org",
              //
              //     "server_data": "deadbeef...",
              //     "server_uri": ".well-known/acme-challenge/...",
-             //     "confirmed": True,
+             //     "confirmed": true,
              //
              //   },
              //   ...
@@ -291,9 +291,14 @@ function validateCSR(e){
     // update the globals
     CSR = {csr: b64(new Uint8Array(Base64.decode(unarmor.exec(csr)[1])))};
     DOMAINS = {};
+    var shortest_domain = domains[0];
     for(var d = 0; d < domains.length; d++){
         DOMAINS[domains[d]] = {};
+        if(shortest_domain.length < domains[d].length){
+            shortest_domain = domains[d];
+        }
     }
+    document.getElementById("ssltest_domain").value = shortest_domain;
 
     //build account registration payload
     getNonce(function(nonce, err){
@@ -463,28 +468,6 @@ function validateInitialSigs(e){
     }
     CSR['sig'] = csr_sig.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
 
-    // register the account
-    status.innerHTML = "registering...";
-    var account_xhr = new XMLHttpRequest();
-    account_xhr.onreadystatechange = function(){
-        if(account_xhr.readyState === 4){
-            if(account_xhr.status === 200 || account_xhr.status === 409){
-                status.innerHTML = "account registered...";
-            }
-            else{
-                fail("Account registration failed. Please start back at Step 1. " +
-                    account_xhr.responseText, true);
-            }
-        }
-    };
-    account_xhr.open("POST", CA + "/acme/new-reg");
-    account_xhr.send(JSON.stringify({
-        "header": ACCOUNT_PUBKEY['jwk'],
-        "protected": ACCOUNT_PUBKEY['protected'],
-        "payload": ACCOUNT_PUBKEY['payload'],
-        "signature": ACCOUNT_PUBKEY['sig'],
-    }));
-
     // request challenges for each domain
     var domains = []
     for(var d in DOMAINS){
@@ -493,6 +476,7 @@ function validateInitialSigs(e){
     var i = 0;
     function requestChallenges(){
         var d = domains[i];
+        var d_ = d.replace(/\./g, "_");
         var domain_xhr = new XMLHttpRequest();
         domain_xhr.onreadystatechange = function(){
             if(domain_xhr.readyState === 4){
@@ -517,6 +501,55 @@ function validateInitialSigs(e){
                         }
                     }
 
+                    // populate step 4 template for this domain
+                    var template = document.getElementById("challenge_template").cloneNode(true);
+                    var names = template.querySelectorAll(".domain");
+                    for(var j = 0; j < names.length; j++){
+                        names[j].innerHTML = "";
+                        names[j].appendChild(document.createTextNode(d));
+                    }
+                    template.querySelector(".ssh").id = "ssh ubuntu@" + d;
+                    template.querySelector(".howto_sign").id = "howto_sign_" + d_;
+                    template.querySelector(".howto_sign_content").id = "howto_sign_" + d_ + "_content";
+                    template.querySelector(".howto_serve").id = "howto_serve_" + d_;
+                    template.querySelector(".howto_serve_content").id = "howto_serve_" + d_ + "_content";
+                    template.querySelector("input[type=submit]").id = "challenge_submit_" + d_;
+                    template.querySelector("input[type=submit]").dataset.domain = d;
+                    template.querySelector("input[type=submit]").value = "I'm now running this command on " + d;
+
+                    // build step 4 commands for this domain
+                    var challenge_cmd = "" +
+                        "<input type='text' value='" +
+                            "PRIV_KEY=./account.key; " +
+                            "echo -n \"" + DOMAINS[d]['challenge_protected'] + "." + DOMAINS[d]['challenge_payload'] + "\" | " +
+                            "openssl dgst -sha256 -sign $PRIV_KEY | " +
+                            "base64 -w 685" +
+                            "' readonly/><br/>" +
+                        "<input id='challenge_sig_" + d_ + "' type='text' " +
+                            "placeholder='Paste the base64 output here (e.g. \"34QuzDI6cn...\")'></input>";
+
+                    // build python server command for this domain
+                    template.querySelector(".step4_commands").innerHTML = challenge_cmd;
+                    var py_server = "" +
+                        "sudo python -c \"import BaseHTTPServer; \\\n" +
+                        "    h = BaseHTTPServer.BaseHTTPRequestHandler; \\\n" +
+                        "    h.do_GET = lambda r: r.send_response(200) or r.end_headers() " +
+                                "or r.wfile.write('" + DOMAINS[d]['server_data'] + "'); \\\n" +
+                        "    s = BaseHTTPServer.HTTPServer(('0.0.0.0', 80), h); \\\n" +
+                        "    s.serve_forever()\"";
+                    template.querySelector("textarea").value = py_server;
+
+                    // append this domain to step 4
+                    template.id = "challenge_" + d_;
+                    template.style.display = null;
+                    document.getElementById("challenge_domains").appendChild(template);
+                    bindHelps([
+                        document.getElementById("howto_sign_" + d_),
+                        document.getElementById("howto_serve_" + d_),
+                    ]);
+                    document.getElementById("challenge_submit_" + d_).addEventListener(
+                        "click", confirmDomainCheckIsRunning);
+
                     // move onto the next domain if any
                     status.innerHTML = "";
                     status.appendChild(document.createTextNode(d + " initialized..."));
@@ -525,62 +558,17 @@ function validateInitialSigs(e){
                         requestChallenges();
                     }
 
-                    // done with domains, so populate step 4
+                    // done with domains, so close out step 3 and show step 4
                     else{
-
-                        // populate step 4 template for this domain
-                        var template = document.getElementById("challenge_template").cloneNode(true);
-                        var names = template.querySelectorAll(".domain");
-                        for(var j = 0; j < names.length; j++){
-                            names[j].innerHTML = "";
-                            names[j].appendChild(document.createTextNode(d));
-                        }
-                        template.querySelector(".howto_sign").id = "howto_sign_" + d.replace(/\./g, "_");
-                        template.querySelector(".howto_sign_content").id = "howto_sign_" + d.replace(/\./g, "_") + "_content";
-                        template.querySelector(".howto_serve").id = "howto_serve_" + d.replace(/\./g, "_");
-                        template.querySelector(".howto_serve_content").id = "howto_serve_" + d.replace(/\./g, "_") + "_content";
-
-                        // build step 4 commands for this domain
-                        var challenge_cmd = "" +
-                            "<input type='text' value='" +
-                                "PRIV_KEY=./account.key; " +
-                                "echo -n \"" + DOMAINS[d]['challenge_protected'] + "." + DOMAINS[d]['challenge_payload'] + "\" | " +
-                                "openssl dgst -sha256 -sign $PRIV_KEY | " +
-                                "base64 -w 685" +
-                                "' readonly/><br/>" +
-                            "<input id='challenge_sig_" + d.replace(/\./g, "_") + "' type='text' " +
-                                "placeholder='Paste the base64 output here (e.g. \"34QuzDI6cn...\")'></input>";
-
-                        // build python server command for this domain
-                        template.querySelector(".step4_commands").innerHTML = challenge_cmd;
-                        var py_server = "" +
-                            "sudo python -c \"import BaseHTTPServer; \\\n" +
-                            "    h = BaseHTTPServer.BaseHTTPRequestHandler; \\\n" +
-                            "    h.do_GET = lambda r: r.send_response(200) or r.end_headers() " +
-                                    "or r.wfile.write('" + DOMAINS[d]['server_data'] + "'); \\\n" +
-                            "    s = BaseHTTPServer.HTTPServer(('0.0.0.0', 80), h); \\\n" +
-                            "    s.serve_forever()";
-                        template.querySelector("textarea").value = py_server;
-
-                        // append this domain to step 4
-                        template.id = "challenge_" + d.replace(/\./g, "_");
-                        template.style.display = null;
-                        document.getElementById("challenge_domains").appendChild(template);
-                        bindHelps([
-                            document.getElementById("howto_sign_" + d.replace(/\./g, "_")),
-                            document.getElementById("howto_serve_" + d.replace(/\./g, "_")),
-                        ]);
-
-                        // close out step 3
                         status.style.display = "inline";
                         status.className = "";
                         status.innerHTML = "Step 3 complete! Please proceed to Step 4.";
                         document.getElementById("step4").style.display = null;
                         document.getElementById("step4_pending").innerHTML = "";
+                        document.getElementById("challenge_submit_" + d_).dataset.islast = "1";
                     }
                 }
                 else{
-                    console.log(domain_xhr);
                     fail("Domain failed. Please start back at Step 1. " +
                         domain_xhr.responseText, true);
                 }
@@ -594,22 +582,197 @@ function validateInitialSigs(e){
             "signature": DOMAINS[domains[i]]['request_sig'],
         }));
     }
-    requestChallenges();
+
+    // register the account
+    status.innerHTML = "registering...";
+    var account_xhr = new XMLHttpRequest();
+    account_xhr.onreadystatechange = function(){
+        if(account_xhr.readyState === 4){
+            if(account_xhr.status === 201 || account_xhr.status === 409){
+                status.innerHTML = "account registered...";
+                requestChallenges()
+            }
+            else{
+                fail("Account registration failed. Please start back at Step 1. " +
+                    account_xhr.responseText, true);
+            }
+        }
+    };
+    account_xhr.open("POST", CA + "/acme/new-reg");
+    account_xhr.send(JSON.stringify({
+        "header": ACCOUNT_PUBKEY['jwk'],
+        "protected": ACCOUNT_PUBKEY['protected'],
+        "payload": ACCOUNT_PUBKEY['payload'],
+        "signature": ACCOUNT_PUBKEY['sig'],
+    }));
 }
 document.getElementById("validate_initial_sigs").addEventListener("click", validateInitialSigs);
 
 // confirm domain check is running
 function confirmDomainCheckIsRunning(e){
-    console.log("confirmDomainCheckIsRunning");
+
+    // get domain information for this challenge
+    var d = e.target.dataset.domain;
+    var d_ = d.replace(/\./g, "_");
+    var islast = e.target.dataset.islast;
+
+    // set the failure state
+    var status = e.target.parentNode.querySelector("span");
+    function fail(msg, fail_all){
+        if(fail_all){
+            ACCOUNT_EMAIL = undefined;
+            ACCOUNT_PUBKEY = undefined;
+            CSR = undefined;
+            DOMAINS = undefined;
+        }
+        status.style.display = "inline";
+        status.className = "error";
+        status.innerHTML = "";
+        status.appendChild(document.createTextNode("Error: " + msg));
+    }
+
+    // clear previous status
+    status.style.display = "inline";
+    status.className = "";
+    status.innerHTML = "validating...";
+
+    // if anything is missing, start over
+    if(!(ACCOUNT_EMAIL && ACCOUNT_PUBKEY && CSR && DOMAINS)){
+        return fail("Something went wrong. Please go back to Step 1.", true);
+    }
+
+    // if the signature is missing, fail
+    var challenge_sig = document.getElementById("challenge_sig_" + d_).value;
+    if(challenge_sig === ""){
+        return fail("You need to run the above commands and paste the output of the first command in the text boxes below it.");
+    }
+    DOMAINS[d]['challenge_sig'] = challenge_sig.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
+
+    // function to check on challenge status
+    function checkOnChallenge(){
+        status.innerHTML = "checking on status...";
+        var check_xhr = new XMLHttpRequest();
+        check_xhr.onreadystatechange = function(){
+            if(check_xhr.readyState === 4){
+                if(check_xhr.status === 202){
+                    var check = JSON.parse(check_xhr.responseText);
+                    if(check['status'] === "pending"){
+                        status.innerHTML = "still testing...";
+                        window.setTimeout(checkOnChallenge, 1000);
+                    }
+                    else if(check['status'] === "valid"){
+                        status.innerHTML = "Domain verified!";
+                        DOMAINS[d]['confirmed'] = true;
+                        checkAllDomains();
+                    }
+                    else{
+                        fail("Domain challenge failed. Please start back at Step 1. " +
+                            check_xhr.responseText, true);
+                    }
+                }
+                else{
+                    fail("Domain challenge failed. Please start back at Step 1. " +
+                        check_xhr.responseText, true);
+                }
+            }
+        };
+        check_xhr.open("GET", DOMAINS[d]['challenge_uri']);
+        check_xhr.send();
+    }
+
+    // request the challenge be checked
+    status.innerHTML = "testing...";
+    var challenge_xhr = new XMLHttpRequest();
+    challenge_xhr.onreadystatechange = function(){
+        if(challenge_xhr.readyState === 4){
+            if(challenge_xhr.status === 202){
+                window.setTimeout(checkOnChallenge, 1000);
+            }
+            else{
+                fail("Domain challenge failed. Please start back at Step 1. " +
+                    challenge_xhr.responseText, true);
+            }
+        }
+    };
+    challenge_xhr.open("POST", DOMAINS[d]['challenge_uri']);
+    challenge_xhr.send(JSON.stringify({
+        "header": ACCOUNT_PUBKEY['jwk'],
+        "protected": DOMAINS[d]['challenge_protected'],
+        "payload": DOMAINS[d]['challenge_payload'],
+        "signature": DOMAINS[d]['challenge_sig'],
+    }));
 }
 
-// verify ownership
-function verifyOwnership(e){
-    console.log("verifyOwnership");
-}
+function checkAllDomains(){
+    // check to see if all confirmed
+    var all_confirmed = true;
+    for(var domain in DOMAINS){
+        if(DOMAINS[domain]['confirmed'] !== true){
+            all_confirmed = false;
+        }
+    }
 
-// request to sign certificate
-function signCertificate(e){
-    console.log("signCertificate");
+    // not all confirmed, so don't request certificate yet
+    if(!all_confirmed){
+        return;
+    }
+
+    // set status and failure modes
+    var status = document.getElementById("step5_pending");
+    function fail(msg, fail_all){
+        if(fail_all){
+            ACCOUNT_EMAIL = undefined;
+            ACCOUNT_PUBKEY = undefined;
+            CSR = undefined;
+            DOMAINS = undefined;
+        }
+        status.style.display = "inline";
+        status.className = "error";
+        status.innerHTML = "";
+        status.appendChild(document.createTextNode("Error: " + msg));
+    }
+
+    // all confirmed, so get certificate!
+    status.innerHTML = "signing certificate...";
+    var cert_xhr = new XMLHttpRequest();
+    cert_xhr.onreadystatechange = function(){
+        if(cert_xhr.readyState === 4){
+            if(cert_xhr.status === 201){
+
+                // alert when navigating away
+                window.onbeforeunload = function(){
+                    return "Be sure to save your signed certificate! " +
+                           "It will be lost if you navigate away from this " +
+                           "page before saving it, and you might not be able " +
+                           "to get another one issued!";
+                };
+
+                // format cert into PEM format
+                var crt64 = window.btoa(String.fromCharCode.apply(null, new Uint8Array(cert_xhr.response)));
+                var pem = "-----BEGIN CERTIFICATE-----\n";
+                for(var i = 0; i < Math.ceil(crt64.length / 64.0); i++){
+                    pem += crt64.substr(i * 64, 64) + "\n";
+                }
+                pem += "-----END CERTIFICATE-----";
+                document.getElementById("crt").value = pem;
+
+                // show certificate field
+                status.innerHTML = "see below";
+                document.getElementById("step5").style.display = null;
+            }
+            else{
+                fail("Certificate signature failed. Please start back at Step 1.", true);
+                console.log("error", cert_xhr);
+            }
+        }
+    };
+    cert_xhr.responseType = "arraybuffer";
+    cert_xhr.open("POST", CA + "/acme/new-cert");
+    cert_xhr.send(JSON.stringify({
+        "header": ACCOUNT_PUBKEY['jwk'],
+        "protected": CSR['protected'],
+        "payload": CSR['payload'],
+        "signature": CSR['sig'],
+    }));
 }
 
