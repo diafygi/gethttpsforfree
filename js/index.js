@@ -356,59 +356,59 @@ function validateCSR(e){
 
         // show the success text (simulate a delay so it looks like we thought hard)
         else{
+            document.getElementById("step3_commands").innerHTML = "";
+
             // build the account registration signature command
-            var account_template = "" +
-                "<input type='text' value='" +
-                    "PRIV_KEY=./account.key; " +
-                    "echo -n \"" + ACCOUNT_PUBKEY['protected'] + "." + ACCOUNT_PUBKEY['payload'] + "\" | " +
-                    "openssl dgst -sha256 -sign $PRIV_KEY | " +
-                    "base64 -w 685" +
-                    "' readonly/><br/>" +
-                "<input id='account_sig' type='text' " +
-                    "placeholder='Paste the base64 output here (e.g. \"34QuzDI6cn...\")'></input>" +
-                "<br/><br/>";
+            var account_template = document.getElementById("signing_template").cloneNode(true);
+            account_template.querySelectorAll("input")[0].value = "" +
+                "PRIV_KEY=./account.key; " +
+                "echo -n \"" + ACCOUNT_PUBKEY['protected'] + "." + ACCOUNT_PUBKEY['payload'] + "\" | " +
+                "openssl dgst -sha256 -sign $PRIV_KEY | " +
+                "base64 -w 685";
+            account_template.querySelectorAll("input")[1].id = "account_sig";
+            account_template.querySelectorAll("input")[1].value = "";
+            account_template.style.display = null;
+            document.getElementById("step3_commands").appendChild(account_template);
+            document.getElementById("step3_commands").appendChild(document.createElement("br"));
 
             // build the domain signature commands
-            domain_templates = "";
-            for(var d in DOMAINS){
-                domain_templates += "" +
-                    "<input type='text' value='" +
-                        "PRIV_KEY=./account.key; " +
-                        "echo -n \"" + DOMAINS[d]['request_protected'] + "." + DOMAINS[d]['request_payload'] + "\" | " +
-                        "openssl dgst -sha256 -sign $PRIV_KEY | " +
-                        "base64 -w 685" +
-                        "' readonly/><br/>" +
-                    "<input id='domain_sig_" + d.replace(/\./g, "_") + "' type='text' " +
-                        "placeholder='Paste the base64 output here (e.g. \"34QuzDI6cn...\")'></input>" +
-                    "<br/><br/>";
-            }
-
-            // build the csr registration signature command
-            var csr_template = "" +
-                "<input type='text' value='" +
-                    "PRIV_KEY=./account.key; " +
-                    "echo -n \"" + CSR['protected'] + "." + CSR['payload'] + "\" | " +
-                    "openssl dgst -sha256 -sign $PRIV_KEY | " +
-                    "base64 -w 685" +
-                    "' readonly/><br/>" +
-                "<input id='csr_sig' type='text' " +
-                    "placeholder='Paste the base64 output here (e.g. \"34QuzDI6cn...\")'></input>";
-
-            // insert the commands
-            document.getElementById("step3_commands").innerHTML = "" +
-                account_template + domain_templates + csr_template;
-
-            // show the success text and step 3
             var domainString = "";
             for(var d in DOMAINS){
                 domainString += d + ", ";
+                var d_ = d.replace(/\./g, "_");
+                var domain_template = document.getElementById("signing_template").cloneNode(true);
+                domain_template.querySelectorAll("input")[0].value = "" +
+                    "PRIV_KEY=./account.key; " +
+                    "echo -n \"" + DOMAINS[d]['request_protected'] + "." + DOMAINS[d]['request_payload'] + "\" | " +
+                    "openssl dgst -sha256 -sign $PRIV_KEY | " +
+                    "base64 -w 685";
+                domain_template.querySelectorAll("input")[1].id = "domain_sig_" + d_;
+                domain_template.querySelectorAll("input")[1].value = "";
+                domain_template.style.display = null;
+                document.getElementById("step3_commands").appendChild(domain_template);
+                document.getElementById("step3_commands").appendChild(document.createElement("br"));
             }
-            domainString = domainString.substr(0, domainString.length - 2);
+
+            // build the csr registration signature command
+            var csr_template = document.getElementById("signing_template").cloneNode(true);
+            csr_template.querySelectorAll("input")[0].value = "" +
+                    "PRIV_KEY=./account.key; " +
+                    "echo -n \"" + CSR['protected'] + "." + CSR['payload'] + "\" | " +
+                    "openssl dgst -sha256 -sign $PRIV_KEY | " +
+                    "base64 -w 685";
+            csr_template.querySelectorAll("input")[1].id = "csr_sig";
+            csr_template.querySelectorAll("input")[1].value = "";
+            csr_template.style.display = null;
+            document.getElementById("step3_commands").appendChild(csr_template);
+
+            // show the success text and step 3
             status.style.display = "inline";
             status.classNsame = "";
             status.innerHTML = "";
             status.appendChild(document.createTextNode(
-                "Found domains! Proceed to Step 3! (" + domainString + ")"));
+                "Found domains! Proceed to Step 3! (" +
+                domainString.substr(0, domainString.length - 2) +
+                ")"));
             document.getElementById("step3").style.display = null;
             document.getElementById("step3_pending").innerHTML = "";
         }
@@ -453,7 +453,8 @@ function validateInitialSigs(e){
 
     // parse new-authz signatures
     for(var d in DOMAINS){
-        var domain_sig = document.getElementById("domain_sig_" + d.replace(/\./g, "_")).value;
+        var d_ = d.replace(/\./g, "_");
+        var domain_sig = document.getElementById("domain_sig_" + d_).value;
         if(domain_sig === ""){
             return fail(missing_msg);
         }
@@ -517,18 +518,18 @@ function validateInitialSigs(e){
                     template.querySelector("input[type=submit]").value = "I'm now running this command on " + d;
 
                     // build step 4 commands for this domain
-                    var challenge_cmd = "" +
-                        "<input type='text' value='" +
-                            "PRIV_KEY=./account.key; " +
-                            "echo -n \"" + DOMAINS[d]['challenge_protected'] + "." + DOMAINS[d]['challenge_payload'] + "\" | " +
-                            "openssl dgst -sha256 -sign $PRIV_KEY | " +
-                            "base64 -w 685" +
-                            "' readonly/><br/>" +
-                        "<input id='challenge_sig_" + d_ + "' type='text' " +
-                            "placeholder='Paste the base64 output here (e.g. \"34QuzDI6cn...\")'></input>";
+                    var challenge_cmd = document.getElementById("signing_template").cloneNode(true);
+                    challenge_cmd.querySelectorAll("input")[0].value = "" +
+                        "PRIV_KEY=./account.key; " +
+                        "echo -n \"" + DOMAINS[d]['challenge_protected'] + "." + DOMAINS[d]['challenge_payload'] + "\" | " +
+                        "openssl dgst -sha256 -sign $PRIV_KEY | " +
+                        "base64 -w 685";
+                    challenge_cmd.querySelectorAll("input")[1].id = "challenge_sig_" + d_;
+                    challenge_cmd.querySelectorAll("input")[1].value = "";
+                    challenge_cmd.style.display = null;
+                    template.querySelector(".step4_commands").appendChild(challenge_cmd);
 
                     // build python server command for this domain
-                    template.querySelector(".step4_commands").innerHTML = challenge_cmd;
                     var py_server = "" +
                         "sudo python -c \"import BaseHTTPServer; \\\n" +
                         "    h = BaseHTTPServer.BaseHTTPRequestHandler; \\\n" +
