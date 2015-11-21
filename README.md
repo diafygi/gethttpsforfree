@@ -64,7 +64,7 @@ TODO (pull requests welcome):
 
 * Third party libraries (asn1.js is the only one)
 * Fonts or images
-* CSS more than 1 kilobyte
+* CSS more than 5 kilobytes
 * Javascript that only changes UI
 * HTML that decreases source readability (added wrapping divs, etc.)
 

@@ -34,6 +34,17 @@ Released under MIT License. Enjoy!
         .help-content{display:inline-block;width:100%;max-width:600px;margin:5px 0px 10px 0px;padding:10px;background-color:#eeeeee;}
         code{display:inline-block;margin:5px 0px;padding:5px;background-color:#ffffff;}
         pre{margin:5px 0px;padding:5px;overflow:auto;background-color:#ffffff;}
+        .tabsection{margin:0px;}
+        .options{margin:0px;padding:0px;}
+        .options li{display:inline-block;margin:0px;padding:0px;}
+        .options a{display:inline-block;margin:0px;padding:6px 12px;font-size:13px;}
+        .options a.active{background-color:#eeeeee;}
+        .tab{background-color:#eeeeee;margin:0px;padding:15px 15px 1px 15px;}
+        .tab .help-content{background-color:#ffffff;}
+        .tab .help-content a{display:inline-block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .tab code{background-color:#eeeeee;}
+        .tab pre{background-color:#eeeeee;}
+        .tab textarea{height:105px;}
         .footer{font-size:12px;}
     </style>
     <script src="js/asn1js/int10.js"></script>
@@ -99,7 +110,6 @@ Released under MIT License. Enjoy!
 
     <div class="field">
         <a id="howto_pubkey" class="help" href="#">(how do I generate this?)</a>
-        <label for="pubkey">Account Public Key:</label><br/>
         <span id="howto_pubkey_content" class="help-content" style="display:none;">
             How to generate a new account keypair using openssl:<br/>
             <ol>
@@ -117,6 +127,7 @@ Released under MIT License. Enjoy!
                 </li>
             </ol>
         </span>
+        <label for="pubkey">Account Public Key:</label><br/>
         <textarea id="pubkey" placeholder="-----BEGIN PUBLIC KEY----- ..."></textarea>
     </div>
 
@@ -140,7 +151,6 @@ Released under MIT License. Enjoy!
 
     <div class="field">
         <a id="howto_csr" class="help" href="#">(how do I generate this?)</a>
-        <label for="csr">Certificate Signing Request:</label><br/>
         <span id="howto_csr_content" class="help-content" style="display:none;">
             How to generate a new Certificate Signing Request (CSR):<br/>
             <ol>
@@ -159,6 +169,7 @@ Released under MIT License. Enjoy!
                 </li>
             </ol>
         </span>
+        <label for="csr">Certificate Signing Request:</label><br/>
         <textarea id="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..."></textarea>
     </div>
 
@@ -184,7 +195,6 @@ Released under MIT License. Enjoy!
 
         <div class="field">
             <a id="howto_sign1" class="help" href="#">(how do I do this?)</a>
-            <label>Run these signature commands in your terminal:</label><br/>
             <span id="howto_sign1_content" class="help-content" style="display:none;">
                 How to generate the needed signatures:<br/>
                 <ol>
@@ -199,6 +209,7 @@ Released under MIT License. Enjoy!
                     </li>
                 </ol>
             </span>
+            <label>Run these signature commands in your terminal:</label><br/>
             <span id="step3_commands">
             </span>
             <span id="signing_template" style="display:none;">
@@ -242,7 +253,6 @@ Released under MIT License. Enjoy!
 
             <div class="field">
                 <a class="howto_sign help" href="#">(how do I do this?)</a>
-                <label>Run this signature command in your terminal:</label><br/>
                 <span class="howto_sign_content help-content" style="display:none;">
                     How to generate the needed signatures:<br/>
                     <ol>
@@ -261,43 +271,96 @@ Released under MIT License. Enjoy!
                         </li>
                     </ol>
                 </span>
-                <div class="step4_commands">
-                </div>
-            </div>
-
-            <div class="field">
-                <a class="howto_serve help" href="#">(how do I do this?)</a>
-                <label>Run this command on <span class="domain">foobar.com</span>'s server:</label><br/>
-                <span class="howto_serve_content help-content" style="display:none;">
-                    How to serve the challenge response on your domain:<br/>
-                    <ol>
-                        <li>
-                            SSH into your domain as someone with sudo permissions:<br/>
-                            <code class="ssh">ssh ubuntu@foobar.com</code>
-                        </li>
-                        <li>
-                            Stop any webserver running on port 80, if any. If you had previously
-                            been running another python command, you can kill it with Ctrl+C):<br/>
-                            <code>sudo service nginx stop</code> &lt;-- example for nginx<br/>
-                            <code>sudo apachectl -k graceful-stop</code> &lt;-- example for apache
-                        </li>
-                        <li>
-                            Copy and paste the python command below into your terminal. This
-                            command starts a temporary webserver that serves nothing but the
-                            challenge response. You only need to keep this running briefly.
-                        </li>
-                        <li>
-                            Click "I'm now running this command..." when the file is being
-                            served on your domain.
-                        </li>
-                    </ol>
+                <label>Run this signature command in your terminal:</label><br/>
+                <span class="step4_commands">
                 </span>
-                <textarea readonly></textarea>
             </div>
 
-            <div class="field">
-                <input type="submit" value="I'm now running this command on foobar.com"/>
-                <span style="display:none;"></span>
+            <div class="field tabsection">
+                <ul class="options">
+                    <li><a href="#">Option 1 - python server</a></li
+                    ><li><a href="#">Option 2 - file-based</a></li>
+                </ul>
+                <div class="tab">
+                    <a class="howto_serve help" href="#">(how do I do this?)</a>
+                    <span class="howto_serve_content help-content" style="display:none;">
+                        How to serve the challenge response on your domain:<br/>
+                        <ol>
+                            <li>
+                                SSH into your domain as someone with sudo permissions:<br/>
+                                <code class="ssh">ssh ubuntu@foobar.com</code>
+                            </li>
+                            <li>
+                                Stop any webserver running on port 80, if any. If you had previously
+                                been running another python command, you can kill it with Ctrl+C):<br/>
+                                <code>sudo service nginx stop</code> &lt;-- example for nginx<br/>
+                                <code>sudo apachectl -k graceful-stop</code> &lt;-- example for apache
+                            </li>
+                            <li>
+                                Copy and paste the python command below into your terminal. This
+                                command starts a temporary webserver that serves nothing but the
+                                challenge response. You only need to keep this running briefly.
+                            </li>
+                            <li>
+                                Open the link in a new window to make sure it's working:<br/>
+                                <a target="_blank"></a>
+                            </li>
+                            <li>
+                                Click "I'm now running this command..." button when the file is being
+                                served on your domain.
+                            </li>
+                        </ol>
+                    </span>
+                    <label>Run this command on <span class="domain">foobar.com</span>'s server:</label><br/>
+                    <textarea readonly></textarea>
+                    <div>
+                        <input type="submit" value="I'm now running this command on foobar.com"/>
+                        <span style="display:none;"></span>
+                    </div>
+                </div>
+                <div class="tab">
+                    <a class="howto_file help" href="#">(how do I do this?)</a>
+                    <span class="howto_file_content help-content" style="display:none;">
+                        How to host this file on your server:<br/>
+                        <ol>
+                            <li>
+                                SSH into your domain as someone with write access to
+                                your static web directory:<br/>
+                                <pre class="ssh">ssh ubuntu@foobar.com</pre>
+                            </li>
+                            <li>
+                                Create the ".well-known/acme-challenge/" folder in your
+                                webserver's static web directory:<br/>
+                                <pre>
+cd /path/to/www/
+mkdir -p .well-known/acme-challenge/
+</pre>
+                            </li>
+                            <li>
+                                Create the file with the necessary contents:<br/>
+                                <pre class="file_cmd">echo ...</pre>
+                            </li>
+                            <li>
+                                Open the link in a new window to make sure it's working:<br/>
+                                <a target="_blank"></a>
+                            </li>
+                            <li>
+                                Click "I'm now serving this file..." button when the file is being
+                                served on your domain.
+                            </li>
+                        </ol>
+                    </span>
+                    <label>Under this url:</label><br/>
+                    <input type="text" class="file_url" value="" readonly/>
+                    <div>
+                        <label>Serve this content:</label>
+                        <input type="text" class="file_data" value="" readonly/>
+                    </div>
+                    <div>
+                        <input type="submit" class="file_submit" value="I'm now serving this file on foobar.com"/>
+                        <span style="display:none;"></span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -316,7 +379,6 @@ Released under MIT License. Enjoy!
 
         <div class="field">
             <a id="howto_install" class="help" href="#">(how do I install this?)</a>
-            <label for="csr">Signed Certificate:</label><br/>
             <span id="howto_install_content" class="help-content" style="display:none;">
                 How to install https on nginx:<br/>
                 <ol>
@@ -364,6 +426,7 @@ server {
                     </li>
                 </ol>
             </span>
+            <label for="csr">Signed Certificate:</label><br/>
             <textarea id="crt" readonly></textarea>
         </div>
 

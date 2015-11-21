@@ -91,6 +91,21 @@ function bindHelps(elems){
 }
 bindHelps(document.querySelectorAll(".help"));
 
+// hide/show the challenge serving tabs
+function switchTab(e){
+    e.preventDefault();
+    var opts = e.target.parentNode.parentNode.querySelectorAll("a");
+    for(var i = 0; i < opts.length; i++){
+        console.log(opts[i].id, e.target.id);
+        opts[i].className = opts[i].id === e.target.id ? "active" : "";
+    }
+    var tab = document.getElementById(e.target.id + "_content");
+    var tabs = document.querySelectorAll("." + tab.className.split(" ")[1]);
+    for(var i = 0; i < tabs.length; i++){
+        tabs[i].style.display = tabs[i].id === tab.id ? null : "none";
+    }
+}
+
 // helper function to get a nonce via an ajax request to the ACME directory
 function getNonce(callback){
     var xhr = new XMLHttpRequest();
@@ -490,6 +505,7 @@ function validateInitialSigs(e){
                             DOMAINS[d]['challenge_uri'] = resp['challenges'][c]['uri'];
                             DOMAINS[d]['server_data'] = keyAuthorization;
                             DOMAINS[d]['server_uri'] = ".well-known/acme-challenge/" + resp['challenges'][c]['token'];
+                            var link = "http://" + d + "/" + DOMAINS[d]['server_uri'];
                             DOMAINS[d]['challenge_payload'] = b64(JSON.stringify({
                                 resource: "challenge",
                                 keyAuthorization: keyAuthorization,
@@ -508,14 +524,8 @@ function validateInitialSigs(e){
                         names[j].innerHTML = "";
                         names[j].appendChild(document.createTextNode(d));
                     }
-                    template.querySelector(".ssh").id = "ssh ubuntu@" + d;
                     template.querySelector(".howto_sign").id = "howto_sign_" + d_;
                     template.querySelector(".howto_sign_content").id = "howto_sign_" + d_ + "_content";
-                    template.querySelector(".howto_serve").id = "howto_serve_" + d_;
-                    template.querySelector(".howto_serve_content").id = "howto_serve_" + d_ + "_content";
-                    template.querySelector("input[type=submit]").id = "challenge_submit_" + d_;
-                    template.querySelector("input[type=submit]").dataset.domain = d;
-                    template.querySelector("input[type=submit]").value = "I'm now running this command on " + d;
 
                     // build step 4 commands for this domain
                     var challenge_cmd = document.getElementById("signing_template").cloneNode(true);
@@ -529,15 +539,54 @@ function validateInitialSigs(e){
                     challenge_cmd.style.display = null;
                     template.querySelector(".step4_commands").appendChild(challenge_cmd);
 
-                    // build python server command for this domain
-                    var py_server = "" +
+                    // setup option ids unique to this domain
+                    template.querySelectorAll(".options a")[0].id = "python_" + d_;
+                    template.querySelectorAll(".options a")[0].className = "active";
+                    template.querySelectorAll(".options a")[1].id = "file_" + d_;
+                    template.querySelectorAll(".options a")[1].className = "";
+                    var python_content = template.querySelectorAll(".tab")[0];
+                    var file_content = template.querySelectorAll(".tab")[1];
+
+                    // python server tab
+                    python_content.id = "python_" + d_ + "_content";
+                    python_content.className = "tab tab_" + d_;
+                    python_content.style.display = null;
+                    python_content.querySelector(".howto_serve").id = "howto_serve_" + d_;
+                    python_content.querySelector(".howto_serve_content").id = "howto_serve_" + d_ + "_content";
+                    python_content.querySelector(".ssh").innerHTML = "";
+                    python_content.querySelector(".ssh").appendChild(document.createTextNode("ssh ubuntu@" + d));
+                    python_content.querySelector(".help-content a").href = link;
+                    python_content.querySelector(".help-content a").innerHTML = "";
+                    python_content.querySelector(".help-content a").appendChild(document.createTextNode(link));
+                    python_content.querySelector("textarea").value = "" +
                         "sudo python -c \"import BaseHTTPServer; \\\n" +
                         "    h = BaseHTTPServer.BaseHTTPRequestHandler; \\\n" +
                         "    h.do_GET = lambda r: r.send_response(200) or r.end_headers() " +
                                 "or r.wfile.write('" + DOMAINS[d]['server_data'] + "'); \\\n" +
                         "    s = BaseHTTPServer.HTTPServer(('0.0.0.0', 80), h); \\\n" +
                         "    s.serve_forever()\"";
-                    template.querySelector("textarea").value = py_server;
+                    python_content.querySelector("input[type=submit]").id = "python_submit_" + d_;
+                    python_content.querySelector("input[type=submit]").dataset.domain = d;
+                    python_content.querySelector("input[type=submit]").value = "I'm now running this command on " + d;
+
+                    // file-based tab
+                    file_content.id = "file_" + d_ + "_content";
+                    file_content.className = "tab tab_" + d_;
+                    file_content.style.display = "none";
+                    file_content.querySelector(".howto_file").id = "howto_file_" + d_;
+                    file_content.querySelector(".howto_file_content").id = "howto_file_" + d_ + "_content";
+                    file_content.querySelector(".ssh").innerHTML = "";
+                    file_content.querySelector(".ssh").appendChild(document.createTextNode("ssh ubuntu@" + d));
+                    file_content.querySelector(".help-content a").href = link;
+                    file_content.querySelector(".help-content a").innerHTML = "";
+                    file_content.querySelector(".help-content a").appendChild(document.createTextNode(link));
+                    file_content.querySelector(".file_cmd").innerHTML = "" +
+                        "echo \"" + DOMAINS[d]['server_data'] + "\" > " + DOMAINS[d]['server_uri'];
+                    file_content.querySelector(".file_url").value = link;
+                    file_content.querySelector(".file_data").value = DOMAINS[d]['server_data'];
+                    file_content.querySelector("input[type=submit]").id = "file_submit_" + d_;
+                    file_content.querySelector("input[type=submit]").dataset.domain = d;
+                    file_content.querySelector("input[type=submit]").value = "I'm now serving this file on " + d;
 
                     // append this domain to step 4
                     template.id = "challenge_" + d_;
@@ -546,14 +595,17 @@ function validateInitialSigs(e){
                     bindHelps([
                         document.getElementById("howto_sign_" + d_),
                         document.getElementById("howto_serve_" + d_),
+                        document.getElementById("howto_file_" + d_),
                     ]);
-                    document.getElementById("challenge_submit_" + d_).addEventListener(
-                        "click", confirmDomainCheckIsRunning);
+                    document.getElementById("python_" + d_).addEventListener("click", switchTab);
+                    document.getElementById("file_" + d_).addEventListener("click", switchTab);
+                    document.getElementById("python_submit_" + d_).addEventListener("click", confirmDomainCheckIsRunning);
+                    document.getElementById("file_submit_" + d_).addEventListener("click", confirmDomainCheckIsRunning);
 
                     // move onto the next domain if any
                     status.innerHTML = "";
                     status.appendChild(document.createTextNode(d + " initialized..."));
-                    if((i + 1) < domains.length){
+                    if(i < (domains.length - 1)){
                         i += 1;
                         requestChallenges();
                     }
@@ -565,7 +617,6 @@ function validateInitialSigs(e){
                         status.innerHTML = "Step 3 complete! Please proceed to Step 4.";
                         document.getElementById("step4").style.display = null;
                         document.getElementById("step4_pending").innerHTML = "";
-                        document.getElementById("challenge_submit_" + d_).dataset.islast = "1";
                     }
                 }
                 else{
@@ -590,7 +641,7 @@ function validateInitialSigs(e){
         if(account_xhr.readyState === 4){
             if(account_xhr.status === 201 || account_xhr.status === 409){
                 status.innerHTML = "account registered...";
-                requestChallenges()
+                requestChallenges();
             }
             else{
                 fail("Account registration failed. Please start back at Step 1. " +
@@ -614,7 +665,6 @@ function confirmDomainCheckIsRunning(e){
     // get domain information for this challenge
     var d = e.target.dataset.domain;
     var d_ = d.replace(/\./g, "_");
-    var islast = e.target.dataset.islast;
 
     // set the failure state
     var status = e.target.parentNode.querySelector("span");
@@ -644,7 +694,7 @@ function confirmDomainCheckIsRunning(e){
     // if the signature is missing, fail
     var challenge_sig = document.getElementById("challenge_sig_" + d_).value;
     if(challenge_sig === ""){
-        return fail("You need to run the above commands and paste the output of the first command in the text boxes below it.");
+        return fail("You need to run the above signature command and paste the output in the text box.");
     }
     DOMAINS[d]['challenge_sig'] = challenge_sig.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
 
