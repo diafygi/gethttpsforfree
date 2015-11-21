@@ -5,9 +5,10 @@ HAVE A WHITELISTED DOMAIN DURING BETA. GENERAL AVAILABILITY WILL BE SOON!**
 
 Website: https://diafygi.github.io/gethttpsforfree/
 
-This is a project that allows you to get a free HTTPS certificate
-without having to install any software or having to share your private
-keys with anyone.
+This is a project that allows you to get a free HTTPS certificate without
+having to install any software or having to share your private keys with anyone.
+It uses the non-profit [Let's Encrypt](https://letsencrypt.org/) certificate
+authority to issue the free certificates. Hooray for free certs!
 
 ##Donate
 
@@ -18,12 +19,13 @@ but they do fantastic work.
 
 ##How to use this website
 
+Go to: https://diafygi.github.io/gethttpsforfree/
+
 The website works by generating commands for you to run in your terminal, then
 making requests to the Let's Encrypt ACME API to issue your certificate. Simply
-visit https://diafygi.github.io/gethttpsforfree/ and follow the steps! If you
-don't know how to do something, try clicking the help links that explain how to
-complete the step. If you're still confused, please create an issue and I'll
-address your issue ASAP!
+visit the above website and follow the steps! If you don't know how to do
+something, try clicking the help links that explain how to complete the step. If
+you're still confused, please create an issue and I'll address your issue ASAP!
 
 Requirements for your local machine:
 * openssl
@@ -54,7 +56,17 @@ clear what it's doing.
 TODO (pull requests welcome):
 * `renew.html` - A page with steps for renewing certificates
 * `revoke.html` - A page with steps for revoking certificates
-* Alternative file-base hosting command instead of pythons
-* Installation instructions for apache
+* Alternative file-based command instead of python server
+* Installation instructions for Apache
 * Accept GPG public keys as account public keys
+
+##What's NOT on the Roadmap
+
+* Third party libraries (asn1.js is the only one)
+* Fonts or images
+* CSS more than 1 kilobyte
+* Javascript that only changes UI
+* HTML that decreases source readability (added wrapping divs, etc.)
+
+This website is supposed to [work](http://motherfuckingwebsite.com/), nothing more.
 
