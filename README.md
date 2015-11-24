@@ -3,7 +3,7 @@
 **WARNING: THE LET'S ENCRYPT CERTIFICATE AUTHORITY IS ONLY IN BETA! YOU MUST
 HAVE A WHITELISTED DOMAIN DURING BETA. GENERAL AVAILABILITY WILL BE SOON!**
 
-Website: https://diafygi.github.io/gethttpsforfree/
+Website: https://gethttpsforfree.com
 
 This is a project that allows you to get a free HTTPS certificate without
 having to install any software or having to share your private keys with anyone.
@@ -19,7 +19,7 @@ but they do fantastic work.
 
 ##How to use this website
 
-Go to: https://diafygi.github.io/gethttpsforfree/
+Go to: https://gethttpsforfree.com
 
 The website works by generating commands for you to run in your terminal, then
 making requests to the Let's Encrypt ACME API to issue your certificate. Simply
