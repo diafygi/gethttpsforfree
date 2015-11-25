@@ -110,23 +110,23 @@ Released under MIT License. Enjoy!
 
     <div class="field">
         <a id="howto_pubkey" class="help" href="#">(how do I generate this?)</a>
-        <span id="howto_pubkey_content" class="help-content" style="display:none;">
+        <div id="howto_pubkey_content" class="help-content" style="display:none;">
             How to generate a new account keypair using openssl:<br/>
             <ol>
                 <li>
                     Generate a account private key if you don't have one:<br/>
-                    (KEEP ACCOUNT.KEY SECRET!)</br>
+                    (KEEP ACCOUNT.KEY SECRET!)<br/>
                     <code>openssl genrsa 4096 > account.key</code>
                 </li>
                 <li>
-                    Print your public key:</br>
+                    Print your public key:<br/>
                     <code>openssl rsa -in account.key -pubout</code>
                 </li>
                 <li>
-                    Copy and paste the public key in to the box below.</br>
+                    Copy and paste the public key in to the box below.<br/>
                 </li>
             </ol>
-        </span>
+        </div>
         <label for="pubkey">Account Public Key:</label><br/>
         <textarea id="pubkey" placeholder="-----BEGIN PUBLIC KEY----- ..."></textarea>
     </div>
@@ -151,24 +151,24 @@ Released under MIT License. Enjoy!
 
     <div class="field">
         <a id="howto_csr" class="help" href="#">(how do I generate this?)</a>
-        <span id="howto_csr_content" class="help-content" style="display:none;">
+        <div id="howto_csr_content" class="help-content" style="display:none;">
             How to generate a new Certificate Signing Request (CSR):<br/>
             <ol>
                 <li>
                     Generate a TLS private key if you don't have one:<br/>
-                    (KEEP DOMAIN.KEY SECRET!)</br>
+                    (KEEP DOMAIN.KEY SECRET!)<br/>
                     <code>openssl genrsa 4096 > domain.key</code>
                 </li>
                 <li>
-                    Generate a CSR for your the domains you want certs for:</br>
-                    (replace "foo.com" with your domain)</br>
-                    <code>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))</code>
+                    Generate a CSR for your the domains you want certs for:<br/>
+                    (replace "foo.com" with your domain)<br/>
+                    <code>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config &lt;(cat /etc/ssl/openssl.cnf &lt;(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))</code>
                 </li>
                 <li>
-                    Copy and paste the CSR in to the box below.</br>
+                    Copy and paste the CSR in to the box below.<br/>
                 </li>
             </ol>
-        </span>
+        </div>
         <label for="csr">Certificate Signing Request:</label><br/>
         <textarea id="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..."></textarea>
     </div>
@@ -195,7 +195,7 @@ Released under MIT License. Enjoy!
 
         <div class="field">
             <a id="howto_sign1" class="help" href="#">(how do I do this?)</a>
-            <span id="howto_sign1_content" class="help-content" style="display:none;">
+            <div id="howto_sign1_content" class="help-content" style="display:none;">
                 How to generate the needed signatures:<br/>
                 <ol>
                     <li>
@@ -208,7 +208,7 @@ Released under MIT License. Enjoy!
                         into the text field below that command.
                     </li>
                 </ol>
-            </span>
+            </div>
             <label>Run these signature commands in your terminal:</label><br/>
             <span id="step3_commands">
             </span>
@@ -253,7 +253,7 @@ Released under MIT License. Enjoy!
 
             <div class="field">
                 <a class="howto_sign help" href="#">(how do I do this?)</a>
-                <span class="howto_sign_content help-content" style="display:none;">
+                <div class="howto_sign_content help-content" style="display:none;">
                     How to generate the needed signatures:<br/>
                     <ol>
                         <li>
@@ -270,7 +270,7 @@ Released under MIT License. Enjoy!
                             into the text field below that command.
                         </li>
                     </ol>
-                </span>
+                </div>
                 <label>Run this signature command in your terminal:</label><br/>
                 <span class="step4_commands">
                 </span>
@@ -283,7 +283,7 @@ Released under MIT License. Enjoy!
                 </ul>
                 <div class="tab">
                     <a class="howto_serve help" href="#">(how do I do this?)</a>
-                    <span class="howto_serve_content help-content" style="display:none;">
+                    <div class="howto_serve_content help-content" style="display:none;">
                         How to serve the challenge response on your domain:<br/>
                         <ol>
                             <li>
@@ -310,7 +310,7 @@ Released under MIT License. Enjoy!
                                 served on your domain.
                             </li>
                         </ol>
-                    </span>
+                    </div>
                     <label>Run this command on <span class="domain">foobar.com</span>'s server:</label><br/>
                     <textarea readonly></textarea>
                     <div>
@@ -320,7 +320,7 @@ Released under MIT License. Enjoy!
                 </div>
                 <div class="tab">
                     <a class="howto_file help" href="#">(how do I do this?)</a>
-                    <span class="howto_file_content help-content" style="display:none;">
+                    <div class="howto_file_content help-content" style="display:none;">
                         How to host this file on your server:<br/>
                         <ol>
                             <li>
@@ -349,7 +349,7 @@ mkdir -p .well-known/acme-challenge/
                                 served on your domain.
                             </li>
                         </ol>
-                    </span>
+                    </div>
                     <label>Under this url:</label><br/>
                     <input type="text" class="file_url" value="" readonly/>
                     <div>
@@ -379,7 +379,7 @@ mkdir -p .well-known/acme-challenge/
 
         <div class="field">
             <a id="howto_install" class="help" href="#">(how do I install this?)</a>
-            <span id="howto_install_content" class="help-content" style="display:none;">
+            <div id="howto_install_content" class="help-content" style="display:none;">
                 How to install https on nginx:<br/>
                 <ol>
                     <li>
@@ -425,7 +425,7 @@ server {
 </pre>
                     </li>
                 </ol>
-            </span>
+            </div>
             <label for="csr">Signed Certificate:</label><br/>
             <textarea id="crt" readonly></textarea>
         </div>
