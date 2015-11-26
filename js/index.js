@@ -579,8 +579,16 @@ function validateInitialSigs(e){
                     file_content.querySelector(".help-content a").href = link;
                     file_content.querySelector(".help-content a").innerHTML = "";
                     file_content.querySelector(".help-content a").appendChild(document.createTextNode(link));
+                    file_content.querySelector(".nginx_location").textContent = "" +
+                        "#nginx example\n" +
+                        "location /.well-known/acme-challenge/ {\n" +
+                        "    alias /path/to/www/;\n" +
+                        "    try_files $uri =404;\n" +
+                        "}\n\n" +
+                        "#apache example\n" +
+                        "Alias /.well-known/acme-challenge /path/to/www/.well-known/acme-challenge";
                     file_content.querySelector(".file_cmd").textContent = "" +
-                        "echo \"" + DOMAINS[d]['server_data'] + "\" > " + DOMAINS[d]['server_uri'];
+                        "echo \"" + DOMAINS[d]['server_data'] + "\" > /path/to/www/" + DOMAINS[d]['server_uri'];
                     file_content.querySelector(".file_url").value = link;
                     file_content.querySelector(".file_data").value = DOMAINS[d]['server_data'];
                     file_content.querySelector("input[type=submit]").id = "file_submit_" + d_;

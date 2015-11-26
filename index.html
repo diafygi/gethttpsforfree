@@ -329,12 +329,13 @@ Released under MIT License. Enjoy!
                                 <pre class="ssh">ssh ubuntu@foobar.com</pre>
                             </li>
                             <li>
-                                Create the ".well-known/acme-challenge/" folder in your
-                                webserver's static web directory:<br/>
-                                <pre>
-cd /path/to/www/
-mkdir -p .well-known/acme-challenge/
-</pre>
+                                Create the ".well-known/acme-challenge/" directory
+                                in your webserver's static file path:<br/>
+                                <pre class="wwwdir">mkdir -p /path/to/www/.well-known/acme-challenge/</pre>
+                            <li>
+                                Add the static folder to your webserver's config
+                                (if you haven't already):<br/>
+                                <pre class="nginx_location">server {...</pre>
                             </li>
                             <li>
                                 Create the file with the necessary contents:<br/>
