@@ -580,7 +580,7 @@ function validateInitialSigs(e){
                     file_content.querySelector(".help-content a").href = link;
                     file_content.querySelector(".help-content a").innerHTML = "";
                     file_content.querySelector(".help-content a").appendChild(document.createTextNode(link));
-                    file_content.querySelector(".file_cmd").innerHTML = "" +
+                    file_content.querySelector(".file_cmd").textContent = "" +
                         "echo \"" + DOMAINS[d]['server_data'] + "\" > " + DOMAINS[d]['server_uri'];
                     file_content.querySelector(".file_url").value = link;
                     file_content.querySelector(".file_data").value = DOMAINS[d]['server_data'];
