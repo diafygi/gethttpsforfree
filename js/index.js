@@ -96,7 +96,6 @@ function switchTab(e){
     e.preventDefault();
     var opts = e.target.parentNode.parentNode.querySelectorAll("a");
     for(var i = 0; i < opts.length; i++){
-        console.log(opts[i].id, e.target.id);
         opts[i].className = opts[i].id === e.target.id ? "active" : "";
     }
     var tab = document.getElementById(e.target.id + "_content");
