@@ -162,7 +162,10 @@ Released under MIT License. Enjoy!
                 <li>
                     Generate a CSR for your the domains you want certs for:</br>
                     (replace "foo.com" with your domain)</br>
-                    <code>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))</code>
+                    Linux:
+                    <code>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))</code><br/>
+                    Mac OSX:
+                    <code>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config <(cat /System/Library/OpenSSL/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))</code>
                 </li>
                 <li>
                     Copy and paste the CSR in to the box below.</br>
@@ -204,7 +207,7 @@ Released under MIT License. Enjoy!
                         in the command to wherever it exists).
                     </li>
                     <li>
-                        Copy and paste the base64 encoded signature output from the command
+                        Copy and paste the hex encoded signature output from the command
                         into the text field below that command.
                     </li>
                 </ol>
@@ -214,7 +217,7 @@ Released under MIT License. Enjoy!
             </span>
             <span id="signing_template" style="display:none;">
                 <input type="text" value="echo ..." readonly/><br/>
-                <input id="challenge_sig_foobar_com" type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'/><br/>
+                <input id="challenge_sig_foobar_com" type="text" placeholder='Paste the hex output here (e.g. "(stdin)= f2cf67e4...")'/><br/>
             </span>
         </div>
 
@@ -266,7 +269,7 @@ Released under MIT License. Enjoy!
                             in the command to whatever you named it).
                         </li>
                         <li>
-                            Copy and paste the base64 encoded signature output from the command
+                            Copy and paste the hex encoded signature output from the command
                             into the text field below that command.
                         </li>
                     </ol>

@@ -30,14 +30,13 @@ you're still confused, please create an issue and I'll address your issue ASAP!
 Requirements for your local machine:
 * openssl
 * echo
-* base64
 
 Requirements for your server:
 * python
 
 These should all be installed by default in Linux and Mac OSX. If you're
 running Windows, you might need to install [Cygwin](https://cygwin.com/install.html)
-to get openssl, echo, and base64 working on Windows.
+to get openssl and echo working on Windows.
 
 ##How this website works
 
@@ -115,10 +114,9 @@ terminal.
 
 These commands are structured like this:
 ```
-PRIV_KEY=./account.key; \                     #set the location of your account private key (change this location if different)
-    echo -n "<request_payload_data>" | \      #pipe the payload into openssl
-    openssl dgst -sha256 -sign $PRIV_KEY | \  #sign the payload using your private key
-    base64 -w 685                             #base64 encode the signature so it can be copied back into the browser
+PRIV_KEY=./account.key; \                      #set the location of your account private key (change this location if different)
+    echo -n "<request_payload_data>" | \       #pipe the payload into openssl
+    openssl dgst -sha256 -hex -sign $PRIV_KEY  #sign the payload using your private key and output hex
 ```
 
 Once these signatures are pasted back into the inputs, the javascript makes the
