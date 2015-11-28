@@ -78,6 +78,21 @@ function b64(bytes){
     return str64.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
 }
 
+// parse openssl hex output
+var OPENSSL_HEX = /(?:\(stdin\)= |)([a-f0-9]{512,1024})/
+function hex2b64(hex){
+    if(!OPENSSL_HEX.test(hex)){
+        return null;
+    }
+    hex = OPENSSL_HEX.exec(hex)[1];
+    var bytes = [];
+    while(hex.length >= 2){
+        bytes.push(parseInt(hex.substring(0, 2), 16));
+        hex = hex.substring(2, hex.length);
+    }
+    return b64(new Uint8Array(bytes));
+}
+
 // hide/show the help content
 function helpContent(e){
     e.preventDefault();
@@ -96,7 +111,6 @@ function switchTab(e){
     e.preventDefault();
     var opts = e.target.parentNode.parentNode.querySelectorAll("a");
     for(var i = 0; i < opts.length; i++){
-        console.log(opts[i].id, e.target.id);
         opts[i].className = opts[i].id === e.target.id ? "active" : "";
     }
     var tab = document.getElementById(e.target.id + "_content");
@@ -378,8 +392,7 @@ function validateCSR(e){
             account_template.querySelectorAll("input")[0].value = "" +
                 "PRIV_KEY=./account.key; " +
                 "echo -n \"" + ACCOUNT_PUBKEY['protected'] + "." + ACCOUNT_PUBKEY['payload'] + "\" | " +
-                "openssl dgst -sha256 -sign $PRIV_KEY | " +
-                "base64 -w 685";
+                "openssl dgst -sha256 -hex -sign $PRIV_KEY";
             account_template.querySelectorAll("input")[1].id = "account_sig";
             account_template.querySelectorAll("input")[1].value = "";
             account_template.style.display = null;
@@ -395,8 +408,7 @@ function validateCSR(e){
                 domain_template.querySelectorAll("input")[0].value = "" +
                     "PRIV_KEY=./account.key; " +
                     "echo -n \"" + DOMAINS[d]['request_protected'] + "." + DOMAINS[d]['request_payload'] + "\" | " +
-                    "openssl dgst -sha256 -sign $PRIV_KEY | " +
-                    "base64 -w 685";
+                    "openssl dgst -sha256 -hex -sign $PRIV_KEY";
                 domain_template.querySelectorAll("input")[1].id = "domain_sig_" + d_;
                 domain_template.querySelectorAll("input")[1].value = "";
                 domain_template.style.display = null;
@@ -409,8 +421,7 @@ function validateCSR(e){
             csr_template.querySelectorAll("input")[0].value = "" +
                     "PRIV_KEY=./account.key; " +
                     "echo -n \"" + CSR['protected'] + "." + CSR['payload'] + "\" | " +
-                    "openssl dgst -sha256 -sign $PRIV_KEY | " +
-                    "base64 -w 685";
+                    "openssl dgst -sha256 -hex -sign $PRIV_KEY";
             csr_template.querySelectorAll("input")[1].id = "csr_sig";
             csr_template.querySelectorAll("input")[1].value = "";
             csr_template.style.display = null;
@@ -460,28 +471,28 @@ function validateInitialSigs(e){
 
     // parse account registration signature
     var missing_msg = "You need to run the above commands and paste the output in the text boxes below each command.";
-    var account_sig = document.getElementById("account_sig").value;
-    if(account_sig === ""){
+    var account_sig = hex2b64(document.getElementById("account_sig").value);
+    if(account_sig === null){
         return fail(missing_msg);
     }
-    ACCOUNT_PUBKEY['sig'] = account_sig.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
+    ACCOUNT_PUBKEY['sig'] = account_sig;
 
     // parse new-authz signatures
     for(var d in DOMAINS){
         var d_ = d.replace(/\./g, "_");
-        var domain_sig = document.getElementById("domain_sig_" + d_).value;
-        if(domain_sig === ""){
+        var domain_sig = hex2b64(document.getElementById("domain_sig_" + d_).value);
+        if(domain_sig === null){
             return fail(missing_msg);
         }
-        DOMAINS[d]['request_sig'] = domain_sig.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
+        DOMAINS[d]['request_sig'] = domain_sig;
     }
 
     // parse csr signature
-    var csr_sig = document.getElementById("csr_sig").value;
-    if(csr_sig === ""){
+    var csr_sig = hex2b64(document.getElementById("csr_sig").value);
+    if(csr_sig === null){
         return fail(missing_msg);
     }
-    CSR['sig'] = csr_sig.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
+    CSR['sig'] = csr_sig;
 
     // request challenges for each domain
     var domains = []
@@ -532,8 +543,7 @@ function validateInitialSigs(e){
                     challenge_cmd.querySelectorAll("input")[0].value = "" +
                         "PRIV_KEY=./account.key; " +
                         "echo -n \"" + DOMAINS[d]['challenge_protected'] + "." + DOMAINS[d]['challenge_payload'] + "\" | " +
-                        "openssl dgst -sha256 -sign $PRIV_KEY | " +
-                        "base64 -w 685";
+                        "openssl dgst -sha256 -hex -sign $PRIV_KEY";
                     challenge_cmd.querySelectorAll("input")[1].id = "challenge_sig_" + d_;
                     challenge_cmd.querySelectorAll("input")[1].value = "";
                     challenge_cmd.style.display = null;
@@ -580,8 +590,16 @@ function validateInitialSigs(e){
                     file_content.querySelector(".help-content a").href = link;
                     file_content.querySelector(".help-content a").innerHTML = "";
                     file_content.querySelector(".help-content a").appendChild(document.createTextNode(link));
-                    file_content.querySelector(".file_cmd").innerHTML = "" +
-                        "echo \"" + DOMAINS[d]['server_data'] + "\" > " + DOMAINS[d]['server_uri'];
+                    file_content.querySelector(".nginx_location").textContent = "" +
+                        "#nginx example\n" +
+                        "location /.well-known/acme-challenge/ {\n" +
+                        "    alias /path/to/www/;\n" +
+                        "    try_files $uri =404;\n" +
+                        "}\n\n" +
+                        "#apache example\n" +
+                        "Alias /.well-known/acme-challenge /path/to/www/.well-known/acme-challenge";
+                    file_content.querySelector(".file_cmd").textContent = "" +
+                        "echo \"" + DOMAINS[d]['server_data'] + "\" > /path/to/www/" + DOMAINS[d]['server_uri'];
                     file_content.querySelector(".file_url").value = link;
                     file_content.querySelector(".file_data").value = DOMAINS[d]['server_data'];
                     file_content.querySelector("input[type=submit]").id = "file_submit_" + d_;
@@ -692,11 +710,11 @@ function confirmDomainCheckIsRunning(e){
     }
 
     // if the signature is missing, fail
-    var challenge_sig = document.getElementById("challenge_sig_" + d_).value;
-    if(challenge_sig === ""){
+    var challenge_sig = hex2b64(document.getElementById("challenge_sig_" + d_).value);
+    if(challenge_sig === null){
         return fail("You need to run the above signature command and paste the output in the text box.");
     }
-    DOMAINS[d]['challenge_sig'] = challenge_sig.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
+    DOMAINS[d]['challenge_sig'] = challenge_sig;
 
     // function to check on challenge status
     function checkOnChallenge(){

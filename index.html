@@ -160,9 +160,12 @@ Released under MIT License. Enjoy!
                     <code>openssl genrsa 4096 > domain.key</code>
                 </li>
                 <li>
-                    Generate a CSR for your the domains you want certs for:<br/>
-                    (replace "foo.com" with your domain)<br/>
-                    <code>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config &lt;(cat /etc/ssl/openssl.cnf &lt;(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))</code>
+                    Generate a CSR for your the domains you want certs for:</br>
+                    (replace "foo.com" with your domain)</br>
+                    Linux:
+                    <code>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config &lt;(cat /etc/ssl/openssl.cnf &lt;(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))</code><br/>
+                    Mac OSX:
+                    <code>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config &lt;(cat /System/Library/OpenSSL/openssl.cnf &lt;(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))</code>
                 </li>
                 <li>
                     Copy and paste the CSR in to the box below.<br/>
@@ -204,7 +207,7 @@ Released under MIT License. Enjoy!
                         in the command to wherever it exists).
                     </li>
                     <li>
-                        Copy and paste the base64 encoded signature output from the command
+                        Copy and paste the hex encoded signature output from the command
                         into the text field below that command.
                     </li>
                 </ol>
@@ -214,7 +217,7 @@ Released under MIT License. Enjoy!
             </span>
             <span id="signing_template" style="display:none;">
                 <input type="text" value="echo ..." readonly/><br/>
-                <input id="challenge_sig_foobar_com" type="text" placeholder='Paste the base64 output here (e.g. "34QuzDI6cn...")'/><br/>
+                <input id="challenge_sig_foobar_com" type="text" placeholder='Paste the hex output here (e.g. "(stdin)= f2cf67e4...")'/><br/>
             </span>
         </div>
 
@@ -266,7 +269,7 @@ Released under MIT License. Enjoy!
                             in the command to whatever you named it).
                         </li>
                         <li>
-                            Copy and paste the base64 encoded signature output from the command
+                            Copy and paste the hex encoded signature output from the command
                             into the text field below that command.
                         </li>
                     </ol>
@@ -329,12 +332,13 @@ Released under MIT License. Enjoy!
                                 <pre class="ssh">ssh ubuntu@foobar.com</pre>
                             </li>
                             <li>
-                                Create the ".well-known/acme-challenge/" folder in your
-                                webserver's static web directory:<br/>
-                                <pre>
-cd /path/to/www/
-mkdir -p .well-known/acme-challenge/
-</pre>
+                                Create the ".well-known/acme-challenge/" directory
+                                in your webserver's static file path:<br/>
+                                <pre class="wwwdir">mkdir -p /path/to/www/.well-known/acme-challenge/</pre>
+                            <li>
+                                Add the static folder to your webserver's config
+                                (if you haven't already):<br/>
+                                <pre class="nginx_location">server {...</pre>
                             </li>
                             <li>
                                 Create the file with the necessary contents:<br/>
