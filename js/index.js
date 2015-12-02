@@ -599,7 +599,7 @@ function validateInitialSigs(e){
                         "#apache example\n" +
                         "Alias /.well-known/acme-challenge /path/to/www/.well-known/acme-challenge";
                     file_content.querySelector(".file_cmd").textContent = "" +
-                        "echo \"" + DOMAINS[d]['server_data'] + "\" > /path/to/www/" + DOMAINS[d]['server_uri'];
+                        "echo -n \"" + DOMAINS[d]['server_data'] + "\" > /path/to/www/" + DOMAINS[d]['server_uri'];
                     file_content.querySelector(".file_url").value = link;
                     file_content.querySelector(".file_data").value = DOMAINS[d]['server_data'];
                     file_content.querySelector("input[type=submit]").id = "file_submit_" + d_;
