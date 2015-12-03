@@ -1,8 +1,5 @@
 # Get HTTPS for free!
 
-**WARNING: THE LET'S ENCRYPT CERTIFICATE AUTHORITY IS ONLY IN BETA! YOU MUST
-HAVE A WHITELISTED DOMAIN DURING BETA. GENERAL AVAILABILITY WILL BE SOON!**
-
 Website: https://gethttpsforfree.com
 
 This is a project that allows you to get a free HTTPS certificate without
@@ -96,7 +93,7 @@ cannot be the same as your account private key, according to ACME.
 Third, you need tell the Let's Encrypt API that you want to register and get certs
 for some domains. These requests must be signed with your account private key, so
 this steps compiles the request payloads that need signatures. You need to ask for
-challenges for each domain, so if you want both `foo.com` and `www.foo.com`, you
+challenges for each domain, so if you want both `example.com` and `www.example.com`, you
 need to make two new-authz calls.
 
 Here's the list of requests that need to be made to the API:
