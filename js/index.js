@@ -830,8 +830,8 @@ function checkAllDomains(){
                 document.getElementById("step5").style.display = null;
             }
             else{
-                fail("Certificate signature failed. Please start back at Step 1.", true);
-                console.log("error", cert_xhr);
+                fail("Certificate signature failed. Please start back at Step 1. " +
+                    cert_xhr.responseText, true);
             }
         }
     };
