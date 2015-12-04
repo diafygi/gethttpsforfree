@@ -161,9 +161,16 @@ Released under MIT License. Enjoy!
                     Generate a CSR for your the domains you want certs for:</br>
                     (replace "foo.com" with your domain)</br>
                     Linux:
-                    <code>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config &lt;(cat /etc/ssl/openssl.cnf &lt;(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))</code><br/>
-                    Mac OSX:
-                    <code>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config &lt;(cat /System/Library/OpenSSL/openssl.cnf &lt;(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))</code>
+                    <pre>
+#change "/etc/ssl/openssl.cnf" as needed:
+#  Debian: /etc/ssl/openssl.cnf
+#  RHEL and CentOS: /etc/pki/tls/openssl.cnf
+#  Mac OSX: /System/Library/OpenSSL/openssl.cnf
+
+openssl req -new -sha256 -key domain.key -subj "/" \
+  -reqexts SAN -config &lt;(cat /etc/ssl/openssl.cnf \
+  &lt;(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))
+</pre>
                 </li>
                 <li>
                     Copy and paste the CSR in to the box below.<br/>
