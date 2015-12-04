@@ -94,7 +94,7 @@ Released under MIT License. Enjoy!
     <!--############################-->
     <h2>Step 1: Account Info</h2>
     <div>
-        Let's Encrypt requires that you register a account email and public key before
+        Let's Encrypt requires that you register an account email and public key before
         issuing a certificate. The email is so that they can contact you if needed, and
         the public key is so you can securely sign your requests to issue/revoke/renew
         your certificates. <i><b>Keep your account private key secret!</b> Anyone who has it
@@ -112,7 +112,7 @@ Released under MIT License. Enjoy!
             How to generate a new account keypair using openssl:<br/>
             <ol>
                 <li>
-                    Generate a account private key if you don't have one:<br/>
+                    Generate an account private key if you don't have one:<br/>
                     (KEEP ACCOUNT.KEY SECRET!)<br/>
                     <code>openssl genrsa 4096 > account.key</code>
                 </li>
@@ -121,7 +121,7 @@ Released under MIT License. Enjoy!
                     <code>openssl rsa -in account.key -pubout</code>
                 </li>
                 <li>
-                    Copy and paste the public key in to the box below.<br/>
+                    Copy and paste the public key into the box below.<br/>
                 </li>
             </ol>
         </div>
@@ -173,7 +173,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
 </pre>
                 </li>
                 <li>
-                    Copy and paste the CSR in to the box below.<br/>
+                    Copy and paste the CSR into the box below.<br/>
                 </li>
             </ol>
         </div>
