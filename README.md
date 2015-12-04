@@ -29,7 +29,7 @@ Requirements for your local machine:
 * echo
 
 Requirements for your server:
-* python
+* python or any webserver that can serve a static file
 
 These should all be installed by default in Linux and Mac OSX. If you're
 running Windows, you might need to install [Cygwin](https://cygwin.com/install.html)
