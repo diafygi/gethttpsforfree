@@ -831,7 +831,7 @@ function checkAllDomains(){
             }
             else{
                 fail("Certificate signature failed. Please start back at Step 1. " +
-                    cert_xhr.responseText, true);
+                    String.fromCharCode.apply(null, new Uint8Array(cert_xhr.response)), true);
             }
         }
     };
