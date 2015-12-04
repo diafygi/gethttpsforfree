@@ -122,6 +122,7 @@ function switchTab(e){
 
 // helper function to get a nonce via an ajax request to the ACME directory
 function getNonce(callback){
+    var cachebuster = b64(window.crypto.getRandomValues(new Uint8Array(8)));
     var xhr = new XMLHttpRequest();
     xhr.onload = function(){
         callback(xhr.getResponseHeader("Replay-Nonce"), undefined);
@@ -129,7 +130,7 @@ function getNonce(callback){
     xhr.onerror = function(){
         callback(undefined, xhr);
     };
-    xhr.open("GET", CA + "/directory");
+    xhr.open("GET", CA + "/directory?cachebuster=" + cachebuster);
     xhr.send();
 }
 
