@@ -430,7 +430,7 @@ function validateCSR(e){
         
             // proceed to step 3 only if domains were found in the csr
             domainString = domainString.substr(0, domainString.length - 2);
-            if (domainString && domainString.length > 0) {
+            if (domainString.length > 0) {
                 status.style.display = "inline";
                 status.classNsame = "";
                 status.innerHTML = "";
