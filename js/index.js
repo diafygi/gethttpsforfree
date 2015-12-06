@@ -317,6 +317,11 @@ function validateCSR(e){
         return fail("Failed validating CSR.");
     }
 
+    // reject CSRs with no domains
+    if(domains.length === 0){
+        return fail("Couldn't find any domains in the CSR.");
+    }
+
     // update the globals
     CSR = {csr: b64(new Uint8Array(Base64.decode(unarmor.exec(csr)[1])))};
     DOMAINS = {};
