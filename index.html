@@ -442,10 +442,13 @@ server {
         SSLEngine on
         SSLCertificateFile    /etc/ssl/certs/chained.pem
         SSLCertificateKeyFile /etc/ssl/private/domain.key
+        ###SSLCertificateChainFile setting needed for Apache 2.2 to avoid "Chain Issues: Incomplete" on SSL test
+        ###SSLCertificateChainFile /etc/ssl/certs/chained.pem
         SSLProtocol all -SSLv2 -SSLv3
         SSlCipherSuite ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA;
         SSLHonorCipherOrder on
         SSLOpenSSLConfCmd DHParameters "/etc/ssl/certs/dhparam.pem"
+        ### SSLOpenSSLConfCmd not supported in Apache 2.2, instead append dhparam.pem to chained.pem
         &lt;Directory /var/www/foo.com/html&gt;
                 Options Indexes FollowSymLinks MultiViews
                 AllowOverride All
