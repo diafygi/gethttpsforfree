@@ -437,15 +437,16 @@ server {
 <pre>
 &lt;VirtualHost _default_:443&gt;
         ServerName foo.com:443
-        ServerAlias www.foo.com:443
+        ServerAlias www.foo.com
         DocumentRoot /var/www/foo.com/html
         SSLEngine on
-        SSLCertificateFile    /etc/ssl/certs/chained.pem
+        SSLCertificateFile    /etc/ssl/certs/domain.crt
         SSLCertificateKeyFile /etc/ssl/private/domain.key
+        SSLCertificateChainFile /etc/ssl/certs/intermediate.pem
         SSLProtocol all -SSLv2 -SSLv3
         SSlCipherSuite ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA;
         SSLHonorCipherOrder on
-        SSLOpenSSLConfCmd DHParameters "/etc/ssl/certs/dhparam.pem"
+        SSLOpenSSLConfCmd DHParameters "/etc/ssl/certs/dhparam.pem" ###Apache 2.2: append dhparam.pem to intermediate.pem
         &lt;Directory /var/www/foo.com/html&gt;
                 Options Indexes FollowSymLinks MultiViews
                 AllowOverride All
