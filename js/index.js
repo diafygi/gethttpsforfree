@@ -631,6 +631,7 @@ function validateInitialSigs(e){
                     // append this domain to step 4
                     template.id = "challenge_" + d_;
                     template.style.display = null;
+                    document.getElementById("challenge_domains").innerHTML = "";
                     document.getElementById("challenge_domains").appendChild(template);
                     bindHelps([
                         document.getElementById("howto_sign_" + d_),
