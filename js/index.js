@@ -201,6 +201,15 @@ function validateAccount(e){
     // calculate thumbprint
     sha256(new Uint8Array(jwk_bytes), function(hash, err){
 
+        if (err){
+            return window.setTimeout(function(){
+                status.style.display = "inline";
+                status.className = "";
+                status.innerHTML = "";
+                status.appendChild(document.createTextNode("Something went wrong! " + err.message));
+            }, 300);
+        }
+
         // update the globals
         ACCOUNT_EMAIL = email;
         ACCOUNT_PUBKEY = {
