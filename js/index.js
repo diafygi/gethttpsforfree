@@ -631,7 +631,6 @@ function validateInitialSigs(e){
                     // append this domain to step 4
                     template.id = "challenge_" + d_;
                     template.style.display = null;
-                    document.getElementById("challenge_domains").innerHTML = "";
                     document.getElementById("challenge_domains").appendChild(template);
                     bindHelps([
                         document.getElementById("howto_sign_" + d_),
@@ -677,6 +676,7 @@ function validateInitialSigs(e){
 
     // register the account
     status.innerHTML = "registering...";
+    document.getElementById("challenge_domains").innerHTML = "";
     var account_xhr = new XMLHttpRequest();
     account_xhr.onreadystatechange = function(){
         if(account_xhr.readyState === 4){
