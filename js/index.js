@@ -41,6 +41,16 @@ var //CA = "https://acme-staging.api.letsencrypt.org",
              //   ...
              // }
 
+// debug console output on failure
+function failConsole(){
+    if(window.location.search.contains("debug") && console){
+        console.log("ACCOUNT_EMAIL", ACCOUNT_EMAIL);
+        console.log("ACCOUNT_PUBKEY", JSON.stringify(ACCOUNT_PUBKEY));
+        console.log("CSR", JSON.stringify(CSR));
+        console.log("DOMAINS", JSON.stringify(DOMAINS));
+    }
+}
+
 // show warning if no webcrypto digest
 window.crypto = window.crypto || window.msCrypto; //for IE11
 if(window.crypto && window.crypto.webkitSubtle){
@@ -138,6 +148,7 @@ function getNonce(callback){
 function validateAccount(e){
     var status = document.getElementById("validate_account_status");
     function fail(msg){
+        failConsole();
         ACCOUNT_EMAIL = undefined;
         ACCOUNT_PUBKEY = undefined;
         status.style.display = "inline";
@@ -230,6 +241,7 @@ document.getElementById("validate_account").addEventListener("click", validateAc
 function validateCSR(e){
     var status = document.getElementById("validate_csr_status");
     function fail(msg){
+        failConsole();
         CSR = undefined;
         DOMAINS = undefined;
         status.style.display = "inline";
@@ -456,6 +468,7 @@ document.getElementById("validate_csr").addEventListener("click", validateCSR);
 function validateInitialSigs(e){
     var status = document.getElementById("validate_initial_sigs_status");
     function fail(msg, fail_all){
+        failConsole();
         if(fail_all){
             ACCOUNT_EMAIL = undefined;
             ACCOUNT_PUBKEY = undefined;
@@ -696,6 +709,7 @@ function confirmDomainCheckIsRunning(e){
     // set the failure state
     var status = e.target.parentNode.querySelector("span");
     function fail(msg, fail_all){
+        failConsole();
         if(fail_all){
             ACCOUNT_EMAIL = undefined;
             ACCOUNT_PUBKEY = undefined;
@@ -797,6 +811,7 @@ function checkAllDomains(){
     // set status and failure modes
     var status = document.getElementById("step5_pending");
     function fail(msg, fail_all){
+        failConsole();
         if(fail_all){
             ACCOUNT_EMAIL = undefined;
             ACCOUNT_PUBKEY = undefined;
