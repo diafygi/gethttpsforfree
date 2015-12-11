@@ -317,6 +317,9 @@ function validateCSR(e){
                                 var sans = xtns[i].sub[1].sub[j].sub[k].sub[1].sub[0].sub;
                                 for(var s = 0; s < sans.length; s++){
                                     var sanRaw = sans[s];
+                                    var tag = sanRaw.tag.tagNumber;
+                                    if(tag != 2)
+                                        continue; // ignore any other subjectAltName type than dNSName (2)
                                     var sanStart = sanRaw.header + sanRaw.stream.pos;
                                     var sanEnd = sanRaw.length + sanRaw.stream.pos + sanRaw.header;
                                     domains.push(sanRaw.stream.parseStringUTF(sanStart, sanEnd));
