@@ -174,7 +174,7 @@ TODO (pull requests welcome):
 * `renew.html` - A page with steps for renewing certificates
 * `revoke.html` - A page with steps for revoking certificates
 * ~~Alternative file-based command instead of python server~~
-* Installation instructions for Apache
+* ~~Installation instructions for Apache~~
 * Accept GPG public keys as account public keys
 
 ##What's NOT on the Roadmap
