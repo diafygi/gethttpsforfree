@@ -43,7 +43,7 @@ var //CA = "https://acme-staging.api.letsencrypt.org",
 
 // debug console output on failure
 function failConsole(){
-    if(window.location.search.contains("debug") && console){
+    if(window.location.search.indexOf("debug") !== -1 && console){
         console.log("ACCOUNT_EMAIL", ACCOUNT_EMAIL);
         console.log("ACCOUNT_PUBKEY", JSON.stringify(ACCOUNT_PUBKEY));
         console.log("CSR", JSON.stringify(CSR));
