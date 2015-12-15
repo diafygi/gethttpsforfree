@@ -318,7 +318,7 @@ function validateCSR(e){
                                 for(var s = 0; s < sans.length; s++){
                                     var sanRaw = sans[s];
                                     var tag = sanRaw.tag.tagNumber;
-                                    if(tag != 2)
+                                    if(tag !== 2)
                                         continue; // ignore any other subjectAltName type than dNSName (2)
                                     var sanStart = sanRaw.header + sanRaw.stream.pos;
                                     var sanEnd = sanRaw.length + sanRaw.stream.pos + sanRaw.header;
