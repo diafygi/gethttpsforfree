@@ -851,7 +851,8 @@ function checkAllDomains(){
                 }
                 pem += "-----END CERTIFICATE-----";
                 document.getElementById("crt").value = pem;
-
+                document.getElementById("downloadfullchain").setAttribute("href", "data:application/x-pem-file;charset=utf-8," + encodeURIComponent(pem + '\n' + document.getElementById("icrt").value))
+                document.getElementById("downloadfullchain").setAttribute("download", "fullchain.pem")
                 // show certificate field
                 status.innerHTML = "see below";
                 document.getElementById("step5").style.display = null;
