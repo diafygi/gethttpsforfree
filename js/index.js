@@ -3,8 +3,8 @@
  */
 
 // global variables
-var //CA = "https://acme-staging.api.letsencrypt.org",
-    CA = "https://acme-v01.api.letsencrypt.org",
+var CA = "https://acme-staging.api.letsencrypt.org",
+    //CA = "https://acme-v01.api.letsencrypt.org",
     TERMS = "https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf",
     ACCOUNT_EMAIL, // "bar@foo.com"
     ACCOUNT_PUBKEY, // {
@@ -115,20 +115,6 @@ function bindHelps(elems){
     }
 }
 bindHelps(document.querySelectorAll(".help"));
-
-// hide/show the challenge serving tabs
-function switchTab(e){
-    e.preventDefault();
-    var opts = e.target.parentNode.parentNode.querySelectorAll("a");
-    for(var i = 0; i < opts.length; i++){
-        opts[i].className = opts[i].id === e.target.id ? "active" : "";
-    }
-    var tab = document.getElementById(e.target.id + "_content");
-    var tabs = document.querySelectorAll("." + tab.className.split(" ")[1]);
-    for(var i = 0; i < tabs.length; i++){
-        tabs[i].style.display = tabs[i].id === tab.id ? null : "none";
-    }
-}
 
 // helper function to get a nonce via an ajax request to the ACME directory
 function getNonce(callback){
@@ -574,18 +560,18 @@ function validateInitialSigs(e){
                     challenge_cmd.style.display = null;
                     template.querySelector(".step4_commands").appendChild(challenge_cmd);
 
-                    // setup option ids unique to this domain
-                    template.querySelectorAll(".options a")[0].id = "python_" + d_;
-                    template.querySelectorAll(".options a")[0].className = "active";
-                    template.querySelectorAll(".options a")[1].id = "file_" + d_;
-                    template.querySelectorAll(".options a")[1].className = "";
-                    var python_content = template.querySelectorAll(".tab")[0];
-                    var file_content = template.querySelectorAll(".tab")[1];
-
                     // python server tab
-                    python_content.id = "python_" + d_ + "_content";
-                    python_content.className = "tab tab_" + d_;
-                    python_content.style.display = null;
+                    var python_tab_id = "tab_" + d_ + "_python";
+                    template.querySelectorAll(".tabs > input")[0].id = python_tab_id;
+                    template.querySelectorAll(".tabs > input")[0].setAttribute("name", "tabs_" + d_);
+                    template.querySelectorAll(".tabs > label")[0].htmlFor = python_tab_id;
+                    var python_content = template.querySelectorAll(".tab")[0];
+                    python_content.id = "content_" + d_ + "_python";
+                    python_content.insertAdjacentHTML("beforebegin",
+                        "<style>" +
+                            "#" + python_tab_id + ":checked ~ #" + python_content.id +
+                            "{display:block;}" +
+                        "</style>"); //#tab_foo_com_python:checked ~ #python_foo_com_content{display:block;}
                     python_content.querySelector(".howto_serve").id = "howto_serve_" + d_;
                     python_content.querySelector(".howto_serve_content").id = "howto_serve_" + d_ + "_content";
                     python_content.querySelector(".ssh").innerHTML = "";
@@ -605,9 +591,17 @@ function validateInitialSigs(e){
                     python_content.querySelector("input[type=submit]").value = "I'm now running this command on " + d;
 
                     // file-based tab
+                    var file_tab_id = "tab_" + d_ + "_file";
+                    template.querySelectorAll(".tabs > input")[1].id = file_tab_id;
+                    template.querySelectorAll(".tabs > input")[1].setAttribute("name", "tabs_" + d_);
+                    template.querySelectorAll(".tabs > label")[1].htmlFor = file_tab_id;
+                    var file_content = template.querySelectorAll(".tab")[1];
                     file_content.id = "file_" + d_ + "_content";
-                    file_content.className = "tab tab_" + d_;
-                    file_content.style.display = "none";
+                    file_content.insertAdjacentHTML("beforebegin",
+                        "<style>" +
+                            "#" + file_tab_id + ":checked ~ #" + file_content.id +
+                            "{display:block;}" +
+                        "</style>"); //#tab_foo_com_file:checked ~ #file_foo_com_content{display:block;}
                     file_content.querySelector(".howto_file").id = "howto_file_" + d_;
                     file_content.querySelector(".howto_file_content").id = "howto_file_" + d_ + "_content";
                     file_content.querySelector(".ssh").innerHTML = "";
@@ -640,8 +634,6 @@ function validateInitialSigs(e){
                         document.getElementById("howto_serve_" + d_),
                         document.getElementById("howto_file_" + d_),
                     ]);
-                    document.getElementById("python_" + d_).addEventListener("click", switchTab);
-                    document.getElementById("file_" + d_).addEventListener("click", switchTab);
                     document.getElementById("python_submit_" + d_).addEventListener("click", confirmDomainCheckIsRunning);
                     document.getElementById("file_submit_" + d_).addEventListener("click", confirmDomainCheckIsRunning);
 

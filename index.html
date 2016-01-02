@@ -36,12 +36,10 @@ Released under MIT License. Enjoy!
         .help-content{display:inline-block;width:100%;max-width:600px;margin:5px 0px 10px 0px;padding:10px;background-color:#eeeeee;border:2px solid #bbbbbb;}
         code{display:inline-block;margin:5px 0px;padding:5px;background-color:#ffffff;}
         pre{margin:5px 0px;padding:5px;overflow:auto;background-color:#ffffff;}
-        .tabsection{margin:0px;}
-        .options{margin:0px;padding:0px;}
-        .options li{display:inline-block;margin:0px;padding:0px;}
-        .options a{display:inline-block;margin:0px;padding:6px 12px;font-size:13px;}
-        .options a.active{background-color:#eeeeee;}
-        .tab{background-color:#eeeeee;margin:0px;padding:15px 15px 1px 15px;}
+        .tabs > label{display:inline-block;margin:0px;padding:6px 12px;font-size:13px;}
+        .tabs input[type=radio]{display:none;}
+        .tabs input[type=radio]:checked + label{background-color:#eeeeee;}
+        .tab{display:none;background-color:#eeeeee;padding:15px 15px 1px 15px;margin:0px 0px 15px 0px;}
         .tab .help-content{background-color:#ffffff;}
         .tab .help-content a{display:inline-block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
         .tab code{background-color:#eeeeee;}
@@ -284,11 +282,15 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                 </span>
             </div>
 
-            <div class="field tabsection">
-                <ul class="options">
-                    <li><a href="#">Option 1 - python server</a></li
-                    ><li><a href="#">Option 2 - file-based</a></li>
-                </ul>
+            <div class="field tabs">
+                <input type="radio" checked/>
+                <label>Option 1 - python server</label>
+
+                <input type="radio">
+                <label>Option 2 - file-based</label>
+
+                <br/>
+
                 <div class="tab">
                     <a class="howto_serve help" href="#">(how do I do this?)</a>
                     <div class="howto_serve_content help-content" style="display:none;">
@@ -326,6 +328,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                         <span style="display:none;"></span>
                     </div>
                 </div>
+
                 <div class="tab">
                     <a class="howto_file help" href="#">(how do I do this?)</a>
                     <div class="howto_file_content help-content" style="display:none;">
