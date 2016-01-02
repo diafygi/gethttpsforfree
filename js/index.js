@@ -3,8 +3,8 @@
  */
 
 // global variables
-var CA = "https://acme-staging.api.letsencrypt.org",
-    //CA = "https://acme-v01.api.letsencrypt.org",
+var //CA = "https://acme-staging.api.letsencrypt.org",
+    CA = "https://acme-v01.api.letsencrypt.org",
     TERMS = "https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf",
     ACCOUNT_EMAIL, // "bar@foo.com"
     ACCOUNT_PUBKEY, // {
@@ -102,19 +102,6 @@ function hex2b64(hex){
     }
     return b64(new Uint8Array(bytes));
 }
-
-// hide/show the help content
-function helpContent(e){
-    e.preventDefault();
-    var help = document.getElementById(e.target.id + "_content");
-    help.style.display = help.style.display === "none" ? "" : "none";
-}
-function bindHelps(elems){
-    for(var i = 0; i < elems.length; i++){
-        elems[i].addEventListener("click", helpContent);
-    }
-}
-bindHelps(document.querySelectorAll(".help"));
 
 // helper function to get a nonce via an ajax request to the ACME directory
 function getNonce(callback){
@@ -547,7 +534,7 @@ function validateInitialSigs(e){
                         names[j].appendChild(document.createTextNode(d));
                     }
                     template.querySelector(".howto_sign").id = "howto_sign_" + d_;
-                    template.querySelector(".howto_sign_content").id = "howto_sign_" + d_ + "_content";
+                    template.querySelector(".howto_sign_label").htmlFor = "howto_sign_" + d_;
 
                     // build step 4 commands for this domain
                     var challenge_cmd = document.getElementById("signing_template").cloneNode(true);
@@ -573,7 +560,7 @@ function validateInitialSigs(e){
                             "{display:block;}" +
                         "</style>"); //#tab_foo_com_python:checked ~ #python_foo_com_content{display:block;}
                     python_content.querySelector(".howto_serve").id = "howto_serve_" + d_;
-                    python_content.querySelector(".howto_serve_content").id = "howto_serve_" + d_ + "_content";
+                    python_content.querySelector(".howto_serve_label").htmlFor = "howto_serve_" + d_;
                     python_content.querySelector(".ssh").innerHTML = "";
                     python_content.querySelector(".ssh").appendChild(document.createTextNode("ssh ubuntu@" + d));
                     python_content.querySelector(".help-content a").href = link;
@@ -603,7 +590,7 @@ function validateInitialSigs(e){
                             "{display:block;}" +
                         "</style>"); //#tab_foo_com_file:checked ~ #file_foo_com_content{display:block;}
                     file_content.querySelector(".howto_file").id = "howto_file_" + d_;
-                    file_content.querySelector(".howto_file_content").id = "howto_file_" + d_ + "_content";
+                    file_content.querySelector(".howto_file_label").htmlFor = "howto_file_" + d_;
                     file_content.querySelector(".ssh").innerHTML = "";
                     file_content.querySelector(".ssh").appendChild(document.createTextNode("ssh ubuntu@" + d));
                     file_content.querySelector(".help-content a").href = link;
@@ -629,11 +616,6 @@ function validateInitialSigs(e){
                     template.id = "challenge_" + d_;
                     template.style.display = null;
                     document.getElementById("challenge_domains").appendChild(template);
-                    bindHelps([
-                        document.getElementById("howto_sign_" + d_),
-                        document.getElementById("howto_serve_" + d_),
-                        document.getElementById("howto_file_" + d_),
-                    ]);
                     document.getElementById("python_submit_" + d_).addEventListener("click", confirmDomainCheckIsRunning);
                     document.getElementById("file_submit_" + d_).addEventListener("click", confirmDomainCheckIsRunning);
 

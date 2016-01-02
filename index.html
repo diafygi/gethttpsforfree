@@ -32,11 +32,13 @@ Released under MIT License. Enjoy!
         h1{border-bottom:solid black 1px;padding-bottom:15px;}
         input[type="text"]{width:100%;}
         textarea{width:100%;height:120px;white-space:pre;}
-        .help{float:right;font-size:12px;}
-        .help-content{display:inline-block;width:100%;max-width:600px;margin:5px 0px 10px 0px;padding:10px;background-color:#eeeeee;border:2px solid #bbbbbb;}
+        .help{float:right;font-size:12px;text-decoration:underline;cursor:pointer;}
+        .help-checkbox{display:none;}
+        .help-checkbox:checked + .help-content{display:inline-block;}
+        .help-content{display:none;width:100%;max-width:600px;margin:5px 0px 10px 0px;padding:10px;background-color:#eeeeee;border:2px solid #bbbbbb;}
         code{display:inline-block;margin:5px 0px;padding:5px;background-color:#ffffff;}
         pre{margin:5px 0px;padding:5px;overflow:auto;background-color:#ffffff;}
-        .tabs > label{display:inline-block;margin:0px;padding:6px 12px;font-size:13px;}
+        .tabs > label{display:inline-block;margin:0px;padding:6px 12px;font-size:13px;text-decoration:underline;cursor:pointer;}
         .tabs input[type=radio]{display:none;}
         .tabs input[type=radio]:checked + label{background-color:#eeeeee;}
         .tab{display:none;background-color:#eeeeee;padding:15px 15px 1px 15px;margin:0px 0px 15px 0px;}
@@ -105,8 +107,9 @@ Released under MIT License. Enjoy!
     </div>
 
     <div class="field">
-        <a id="howto_pubkey" class="help" href="#">(how do I generate this?)</a>
-        <div id="howto_pubkey_content" class="help-content" style="display:none;">
+        <label for="howto_pubkey" class="help">(how do I generate this?)</label>
+        <input id="howto_pubkey" type="checkbox" class="help-checkbox"/>
+        <div class="help-content">
             How to generate a new account keypair using openssl:<br/>
             <ol>
                 <li>
@@ -146,8 +149,9 @@ Released under MIT License. Enjoy!
     </div>
 
     <div class="field">
-        <a id="howto_csr" class="help" href="#">(how do I generate this?)</a>
-        <div id="howto_csr_content" class="help-content" style="display:none;">
+        <label for="howto_csr" class="help">(how do I generate this?)</label>
+        <input id="howto_csr" type="checkbox" class="help-checkbox"/>
+        <div class="help-content">
             How to generate a new Certificate Signing Request (CSR):<br/>
             <ol>
                 <li>
@@ -200,8 +204,9 @@ openssl req -new -sha256 -key domain.key -subj "/" \
         </div>
 
         <div class="field">
-            <a id="howto_sign1" class="help" href="#">(how do I do this?)</a>
-            <div id="howto_sign1_content" class="help-content" style="display:none;">
+            <label for="howto_sign1" class="help">(how do I do this?)</label>
+            <input id="howto_sign1" type="checkbox" class="help-checkbox"/>
+            <div class="help-content">
                 How to generate the needed signatures:<br/>
                 <ol>
                     <li>
@@ -258,8 +263,9 @@ openssl req -new -sha256 -key domain.key -subj "/" \
             <h3>Domain: <span class="domain">foobar.com</span></h3>
 
             <div class="field">
-                <a class="howto_sign help" href="#">(how do I do this?)</a>
-                <div class="howto_sign_content help-content" style="display:none;">
+                <label class="howto_sign_label help">(how do I do this?)</label>
+                <input class="howto_sign help-checkbox" type="checkbox"/>
+                <div class="help-content">
                     How to generate the needed signatures:<br/>
                     <ol>
                         <li>
@@ -292,8 +298,9 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                 <br/>
 
                 <div class="tab">
-                    <a class="howto_serve help" href="#">(how do I do this?)</a>
-                    <div class="howto_serve_content help-content" style="display:none;">
+                    <label class="howto_serve_label help">(how do I do this?)</label>
+                    <input class="howto_serve help-checkbox" type="checkbox"/>
+                    <div class="help-content">
                         How to serve the challenge response on your domain:<br/>
                         <ol>
                             <li>
@@ -330,8 +337,9 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                 </div>
 
                 <div class="tab">
-                    <a class="howto_file help" href="#">(how do I do this?)</a>
-                    <div class="howto_file_content help-content" style="display:none;">
+                    <label class="howto_file_label help">(how do I do this?)</label>
+                    <input class="howto_file help-checkbox" type="checkbox"/>
+                    <div class="help-content">
                         How to host this file on your server:<br/>
                         <ol>
                             <li>
@@ -391,8 +399,9 @@ openssl req -new -sha256 -key domain.key -subj "/" \
         </div>
 
         <div class="field">
-            <a id="howto_install" class="help" href="#">(how do I install this?)</a>
-            <div id="howto_install_content" class="help-content" style="display:none;">
+            <label for="howto_install" class="help">(how do I install this?)</label>
+            <input id="howto_install" type="checkbox" class="help-checkbox"/>
+            <div class="help-content">
                 Nginx installation instructions:<br/>
                 <ol>
                     <li>
