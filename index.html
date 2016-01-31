@@ -478,7 +478,7 @@ scp intermediate.pem root@foo.com:/etc/ssl/certs/intermediate.pem
         SSLCertificateKeyFile /etc/ssl/private/domain.key
         SSLCertificateChainFile /etc/ssl/certs/intermediate.pem
         SSLProtocol all -SSLv2 -SSLv3
-        SSlCipherSuite ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA;
+        SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA;
         SSLHonorCipherOrder on
         &lt;Directory /var/www/foo.com/html&gt;
                 Options Indexes FollowSymLinks MultiViews
