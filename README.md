@@ -46,7 +46,7 @@ pop open your browser's debugger to see the ajax requests that are going on. Ple
 
 First, the ACME protocol requires you register a public key and contact information
 so you can sign all the requests you make to the API. In this step, you need to
-put in an email and a public key. The javascript for this secion then converts the
+put in an email and a public key. The javascript for this section then converts the
 public key to a JSON Web Key ([JWK](https://tools.ietf.org/html/rfc7517)). NOTE:
 currently only RSA 2048 and 4096 bit public keys are accepted by Let's Encrypt.
 
