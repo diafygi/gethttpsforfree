@@ -89,7 +89,7 @@ function b64(bytes){
 }
 
 // parse openssl hex output
-var OPENSSL_HEX = /(?:\(stdin\)= |)([a-f0-9]{512,1024})/
+var OPENSSL_HEX = /(?:\(stdin\)= |)([a-f0-9]{512,1024})/;
 function hex2b64(hex){
     if(!OPENSSL_HEX.test(hex)){
         return null;
@@ -175,7 +175,7 @@ function validateAccount(e){
         "e": b64(new Uint8Array(exponent)),
         "kty": "RSA",
         "n": b64(new Uint8Array(modulus)),
-    }
+    };
     var jwk_json = JSON.stringify(jwk);
     var jwk_bytes = [];
     for(var i = 0; i < jwk_json.length; i++){
@@ -493,7 +493,7 @@ function validateInitialSigs(e){
     CSR['sig'] = csr_sig;
 
     // request challenges for each domain
-    var domains = []
+    var domains = [];
     for(var d in DOMAINS){
         domains.push(d);
     }
