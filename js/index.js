@@ -825,8 +825,9 @@ function checkAllDomains(){
                 // format cert into PEM format
                 var crt64 = window.btoa(String.fromCharCode.apply(null, new Uint8Array(cert_xhr.response)));
                 var pem = "-----BEGIN CERTIFICATE-----\n";
-                for(var i = 0; i < Math.ceil(crt64.length / 64.0); i++){
-                    pem += crt64.substr(i * 64, 64) + "\n";
+                var lineLength = 64;
+                for(var i = 0; i < Math.ceil(crt64.length / lineLength); i++){
+                    pem += crt64.substr(i * lineLength, lineLength) + "\n";
                 }
                 pem += "-----END CERTIFICATE-----";
                 document.getElementById("crt").value = pem;
