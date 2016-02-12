@@ -118,7 +118,7 @@ function getNonce(callback){
 }
 
 // validate account info
-function validateAccount(e){
+function validateAccount(event){
     var status = document.getElementById("validate_account_status");
     function fail(msg){
         failConsole();
@@ -211,7 +211,7 @@ function validateAccount(e){
 document.getElementById("validate_account").addEventListener("click", validateAccount);
 
 // validate CSR
-function validateCSR(e){
+function validateCSR(event){
     var status = document.getElementById("validate_csr_status");
     function fail(msg){
         failConsole();
@@ -326,7 +326,7 @@ function validateCSR(e){
     document.getElementById("ssltest_domain").value = shortest_domain;
 
     //build account registration payload
-    getNonce(function(nonce, err){
+    getNonce(function(nonce, error){
         ACCOUNT_PUBKEY['protected'] = b64(JSON.stringify({nonce: nonce}));
         ACCOUNT_PUBKEY['payload'] = b64(JSON.stringify({
             resource: "new-reg",
@@ -336,7 +336,7 @@ function validateCSR(e){
     });
 
     //build csr payload
-    getNonce(function(nonce, err){
+    getNonce(function(nonce, error){
         CSR['protected'] = b64(JSON.stringify({nonce: nonce}));
         CSR['payload'] = b64(JSON.stringify({
             resource: "new-cert",
@@ -346,7 +346,7 @@ function validateCSR(e){
 
     //build domain payloads
     function buildDomain(domain){
-        getNonce(function(nonce, err){
+        getNonce(function(nonce, error){
             DOMAINS[domain]['request_protected'] = b64(JSON.stringify({nonce: nonce}));
             DOMAINS[domain]['request_payload'] = b64(JSON.stringify({
                 resource: "new-authz",
@@ -443,7 +443,7 @@ function validateCSR(e){
 document.getElementById("validate_csr").addEventListener("click", validateCSR);
 
 // validate initial signatures
-function validateInitialSigs(e){
+function validateInitialSigs(event){
     var status = document.getElementById("validate_initial_sigs_status");
     function fail(msg, fail_all){
         failConsole();
@@ -682,7 +682,7 @@ function validateInitialSigs(e){
 document.getElementById("validate_initial_sigs").addEventListener("click", validateInitialSigs);
 
 // confirm domain check is running
-function confirmDomainCheckIsRunning(e){
+function confirmDomainCheckIsRunning(event){
 
     // get domain information for this challenge
     var d = e.target.dataset.domain;
