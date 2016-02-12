@@ -507,7 +507,7 @@ function validateInitialSigs(event){
         var d_ = d.replace(/\./g, "_");
         var domain_xhr = new XMLHttpRequest();
         domain_xhr.onreadystatechange = function(){
-            if(domain_xhr.readyState === 4){
+            if(domain_xhr.readyState === XMLHttpRequest.DONE){
                 if(domain_xhr.status === 201){
 
                     // compile the challenge payloads
@@ -660,7 +660,7 @@ function validateInitialSigs(event){
     document.getElementById("challenge_domains").innerHTML = "";
     var account_xhr = new XMLHttpRequest();
     account_xhr.onreadystatechange = function(){
-        if(account_xhr.readyState === 4){
+        if(account_xhr.readyState === XMLHttpRequest.DONE){
             if(account_xhr.status === 201 || account_xhr.status === 409){
                 status.innerHTML = "account registered...";
                 requestChallenges();
@@ -726,7 +726,7 @@ function confirmDomainCheckIsRunning(event){
         status.innerHTML = "checking on status...";
         var check_xhr = new XMLHttpRequest();
         check_xhr.onreadystatechange = function(){
-            if(check_xhr.readyState === 4){
+            if(check_xhr.readyState === XMLHttpRequest.DONE){
                 if(check_xhr.status === 202){
                     var check = JSON.parse(check_xhr.responseText);
                     if(check['status'] === "pending"){
@@ -757,7 +757,7 @@ function confirmDomainCheckIsRunning(event){
     status.innerHTML = "testing...";
     var challenge_xhr = new XMLHttpRequest();
     challenge_xhr.onreadystatechange = function(){
-        if(challenge_xhr.readyState === 4){
+        if(challenge_xhr.readyState === XMLHttpRequest.DONE){
             if(challenge_xhr.status === 202){
                 window.setTimeout(checkOnChallenge, 1000);
             }
@@ -811,7 +811,7 @@ function checkAllDomains(){
     status.innerHTML = "signing certificate...";
     var cert_xhr = new XMLHttpRequest();
     cert_xhr.onreadystatechange = function(){
-        if(cert_xhr.readyState === 4){
+        if(cert_xhr.readyState === XMLHttpRequest.DONE){
             if(cert_xhr.status === 201){
 
                 // alert when navigating away
