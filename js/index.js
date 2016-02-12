@@ -56,7 +56,7 @@ window.crypto = window.crypto || window.msCrypto; //for IE11
 if(window.crypto && window.crypto.webkitSubtle){
     window.crypto.subtle = window.crypto.webkitSubtle; //for Safari
 }
-var DIGEST = window.crypto ? (window.crypto.subtle ? window.crypto.subtle.digest : undefined) : undefined;
+var DIGEST = window.crypto ? (window.crypto.subtle ? window.crypto.subtle.digest : null) : null;
 document.getElementById("digest_error").style.display = DIGEST ? "none" : "block";
 
 // SHA-256 shim for standard promise-based and IE11 event-based
@@ -65,19 +65,19 @@ function sha256(bytes, callback){
     // IE11
     if(!hash.then){
         hash.oncomplete = function(e){
-            callback(new Uint8Array(e.target.result), undefined);
+            callback(new Uint8Array(e.target.result), null);
         };
         hash.onerror = function(e){
-            callback(undefined, e);
+            callback(null, e);
         };
     }
     // standard promise-based
     else{
         hash.then(function(result){
-            callback(new Uint8Array(result), undefined);
+            callback(new Uint8Array(result), null);
         })
         .catch(function(error){
-            callback(undefined, error);
+            callback(null, error);
         });
     }
 }
@@ -108,10 +108,10 @@ function getNonce(callback){
     var cachebuster = b64(window.crypto.getRandomValues(new Uint8Array(8)));
     var xhr = new XMLHttpRequest();
     xhr.onload = function(){
-        callback(xhr.getResponseHeader("Replay-Nonce"), undefined);
+        callback(xhr.getResponseHeader("Replay-Nonce"), null);
     };
     xhr.onerror = function(){
-        callback(undefined, xhr);
+        callback(null, xhr);
     };
     xhr.open("GET", CA + "/directory?cachebuster=" + cachebuster);
     xhr.send();
@@ -122,8 +122,8 @@ function validateAccount(event){
     var status = document.getElementById("validate_account_status");
     function fail(msg){
         failConsole();
-        ACCOUNT_EMAIL = undefined;
-        ACCOUNT_PUBKEY = undefined;
+        ACCOUNT_EMAIL = null;
+        ACCOUNT_PUBKEY = null;
         status.style.display = "inline";
         status.className = "error";
         status.innerHTML = "";
@@ -215,8 +215,8 @@ function validateCSR(event){
     var status = document.getElementById("validate_csr_status");
     function fail(msg){
         failConsole();
-        CSR = undefined;
-        DOMAINS = undefined;
+        CSR = null;
+        DOMAINS = null;
         status.style.display = "inline";
         status.className = "error";
         status.innerHTML = "";
@@ -366,12 +366,12 @@ function validateCSR(event){
 
         // check to see if account, csr, and domain new-authz are built
         var still_waiting = false;
-        if(ACCOUNT_PUBKEY['payload'] === undefined || CSR['payload'] === undefined){
+        if(typeof ACCOUNT_PUBKEY['payload'] === 'undefined' || typeof CSR['payload'] === 'undefined'){
             still_waiting = true;
         }
         for(var d in DOMAINS){
             if(!DOMAINS.hasOwnProperty(d)) continue;
-            if(DOMAINS[d]['request_payload'] === undefined){
+            if(typeof DOMAINS[d]['request_payload'] === 'undefined'){
                 still_waiting = true;
             }
         }
@@ -448,10 +448,10 @@ function validateInitialSigs(event){
     function fail(msg, fail_all){
         failConsole();
         if(fail_all){
-            ACCOUNT_EMAIL = undefined;
-            ACCOUNT_PUBKEY = undefined;
-            CSR = undefined;
-            DOMAINS = undefined;
+            ACCOUNT_EMAIL = null;
+            ACCOUNT_PUBKEY = null;
+            CSR = null;
+            DOMAINS = null;
         }
         status.style.display = "inline";
         status.className = "error";
@@ -693,10 +693,10 @@ function confirmDomainCheckIsRunning(event){
     function fail(msg, fail_all){
         failConsole();
         if(fail_all){
-            ACCOUNT_EMAIL = undefined;
-            ACCOUNT_PUBKEY = undefined;
-            CSR = undefined;
-            DOMAINS = undefined;
+            ACCOUNT_EMAIL = null;
+            ACCOUNT_PUBKEY = null;
+            CSR = null;
+            DOMAINS = null;
         }
         status.style.display = "inline";
         status.className = "error";
@@ -796,10 +796,10 @@ function checkAllDomains(){
     function fail(msg, fail_all){
         failConsole();
         if(fail_all){
-            ACCOUNT_EMAIL = undefined;
-            ACCOUNT_PUBKEY = undefined;
-            CSR = undefined;
-            DOMAINS = undefined;
+            ACCOUNT_EMAIL = null;
+            ACCOUNT_PUBKEY = null;
+            CSR = null;
+            DOMAINS = null;
         }
         status.style.display = "inline";
         status.className = "error";
