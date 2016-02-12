@@ -370,6 +370,7 @@ function validateCSR(e){
             still_waiting = true;
         }
         for(var d in DOMAINS){
+            if(!DOMAINS.hasOwnProperty(d)) continue;
             if(DOMAINS[d]['request_payload'] === undefined){
                 still_waiting = true;
             }
@@ -399,6 +400,7 @@ function validateCSR(e){
             // build the domain signature commands
             var domainString = "";
             for(var d in DOMAINS){
+                if(!DOMAINS.hasOwnProperty(d)) continue;
                 domainString += d + ", ";
                 var d_ = d.replace(/\./g, "_");
                 var domain_template = document.getElementById("signing_template").cloneNode(true);
@@ -477,6 +479,7 @@ function validateInitialSigs(e){
 
     // parse new-authz signatures
     for(var d in DOMAINS){
+        if(!DOMAINS.hasOwnProperty(d)) continue;
         var d_ = d.replace(/\./g, "_");
         var domain_sig = hex2b64(document.getElementById("domain_sig_" + d_).value);
         if(domain_sig === null){
@@ -495,6 +498,7 @@ function validateInitialSigs(e){
     // request challenges for each domain
     var domains = [];
     for(var d in DOMAINS){
+        if(!DOMAINS.hasOwnProperty(d)) continue;
         domains.push(d);
     }
     var i = 0;
@@ -776,6 +780,7 @@ function checkAllDomains(){
     // check to see if all confirmed
     var all_confirmed = true;
     for(var domain in DOMAINS){
+        if(!DOMAINS.hasOwnProperty(domain)) continue;
         if(DOMAINS[domain]['confirmed'] !== true){
             all_confirmed = false;
         }
