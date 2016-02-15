@@ -113,7 +113,7 @@ Released under MIT License. Enjoy!
             How to generate a new account keypair using openssl:<br/>
             <ol>
                 <li>
-                    Generate an account private key if you don't have one:<br/>
+                    Generate an account private key if you do not have one:<br/>
                     (KEEP ACCOUNT.KEY SECRET!)<br/>
                     <code>openssl genrsa 4096 > account.key</code>
                 </li>
@@ -145,7 +145,7 @@ Released under MIT License. Enjoy!
         This is the certificate signing request (CSR) that you send to Let's Encrypt
         in order to issue you a signed certificate. It contains the website domains you
         want to issue certs for and the public key of your TLS private key. <i><b>Keep your
-        TLS private key secret!</b> Anyone who has it can man-in-the-middle your website!</i>
+        TLS private key secret!</b> Anyone who has it can man-in-the-middle any HTTPS connection to your website!</i>
     </div>
 
     <div class="field">
@@ -155,7 +155,7 @@ Released under MIT License. Enjoy!
             How to generate a new Certificate Signing Request (CSR):<br/>
             <ol>
                 <li>
-                    Generate a TLS private key if you don't have one:<br/>
+                    Generate a TLS private key if you do not have one:<br/>
                     (KEEP DOMAIN.KEY SECRET!)<br/>
                     <code>openssl genrsa 4096 > domain.key</code>
                 </li>
@@ -211,7 +211,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                 <ol>
                     <li>
                         Copy and paste each command below into your terminal (if your
-                        account private key isn't at "./account.key", change "./account.key"
+                        account private key is not at "./account.key", change "./account.key"
                         in the command to wherever it exists).
                     </li>
                     <li>
@@ -247,7 +247,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
             can do this by serving a specific file at a specific url under your domains.
             Below are the files you need to serve along with some copy-and-paste commands
             you can run on your website to start serving the file. Once you are serving
-            the file on your website, click "I'm now running this on...". After that, you
+            the file on your website, click "I am now running this on...". After that, you
             need to tell Let's Encrypt to check the above files to verify ownership of your
             domains. This request needs to be signed with your account private key. Below
             are the verification requests that you will need to sign. The commands to do
@@ -274,7 +274,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                         </li>
                         <li>
                             Copy and paste each command below into your terminal (if your
-                            account private key isn't named "account.key", change "account.key"
+                            account private key is not named "account.key", change "account.key"
                             in the command to whatever you named it).
                         </li>
                         <li>
@@ -319,11 +319,11 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                                 challenge response. You only need to keep this running briefly.
                             </li>
                             <li>
-                                Open the link in a new window to make sure it's working:<br/>
+                                Open the link in a new window to make sure it is working:<br/>
                                 <a target="_blank"></a>
                             </li>
                             <li>
-                                Click "I'm now running this command..." button when the file is being
+                                Click "I am now running this command..." button when the file is being
                                 served on your domain.
                             </li>
                         </ol>
@@ -331,7 +331,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                     <label>Run this command on <span class="domain">foobar.com</span>'s server:</label><br/>
                     <textarea readonly></textarea>
                     <div>
-                        <input type="submit" value="I'm now running this command on foobar.com"/>
+                        <input type="submit" value="I am now running this command on foobar.com"/>
                         <span style="display:none;"></span>
                     </div>
                 </div>
@@ -354,7 +354,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                             </li>
                             <li>
                                 Add the static folder to your webserver's config
-                                (if you haven't already):<br/>
+                                (if you have not already):<br/>
                                 <pre class="nginx_location">server {...</pre>
                             </li>
                             <li>
@@ -362,11 +362,11 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                                 <pre class="file_cmd">echo ...</pre>
                             </li>
                             <li>
-                                Open the link in a new window to make sure it's working:<br/>
+                                Open the link in a new window to make sure it is working:<br/>
                                 <a target="_blank"></a>
                             </li>
                             <li>
-                                Click "I'm now serving this file..." button when the file is being
+                                Click "I am now serving this file..." button when the file is being
                                 served on your domain.
                             </li>
                         </ol>
@@ -378,7 +378,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                         <input type="text" class="file_data" value="" readonly/>
                     </div>
                     <div>
-                        <input type="submit" class="file_submit" value="I'm now serving this file on foobar.com"/>
+                        <input type="submit" class="file_submit" value="I am now serving this file on foobar.com"/>
                         <span style="display:none;"></span>
                     </div>
                 </div>
