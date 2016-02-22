@@ -23,31 +23,7 @@ Released under MIT License. Enjoy!
     <title>Get HTTPS for free!</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style>
-        *{box-sizing:border-box;}
-        div{margin:15px 0px;}
-        .error{color:#ff1111;}
-        .field{width:100%;max-width:600px;}
-        body{background-color:#fafafa;}
-        li{margin-bottom:10px;}
-        h1{border-bottom:solid black 1px;padding-bottom:15px;}
-        input[type="text"]{width:100%;}
-        textarea{width:100%;height:120px;white-space:pre;}
-        .help{float:right;font-size:12px;text-decoration:underline;cursor:pointer;}
-        .help-checkbox{display:none;}
-        .help-checkbox:checked + .help-content{display:inline-block;}
-        .help-content{display:none;width:100%;max-width:600px;margin:5px 0px 10px 0px;padding:10px;background-color:#eeeeee;border:2px solid #bbbbbb;}
-        code{display:inline-block;margin:5px 0px;padding:5px;background-color:#ffffff;}
-        pre{margin:5px 0px;padding:5px;overflow:auto;background-color:#ffffff;}
-        .tabs > label{display:inline-block;margin:0px;padding:6px 12px;font-size:13px;text-decoration:underline;cursor:pointer;}
-        .tabs input[type=radio]{display:none;}
-        .tabs input[type=radio]:checked + label{background-color:#eeeeee;}
-        .tab{display:none;background-color:#eeeeee;padding:15px 15px 1px 15px;margin:0px 0px 15px 0px;}
-        .tab .help-content{background-color:#ffffff;}
-        .tab .help-content a{display:inline-block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .tab code{background-color:#eeeeee;}
-        .tab pre{background-color:#eeeeee;}
-        .tab textarea{height:105px;}
-        .footer{font-size:12px;}
+        *{box-sizing:border-box}div{margin:15px 0}.error{color:#ff1111}.field{width:100%;max-width:600px}h1,h2,h3{line-height:1.2}body{max-width:650px;margin:40px auto;padding:0 10px;line-height:1.5;font-size:16px;background-color:#fafafa}li{margin-bottom:10px}h1{border-bottom:solid black 1px;padding-bottom:15px}input[type="text"]{width:100%}textarea{width:100%;height:120px;white-space:pre}.help{float:right;font-size:12px;text-decoration:underline;cursor:pointer}.help-checkbox{display:none}.help-checkbox:checked + .help-content{display:inline-block}.help-content{display:none;width:100%;max-width:600px;margin:5px 0 10px 0;padding:10px;background-color:#eeeeee;border:2px solid #bbbbbb}code{display:inline-block;margin:5px 0;padding:5px;background-color:#ffffff}pre{margin:5px 0;padding:5px;overflow:auto;background-color:#ffffff}.tabs > label{display:inline-block;margin:0;padding:6px 12px;font-size:13px;text-decoration:underline;cursor:pointer}.tabs input[type=radio]{display:none}.tabs input[type=radio]:checked + label{background-color:#eeeeee}.tab{display:none;background-color:#eeeeee;padding:15px 15px 1px 15px;margin:0 0 15px 0}.tab .help-content{background-color:#ffffff}.tab .help-content a{display:inline-block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tab code{background-color:#eeeeee}.tab pre{background-color:#eeeeee}.tab textarea{height:105px}.footer{font-size:12px}
     </style>
     <script src="js/asn1js/int10.js"></script>
     <script src="js/asn1js/base64.js"></script>
@@ -56,113 +32,119 @@ Released under MIT License. Enjoy!
 </head>
 <body>
 
-    <!--#############-->
-    <!--##  Intro  ##-->
-    <!--#############-->
-    <h1>Get HTTPS for free!</h1>
-    <h2 id="digest_error" class="error" style="display:none;">
-        ERROR: Your browser is not compatible with this website (this website
-        needs WebCryptoAPI's crypto.subtle.digest()). Please upgrade to a modern
-        browser (Firefox, Chrome, Safari, IE 11+).
-    </h2>
-    <div>
-        You can now get free https certificates from the non-profit certificate
-        authority <a href="https://letsencrypt.org/" target="_blank">Let's Encrypt</a>!
-        This is a website that will take you through the manual steps to get your free
-        https certificate so you can make your own website use https! This website is
-        <a href="https://github.com/diafygi/howtogetfreehttps" target="_blank">open source</a>
-        and <strong>NEVER</strong> asks for your private keys. Never trust a website
-        that asks for your private keys!
-        <!--TODO-->
-        <!--<a href="renew.html">Click here</a> to renew certs.-->
-        <!--<a href="revoke.html">Click here</a> to revoke certs.-->
-    </div>
+<!--#############-->
+<!--##  Intro  ##-->
+<!--#############-->
+<h1>Get HTTPS for free!</h1>
 
-    <div>
-        <b>NOTE: This website is for people who know how to generate certificate signing
+<h2 id="digest_error" class="error" style="display:none;">
+    ERROR: Your browser is not compatible with this website (this website
+    needs WebCryptoAPI's crypto.subtle.digest()). Please upgrade to a modern
+    browser (Firefox, Chrome, Safari, IE 11+).
+</h2>
+
+<div>
+    You can now get free https certificates from the non-profit certificate
+    authority <a href="https://letsencrypt.org/" target="_blank">Let's Encrypt</a>!
+    This is a website that will take you through the manual steps to get your free
+    https certificate so you can make your own website use https! This website is
+    <a href="https://github.com/diafygi/howtogetfreehttps" target="_blank">open source</a>
+    and <strong>NEVER</strong> asks for your private keys. Never trust a website
+    that asks for your private keys!
+    <!--TODO-->
+    <!--<a href="renew.html">Click here</a> to renew certs.-->
+    <!--<a href="revoke.html">Click here</a> to revoke certs.-->
+</div>
+
+<div>
+    <b>NOTE: This website is for people who know how to generate certificate signing
         requests (CSRs)!</b> If you're not familiar with how to do this, please use the
-        official Let's Encrypt <a href="https://github.com/letsencrypt/letsencrypt" target="_blank">client</a>
-        that can automatically issue and install https certificates for you. This
-        website is designed for people who know what they are doing and just want to get
-        their free https certificate.
+    official Let's Encrypt <a href="https://github.com/letsencrypt/letsencrypt" target="_blank">client</a>
+    that can automatically issue and install https certificates for you. This
+    website is designed for people who know what they are doing and just want to get
+    their free https certificate.
+</div>
+
+<hr/>
+
+<!--############################-->
+<!--##  Step 1: Account Info  ##-->
+<!--############################-->
+<h2>Step 1: Account Info</h2>
+
+<div>
+    Let's Encrypt requires that you register an account email and public key before
+    issuing a certificate. The email is so that they can contact you if needed, and
+    the public key is so you can securely sign your requests to issue/revoke/renew
+    your certificates. <i><b>Keep your account private key secret!</b> Anyone who has it
+    can impersonate you when making requests to Let's Encrypt!</i>
+</div>
+
+<div class="field">
+    <label for="email">Account Email:</label><br/>
+    <input id="email" type="text" placeholder="(e.g. webmaster@yourdomain.com)"/>
+</div>
+
+<div class="field">
+    <label for="howto_pubkey" class="help">(how do I generate this?)</label>
+    <input id="howto_pubkey" type="checkbox" class="help-checkbox"/>
+
+    <div class="help-content">
+        How to generate a new account keypair using openssl:<br/>
+        <ol>
+            <li>
+                Generate an account private key if you don't have one:<br/>
+                (KEEP ACCOUNT.KEY SECRET!)<br/>
+                <code>openssl genrsa 4096 > account.key</code>
+            </li>
+            <li>
+                Print your public key:<br/>
+                <code>openssl rsa -in account.key -pubout</code>
+            </li>
+            <li>
+                Copy and paste the public key into the box below.<br/>
+            </li>
+        </ol>
     </div>
+    <label for="pubkey">Account Public Key:</label><br/>
+    <textarea id="pubkey" placeholder="-----BEGIN PUBLIC KEY----- ..."></textarea>
+</div>
 
-    <hr/>
+<div class="field">
+    <input id="validate_account" type="submit" value="Validate Account Info"/>
+    <span id="validate_account_status" style="display:none;"></span>
+</div>
 
-    <!--############################-->
-    <!--##  Step 1: Account Info  ##-->
-    <!--############################-->
-    <h2>Step 1: Account Info</h2>
-    <div>
-        Let's Encrypt requires that you register an account email and public key before
-        issuing a certificate. The email is so that they can contact you if needed, and
-        the public key is so you can securely sign your requests to issue/revoke/renew
-        your certificates. <i><b>Keep your account private key secret!</b> Anyone who has it
-        can impersonate you when making requests to Let's Encrypt!</i>
-    </div>
+<hr/>
 
-    <div class="field">
-        <label for="email">Account Email:</label><br/>
-        <input id="email" type="text" placeholder="(e.g. webmaster@yourdomain.com)"/>
-    </div>
+<!--###########################################-->
+<!--##  Step 2: Certificate Signing Request  ##-->
+<!--###########################################-->
+<h2>Step 2: Certificate Signing Request</h2>
 
-    <div class="field">
-        <label for="howto_pubkey" class="help">(how do I generate this?)</label>
-        <input id="howto_pubkey" type="checkbox" class="help-checkbox"/>
-        <div class="help-content">
-            How to generate a new account keypair using openssl:<br/>
-            <ol>
-                <li>
-                    Generate an account private key if you don't have one:<br/>
-                    (KEEP ACCOUNT.KEY SECRET!)<br/>
-                    <code>openssl genrsa 4096 > account.key</code>
-                </li>
-                <li>
-                    Print your public key:<br/>
-                    <code>openssl rsa -in account.key -pubout</code>
-                </li>
-                <li>
-                    Copy and paste the public key into the box below.<br/>
-                </li>
-            </ol>
-        </div>
-        <label for="pubkey">Account Public Key:</label><br/>
-        <textarea id="pubkey" placeholder="-----BEGIN PUBLIC KEY----- ..."></textarea>
-    </div>
+<div>
+    This is the certificate signing request (CSR) that you send to Let's Encrypt
+    in order to issue you a signed certificate. It contains the website domains you
+    want to issue certs for and the public key of your TLS private key. <i><b>Keep your
+    TLS private key secret!</b> Anyone who has it can man-in-the-middle your website!</i>
+</div>
 
-    <div class="field">
-        <input id="validate_account" type="submit" value="Validate Account Info"/>
-        <span id="validate_account_status" style="display:none;"></span>
-    </div>
+<div class="field">
+    <label for="howto_csr" class="help">(how do I generate this?)</label>
+    <input id="howto_csr" type="checkbox" class="help-checkbox"/>
 
-    <hr/>
-
-    <!--###########################################-->
-    <!--##  Step 2: Certificate Signing Request  ##-->
-    <!--###########################################-->
-    <h2>Step 2: Certificate Signing Request</h2>
-    <div>
-        This is the certificate signing request (CSR) that you send to Let's Encrypt
-        in order to issue you a signed certificate. It contains the website domains you
-        want to issue certs for and the public key of your TLS private key. <i><b>Keep your
-        TLS private key secret!</b> Anyone who has it can man-in-the-middle your website!</i>
-    </div>
-
-    <div class="field">
-        <label for="howto_csr" class="help">(how do I generate this?)</label>
-        <input id="howto_csr" type="checkbox" class="help-checkbox"/>
-        <div class="help-content">
-            How to generate a new Certificate Signing Request (CSR):<br/>
-            <ol>
-                <li>
-                    Generate a TLS private key if you don't have one:<br/>
-                    (KEEP DOMAIN.KEY SECRET!)<br/>
-                    <code>openssl genrsa 4096 > domain.key</code>
-                </li>
-                <li>
-                    Generate a CSR for your the domains you want certs for:</br>
-                    (replace "foo.com" with your domain)</br>
-                    Linux:
+    <div class="help-content">
+        How to generate a new Certificate Signing Request (CSR):<br/>
+        <ol>
+            <li>
+                Generate a TLS private key if you don't have one:<br/>
+                (KEEP DOMAIN.KEY SECRET!)<br/>
+                <code>openssl genrsa 4096 > domain.key</code>
+            </li>
+            <li>
+                Generate a CSR for your the domains you want certs for:</br>
+                (replace "foo.com" with your domain)</br>
+                Linux:
                     <pre>
 #change "/etc/ssl/openssl.cnf" as needed:
 #  Debian: /etc/ssl/openssl.cnf
@@ -173,46 +155,114 @@ openssl req -new -sha256 -key domain.key -subj "/" \
   -reqexts SAN -config &lt;(cat /etc/ssl/openssl.cnf \
   &lt;(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))
 </pre>
-                </li>
-                <li>
-                    Copy and paste the CSR into the box below.<br/>
-                </li>
-            </ol>
-        </div>
-        <label for="csr">Certificate Signing Request:</label><br/>
-        <textarea id="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..."></textarea>
+            </li>
+            <li>
+                Copy and paste the CSR into the box below.<br/>
+            </li>
+        </ol>
+    </div>
+    <label for="csr">Certificate Signing Request:</label><br/>
+    <textarea id="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..."></textarea>
+</div>
+
+<div class="field">
+    <input id="validate_csr" type="submit" value="Validate CSR"/>
+    <span id="validate_csr_status" style="display:none;"></span>
+</div>
+
+<hr/>
+
+<!--#############################-->
+<!--##  Step 3: Sign Requests  ##-->
+<!--#############################-->
+<h2>Step 3: Sign API Requests<span id="step3_pending"> (waiting...)</span></h2>
+
+<div id="step3" style="display:none;">
+    <div>
+        Let's Encrypt requires that you sign all of your requests to them with your
+        account private key. Below are the requests that you will need to sign. The
+        commands to do this are generated below so you can copy-and-paste them into your
+        terminal. <i>Be sure to change the account private key location so it points to
+        your real private key.</i>
     </div>
 
     <div class="field">
-        <input id="validate_csr" type="submit" value="Validate CSR"/>
-        <span id="validate_csr_status" style="display:none;"></span>
+        <label for="howto_sign1" class="help">(how do I do this?)</label>
+        <input id="howto_sign1" type="checkbox" class="help-checkbox"/>
+
+        <div class="help-content">
+            How to generate the needed signatures:<br/>
+            <ol>
+                <li>
+                    Copy and paste each command below into your terminal (if your
+                    account private key isn't at "./account.key", change "./account.key"
+                    in the command to wherever it exists).
+                </li>
+                <li>
+                    Copy and paste the hex encoded signature output from the command
+                    into the text field below that command.
+                </li>
+            </ol>
+        </div>
+        <label>Run these signature commands in your terminal:</label><br/>
+            <span id="step3_commands">
+            </span>
+            <span id="signing_template" style="display:none;">
+                <input type="text" value="echo ..." readonly/><br/>
+                <input id="challenge_sig_foobar_com" type="text"
+                       placeholder='Paste the hex output here (e.g. "(stdin)= f2cf67e4...")'/><br/>
+            </span>
     </div>
 
-    <hr/>
+    <div class="field">
+        <input id="validate_initial_sigs" type="submit" value="Validate Signatures"/>
+        <span id="validate_initial_sigs_status" style="display:none;"></span>
+    </div>
+</div>
 
-    <!--#############################-->
-    <!--##  Step 3: Sign Requests  ##-->
-    <!--#############################-->
-    <h2>Step 3: Sign API Requests<span id="step3_pending"> (waiting...)</span></h2>
-    <div id="step3" style="display:none;">
-        <div>
-            Let's Encrypt requires that you sign all of your requests to them with your
-            account private key. Below are the requests that you will need to sign. The
-            commands to do this are generated below so you can copy-and-paste them into your
-            terminal. <i>Be sure to change the account private key location so it points to
-            your real private key.</i>
-        </div>
+<hr/>
+
+<!--##########################-->
+<!--##  Step 4: Challenges  ##-->
+<!--##########################-->
+<h2>Step 4: Verify Ownership<span id="step4_pending"> (waiting...)</span></h2>
+
+<div id="step4" style="display:none;">
+    <div>
+        Let's Encrypt requires you prove you own the domains you have in your CSR. You
+        can do this by serving a specific file at a specific url under your domains.
+        Below are the files you need to serve along with some copy-and-paste commands
+        you can run on your website to start serving the file. Once you are serving
+        the file on your website, click "I'm now running this on...". After that, you
+        need to tell Let's Encrypt to check the above files to verify ownership of your
+        domains. This request needs to be signed with your account private key. Below
+        are the verification requests that you will need to sign. The commands to do
+        this are generated below so you can copy-and-paste them into your terminal.
+        <i>Be sure to change the account private key location so it points to your real
+            private key.</i>
+    </div>
+
+    <div id="challenge_domains">
+    </div>
+
+    <div id="challenge_template" style="display:none;">
+        <h3>Domain: <span class="domain">foobar.com</span></h3>
 
         <div class="field">
-            <label for="howto_sign1" class="help">(how do I do this?)</label>
-            <input id="howto_sign1" type="checkbox" class="help-checkbox"/>
+            <label class="howto_sign_label help">(how do I do this?)</label>
+            <input class="howto_sign help-checkbox" type="checkbox"/>
+
             <div class="help-content">
                 How to generate the needed signatures:<br/>
                 <ol>
                     <li>
+                        Navigate in the terminal to the directory with account private
+                        key ("account.key" or whatever you named it).
+                    </li>
+                    <li>
                         Copy and paste each command below into your terminal (if your
-                        account private key isn't at "./account.key", change "./account.key"
-                        in the command to wherever it exists).
+                        account private key isn't named "account.key", change "account.key"
+                        in the command to whatever you named it).
                     </li>
                     <li>
                         Copy and paste the hex encoded signature output from the command
@@ -220,211 +270,154 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                     </li>
                 </ol>
             </div>
-            <label>Run these signature commands in your terminal:</label><br/>
-            <span id="step3_commands">
-            </span>
-            <span id="signing_template" style="display:none;">
-                <input type="text" value="echo ..." readonly/><br/>
-                <input id="challenge_sig_foobar_com" type="text" placeholder='Paste the hex output here (e.g. "(stdin)= f2cf67e4...")'/><br/>
-            </span>
+            <label>Run this signature command in your terminal:</label><br/>
+                <span class="step4_commands">
+                </span>
         </div>
 
-        <div class="field">
-            <input id="validate_initial_sigs" type="submit" value="Validate Signatures"/>
-            <span id="validate_initial_sigs_status" style="display:none;"></span>
-        </div>
-    </div>
+        <div class="field tabs">
+            <input type="radio" checked/>
+            <label>Option 1 - python server</label>
 
-    <hr/>
+            <input type="radio">
+            <label>Option 2 - file-based</label>
 
-    <!--##########################-->
-    <!--##  Step 4: Challenges  ##-->
-    <!--##########################-->
-    <h2>Step 4: Verify Ownership<span id="step4_pending"> (waiting...)</span></h2>
-    <div id="step4" style="display:none;">
-        <div>
-            Let's Encrypt requires you prove you own the domains you have in your CSR. You
-            can do this by serving a specific file at a specific url under your domains.
-            Below are the files you need to serve along with some copy-and-paste commands
-            you can run on your website to start serving the file. Once you are serving
-            the file on your website, click "I'm now running this on...". After that, you
-            need to tell Let's Encrypt to check the above files to verify ownership of your
-            domains. This request needs to be signed with your account private key. Below
-            are the verification requests that you will need to sign. The commands to do
-            this are generated below so you can copy-and-paste them into your terminal.
-            <i>Be sure to change the account private key location so it points to your real
-            private key.</i>
-        </div>
+            <br/>
 
-        <div id="challenge_domains">
-        </div>
+            <div class="tab">
+                <label class="howto_serve_label help">(how do I do this?)</label>
+                <input class="howto_serve help-checkbox" type="checkbox"/>
 
-        <div id="challenge_template" style="display:none;">
-            <h3>Domain: <span class="domain">foobar.com</span></h3>
-
-            <div class="field">
-                <label class="howto_sign_label help">(how do I do this?)</label>
-                <input class="howto_sign help-checkbox" type="checkbox"/>
                 <div class="help-content">
-                    How to generate the needed signatures:<br/>
+                    How to serve the challenge response on your domain:<br/>
                     <ol>
                         <li>
-                            Navigate in the terminal to the directory with account private
-                            key ("account.key" or whatever you named it).
+                            SSH into your domain as someone with sudo permissions:<br/>
+                            <code class="ssh">ssh ubuntu@foobar.com</code>
                         </li>
                         <li>
-                            Copy and paste each command below into your terminal (if your
-                            account private key isn't named "account.key", change "account.key"
-                            in the command to whatever you named it).
+                            Stop any webserver running on port 80, if any. If you had previously
+                            been running another python command, you can kill it with Ctrl+C):<br/>
+                            <code>sudo service nginx stop</code> &lt;-- example for nginx<br/>
+                            <code>sudo apachectl -k graceful-stop</code> &lt;-- example for apache
                         </li>
                         <li>
-                            Copy and paste the hex encoded signature output from the command
-                            into the text field below that command.
+                            Copy and paste the python command below into your terminal. This
+                            command starts a temporary webserver that serves nothing but the
+                            challenge response. You only need to keep this running briefly.
+                        </li>
+                        <li>
+                            Open the link in a new window to make sure it's working:<br/>
+                            <a target="_blank"></a>
+                        </li>
+                        <li>
+                            Click "I'm now running this command..." button when the file is being
+                            served on your domain.
                         </li>
                     </ol>
                 </div>
-                <label>Run this signature command in your terminal:</label><br/>
-                <span class="step4_commands">
-                </span>
+                <label>Run this command on <span class="domain">foobar.com</span>'s server:</label><br/>
+                <textarea readonly></textarea>
+
+                <div>
+                    <input type="submit" value="I'm now running this command on foobar.com"/>
+                    <span style="display:none;"></span>
+                </div>
             </div>
 
-            <div class="field tabs">
-                <input type="radio" checked/>
-                <label>Option 1 - python server</label>
+            <div class="tab">
+                <label class="howto_file_label help">(how do I do this?)</label>
+                <input class="howto_file help-checkbox" type="checkbox"/>
 
-                <input type="radio">
-                <label>Option 2 - file-based</label>
-
-                <br/>
-
-                <div class="tab">
-                    <label class="howto_serve_label help">(how do I do this?)</label>
-                    <input class="howto_serve help-checkbox" type="checkbox"/>
-                    <div class="help-content">
-                        How to serve the challenge response on your domain:<br/>
-                        <ol>
-                            <li>
-                                SSH into your domain as someone with sudo permissions:<br/>
-                                <code class="ssh">ssh ubuntu@foobar.com</code>
-                            </li>
-                            <li>
-                                Stop any webserver running on port 80, if any. If you had previously
-                                been running another python command, you can kill it with Ctrl+C):<br/>
-                                <code>sudo service nginx stop</code> &lt;-- example for nginx<br/>
-                                <code>sudo apachectl -k graceful-stop</code> &lt;-- example for apache
-                            </li>
-                            <li>
-                                Copy and paste the python command below into your terminal. This
-                                command starts a temporary webserver that serves nothing but the
-                                challenge response. You only need to keep this running briefly.
-                            </li>
-                            <li>
-                                Open the link in a new window to make sure it's working:<br/>
-                                <a target="_blank"></a>
-                            </li>
-                            <li>
-                                Click "I'm now running this command..." button when the file is being
-                                served on your domain.
-                            </li>
-                        </ol>
-                    </div>
-                    <label>Run this command on <span class="domain">foobar.com</span>'s server:</label><br/>
-                    <textarea readonly></textarea>
-                    <div>
-                        <input type="submit" value="I'm now running this command on foobar.com"/>
-                        <span style="display:none;"></span>
-                    </div>
+                <div class="help-content">
+                    How to host this file on your server:<br/>
+                    <ol>
+                        <li>
+                            SSH into your domain as someone with write access to
+                            your static web directory:<br/>
+                            <pre class="ssh">ssh ubuntu@foobar.com</pre>
+                        </li>
+                        <li>
+                            Create the ".well-known/acme-challenge/" directory
+                            in your webserver's static file path:<br/>
+                            <pre class="wwwdir">mkdir -p /path/to/www/.well-known/acme-challenge/</pre>
+                        </li>
+                        <li>
+                            Add the static folder to your webserver's config
+                            (if you haven't already):<br/>
+                            <pre class="nginx_location">server {...</pre>
+                        </li>
+                        <li>
+                            Create the file with the necessary contents:<br/>
+                            <pre class="file_cmd">echo ...</pre>
+                        </li>
+                        <li>
+                            Open the link in a new window to make sure it's working:<br/>
+                            <a target="_blank"></a>
+                        </li>
+                        <li>
+                            Click "I'm now serving this file..." button when the file is being
+                            served on your domain.
+                        </li>
+                    </ol>
                 </div>
+                <label>Under this url:</label><br/>
+                <input type="text" class="file_url" value="" readonly/>
 
-                <div class="tab">
-                    <label class="howto_file_label help">(how do I do this?)</label>
-                    <input class="howto_file help-checkbox" type="checkbox"/>
-                    <div class="help-content">
-                        How to host this file on your server:<br/>
-                        <ol>
-                            <li>
-                                SSH into your domain as someone with write access to
-                                your static web directory:<br/>
-                                <pre class="ssh">ssh ubuntu@foobar.com</pre>
-                            </li>
-                            <li>
-                                Create the ".well-known/acme-challenge/" directory
-                                in your webserver's static file path:<br/>
-                                <pre class="wwwdir">mkdir -p /path/to/www/.well-known/acme-challenge/</pre>
-                            </li>
-                            <li>
-                                Add the static folder to your webserver's config
-                                (if you haven't already):<br/>
-                                <pre class="nginx_location">server {...</pre>
-                            </li>
-                            <li>
-                                Create the file with the necessary contents:<br/>
-                                <pre class="file_cmd">echo ...</pre>
-                            </li>
-                            <li>
-                                Open the link in a new window to make sure it's working:<br/>
-                                <a target="_blank"></a>
-                            </li>
-                            <li>
-                                Click "I'm now serving this file..." button when the file is being
-                                served on your domain.
-                            </li>
-                        </ol>
-                    </div>
-                    <label>Under this url:</label><br/>
-                    <input type="text" class="file_url" value="" readonly/>
-                    <div>
-                        <label>Serve this content:</label>
-                        <input type="text" class="file_data" value="" readonly/>
-                    </div>
-                    <div>
-                        <input type="submit" class="file_submit" value="I'm now serving this file on foobar.com"/>
-                        <span style="display:none;"></span>
-                    </div>
+                <div>
+                    <label>Serve this content:</label>
+                    <input type="text" class="file_data" value="" readonly/>
+                </div>
+                <div>
+                    <input type="submit" class="file_submit" value="I'm now serving this file on foobar.com"/>
+                    <span style="display:none;"></span>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <hr/>
+<hr/>
 
-    <!--#################################-->
-    <!--##  Step 5: Issue Certificate  ##-->
-    <!--#################################-->
-    <h2>Step 5: Install Certificate (<span id="step5_pending">waiting...</span>)</h2>
-    <div id="step5" style="display:none;">
-        <div>
-            Congratulations! Let's Encrypt has issued you a certificate for your domains!
-            Below is the signed certificate you can use on your website to
-        </div>
+<!--#################################-->
+<!--##  Step 5: Issue Certificate  ##-->
+<!--#################################-->
+<h2>Step 5: Install Certificate (<span id="step5_pending">waiting...</span>)</h2>
 
-        <div class="field">
-            <label for="howto_install" class="help">(how do I install this?)</label>
-            <input id="howto_install" type="checkbox" class="help-checkbox"/>
-            <div class="help-content">
-                Nginx installation instructions:<br/>
-                <ol>
-                    <li>
-                        Copy and paste both the below domain certificate and the below
-                        intermediate certificate into the same text file called "chained.pem".
-                    </li>
-                    <li>
-                        If not done already, generate non-default dhparams.<br/>
-                        <code>openssl dhparam -out dhparam.pem 4096</code>
-                    </li>
-                    <li>
-                        Copy "chained.pem" and "dhparam.pem" to /etc/ssl/certs/.<br/>
+<div id="step5" style="display:none;">
+    <div>
+        Congratulations! Let's Encrypt has issued you a certificate for your domains!
+        Below is the signed certificate you can use on your website to
+    </div>
+
+    <div class="field">
+        <label for="howto_install" class="help">(how do I install this?)</label>
+        <input id="howto_install" type="checkbox" class="help-checkbox"/>
+
+        <div class="help-content">
+            Nginx installation instructions:<br/>
+            <ol>
+                <li>
+                    Copy and paste both the below domain certificate and the below
+                    intermediate certificate into the same text file called "chained.pem".
+                </li>
+                <li>
+                    If not done already, generate non-default dhparams.<br/>
+                    <code>openssl dhparam -out dhparam.pem 4096</code>
+                </li>
+                <li>
+                    Copy "chained.pem" and "dhparam.pem" to /etc/ssl/certs/.<br/>
                         <pre>
 scp chained.pem root@foo.com:/etc/ssl/certs/chained.pem
 scp dhparam.pem root@foo.com:/etc/ssl/certs/dhparam.pem
 </pre>
-                    </li>
-                    <li>
-                        Copy "domain.key" /etc/ssl/private/.<br/>
-                        <code>scp domain.key root@foo.com:/etc/ssl/private/domain.key</code><br/>
-                    </li>
-                    <li>
-                        Update your webserver config to use https (examples below).<br/>
+                </li>
+                <li>
+                    Copy "domain.key" /etc/ssl/private/.<br/>
+                    <code>scp domain.key root@foo.com:/etc/ssl/private/domain.key</code><br/>
+                </li>
+                <li>
+                    Update your webserver config to use https (examples below).<br/>
 <pre>
 server {
     listen 443;
@@ -445,29 +438,29 @@ server {
     }
 }
 </pre>
-                    </li>
-                </ol>
-                Apache installation instructions:<br/>
-                <ol>
-                    <li>
-                        Copy and paste the below domain certificate into file "domain.crt".
-                    </li>
-                    <li>
-                        Copy and paste the below intermediate certificate into file "intermediate.pem".
-                    </li>
-                    <li>
-                        Copy "domain.crt" and "intermediate.pem" to /etc/ssl/certs/.<br/>
+                </li>
+            </ol>
+            Apache installation instructions:<br/>
+            <ol>
+                <li>
+                    Copy and paste the below domain certificate into file "domain.crt".
+                </li>
+                <li>
+                    Copy and paste the below intermediate certificate into file "intermediate.pem".
+                </li>
+                <li>
+                    Copy "domain.crt" and "intermediate.pem" to /etc/ssl/certs/.<br/>
                         <pre>
 scp domain.crt root@foo.com:/etc/ssl/certs/domain.crt
 scp intermediate.pem root@foo.com:/etc/ssl/certs/intermediate.pem
 </pre>
-                    </li>
-                    <li>
-                        Copy "domain.key" /etc/ssl/private/.<br/>
-                        <code>scp domain.key root@foo.com:/etc/ssl/private/domain.key</code><br/>
-                    </li>
-                    <li>
-                        Update your webserver config to use https (examples below).<br/>
+                </li>
+                <li>
+                    Copy "domain.key" /etc/ssl/private/.<br/>
+                    <code>scp domain.key root@foo.com:/etc/ssl/private/domain.key</code><br/>
+                </li>
+                <li>
+                    Update your webserver config to use https (examples below).<br/>
 <pre>
 &lt;VirtualHost _default_:443&gt;
         ServerName foo.com:443
@@ -488,15 +481,15 @@ scp intermediate.pem root@foo.com:/etc/ssl/certs/intermediate.pem
         &lt;/Directory&gt;
 &lt;/VirtualHost&gt;
 </pre>
-                    </li>
-                </ol>
-            </div>
-            <label for="csr">Signed Certificate:</label><br/>
-            <textarea id="crt" readonly></textarea>
+                </li>
+            </ol>
         </div>
+        <label for="csr">Signed Certificate:</label><br/>
+        <textarea id="crt" readonly></textarea>
+    </div>
 
-        <div class="field">
-            <label for="csr">Intermediate Certificate:</label><br/>
+    <div class="field">
+        <label for="csr">Intermediate Certificate:</label><br/>
 <textarea readonly>
 -----BEGIN CERTIFICATE-----
 MIIEqDCCA5CgAwIBAgIRAJgT9HUT5XULQ+dDHpceRL0wDQYJKoZIhvcNAQELBQAw
@@ -526,22 +519,22 @@ ZnupyxpsEUlEaFb+/SCI4KCSBdAsYxAcsHYI5xxEI4LutHp6s3OT2FuO90WfdsIk
 f1w8DdnkabOLGeOVcj9LQ+s67vBykx4anTjURkbqZslUEUsn2k5xeua2zUk=
 -----END CERTIFICATE-----
 </textarea>
-        </div>
-
-        <div class="field">
-            <form action="https://www.ssllabs.com/ssltest/analyze.html" target="_blank">
-                <input id="ssltest_domain" type="hidden" name="d" value="foobar.com">
-                <input type="submit" value="Test my install"/>
-            </form>
-        </div>
     </div>
 
-    <hr/>
-
-    <div class="footer">
-        This website is static, so it can be saved and loaded locally. Just right-click and "Save Page As.."!<br/>
-        Released under MIT license | Source code: <a href="https://github.com/diafygi/gethttpsforfree" target="_blank">https://github.com/diafygi/gethttpsforfree</a>
+    <div class="field">
+        <form action="https://www.ssllabs.com/ssltest/analyze.html" target="_blank">
+            <input id="ssltest_domain" type="hidden" name="d" value="foobar.com">
+            <input type="submit" value="Test my install"/>
+        </form>
     </div>
-    <script src="js/index.js"></script>
+</div>
+
+<hr/>
+
+<div class="footer">
+    This website is static, so it can be saved and loaded locally. Just right-click and "Save Page As.."!<br/>
+    Released under MIT license | Source code: <a href="https://github.com/diafygi/gethttpsforfree" target="_blank">https://github.com/diafygi/gethttpsforfree</a>
+</div>
+<script src="js/index.js"></script>
 </body>
 </html>
