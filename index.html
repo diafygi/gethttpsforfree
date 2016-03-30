@@ -194,7 +194,6 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--##  Step 3: Sign Requests  ##-->
     <!--#############################-->
     <h2>Step 3: Sign API Requests<span id="step3_pending"> (waiting...)</span></h2>
-    <div id="step3" style="display:none;">
         <div>
             Let's Encrypt requires that you sign all of your requests to them with your
             account private key. Below are the requests that you will need to sign. The
@@ -233,7 +232,6 @@ openssl req -new -sha256 -key domain.key -subj "/" \
             <input id="validate_initial_sigs" type="submit" value="Validate Signatures"/>
             <span id="validate_initial_sigs_status" style="display:none;"></span>
         </div>
-    </div>
 
     <hr/>
 
@@ -241,7 +239,6 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--##  Step 4: Challenges  ##-->
     <!--##########################-->
     <h2>Step 4: Verify Ownership<span id="step4_pending"> (waiting...)</span></h2>
-    <div id="step4" style="display:none;">
         <div>
             Let's Encrypt requires you prove you own the domains you have in your CSR. You
             can do this by serving a specific file at a specific url under your domains.
@@ -384,7 +381,6 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                 </div>
             </div>
         </div>
-    </div>
 
     <hr/>
 
@@ -392,7 +388,6 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--##  Step 5: Issue Certificate  ##-->
     <!--#################################-->
     <h2>Step 5: Install Certificate (<span id="step5_pending">waiting...</span>)</h2>
-    <div id="step5" style="display:none;">
         <div>
             Congratulations! Let's Encrypt has issued you a certificate for your domains!
             Below is the signed certificate you can use on your website to
@@ -534,7 +529,6 @@ KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==
                 <input type="submit" value="Test my install"/>
             </form>
         </div>
-    </div>
 
     <hr/>
 
