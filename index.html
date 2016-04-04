@@ -407,6 +407,11 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                     <li>
                         Copy and paste both the below domain certificate and the below
                         intermediate certificate into the same text file called "chained.pem".
+                        If you saved the content of the certificates to individual files
+                        (named domain.crt and intermediate.crt) you can attempt the following: 
+                        <pre>
+                            awk 'FNR==0{print ""}{print}' domain.crt intermediate.crt > chained.pem
+                        </pre>
                     </li>
                     <li>
                         If not done already, generate non-default dhparams.<br/>
