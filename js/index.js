@@ -56,7 +56,7 @@ window.crypto = window.crypto || window.msCrypto; //for IE11
 if(window.crypto && window.crypto.webkitSubtle){
     window.crypto.subtle = window.crypto.webkitSubtle; //for Safari
 }
-var DIGEST = window.crypto ? (window.crypto.subtle ? window.crypto.subtle.digest : undefined) : undefined;
+var DIGEST = window.crypto ? (window.crypto.subtle ? window.crypto.subtle.digest : null) : null;
 document.getElementById("digest_error").style.display = DIGEST ? "none" : "block";
 
 // SHA-256 shim for standard promise-based and IE11 event-based
@@ -65,19 +65,19 @@ function sha256(bytes, callback){
     // IE11
     if(!hash.then){
         hash.oncomplete = function(e){
-            callback(new Uint8Array(e.target.result), undefined);
+            callback(new Uint8Array(e.target.result), null);
         };
         hash.onerror = function(e){
-            callback(undefined, e);
+            callback(null, e);
         };
     }
     // standard promise-based
     else{
         hash.then(function(result){
-            callback(new Uint8Array(result), undefined);
+            callback(new Uint8Array(result), null);
         })
         .catch(function(error){
-            callback(undefined, error);
+            callback(null, error);
         });
     }
 }
@@ -89,7 +89,7 @@ function b64(bytes){
 }
 
 // parse openssl hex output
-var OPENSSL_HEX = /(?:\(stdin\)= |)([a-f0-9]{512,1024})/
+var OPENSSL_HEX = /(?:\(stdin\)= |)([a-f0-9]{512,1024})/;
 function hex2b64(hex){
     if(!OPENSSL_HEX.test(hex)){
         return null;
@@ -108,22 +108,22 @@ function getNonce(callback){
     var cachebuster = b64(window.crypto.getRandomValues(new Uint8Array(8)));
     var xhr = new XMLHttpRequest();
     xhr.onload = function(){
-        callback(xhr.getResponseHeader("Replay-Nonce"), undefined);
+        callback(xhr.getResponseHeader("Replay-Nonce"), null);
     };
     xhr.onerror = function(){
-        callback(undefined, xhr);
+        callback(null, xhr);
     };
     xhr.open("GET", CA + "/directory?cachebuster=" + cachebuster);
     xhr.send();
 }
 
 // validate account info
-function validateAccount(e){
+function validateAccount(event){
     var status = document.getElementById("validate_account_status");
     function fail(msg){
         failConsole();
-        ACCOUNT_EMAIL = undefined;
-        ACCOUNT_PUBKEY = undefined;
+        ACCOUNT_EMAIL = null;
+        ACCOUNT_PUBKEY = null;
         status.style.display = "inline";
         status.className = "error";
         status.innerHTML = "";
@@ -175,7 +175,7 @@ function validateAccount(e){
         "e": b64(new Uint8Array(exponent)),
         "kty": "RSA",
         "n": b64(new Uint8Array(modulus)),
-    }
+    };
     var jwk_json = JSON.stringify(jwk);
     var jwk_bytes = [];
     for(var i = 0; i < jwk_json.length; i++){
@@ -211,12 +211,12 @@ function validateAccount(e){
 document.getElementById("validate_account").addEventListener("click", validateAccount);
 
 // validate CSR
-function validateCSR(e){
+function validateCSR(event){
     var status = document.getElementById("validate_csr_status");
     function fail(msg){
         failConsole();
-        CSR = undefined;
-        DOMAINS = undefined;
+        CSR = null;
+        DOMAINS = null;
         status.style.display = "inline";
         status.className = "error";
         status.innerHTML = "";
@@ -326,7 +326,7 @@ function validateCSR(e){
     document.getElementById("ssltest_domain").value = shortest_domain;
 
     //build account registration payload
-    getNonce(function(nonce, err){
+    getNonce(function(nonce, error){
         ACCOUNT_PUBKEY['protected'] = b64(JSON.stringify({nonce: nonce}));
         ACCOUNT_PUBKEY['payload'] = b64(JSON.stringify({
             resource: "new-reg",
@@ -336,7 +336,7 @@ function validateCSR(e){
     });
 
     //build csr payload
-    getNonce(function(nonce, err){
+    getNonce(function(nonce, error){
         CSR['protected'] = b64(JSON.stringify({nonce: nonce}));
         CSR['payload'] = b64(JSON.stringify({
             resource: "new-cert",
@@ -346,7 +346,7 @@ function validateCSR(e){
 
     //build domain payloads
     function buildDomain(domain){
-        getNonce(function(nonce, err){
+        getNonce(function(nonce, error){
             DOMAINS[domain]['request_protected'] = b64(JSON.stringify({nonce: nonce}));
             DOMAINS[domain]['request_payload'] = b64(JSON.stringify({
                 resource: "new-authz",
@@ -366,11 +366,12 @@ function validateCSR(e){
 
         // check to see if account, csr, and domain new-authz are built
         var still_waiting = false;
-        if(ACCOUNT_PUBKEY['payload'] === undefined || CSR['payload'] === undefined){
+        if(typeof ACCOUNT_PUBKEY['payload'] === 'undefined' || typeof CSR['payload'] === 'undefined'){
             still_waiting = true;
         }
         for(var d in DOMAINS){
-            if(DOMAINS[d]['request_payload'] === undefined){
+            if(!DOMAINS.hasOwnProperty(d)) continue;
+            if(typeof DOMAINS[d]['request_payload'] === 'undefined'){
                 still_waiting = true;
             }
         }
@@ -399,6 +400,7 @@ function validateCSR(e){
             // build the domain signature commands
             var domainString = "";
             for(var d in DOMAINS){
+                if(!DOMAINS.hasOwnProperty(d)) continue;
                 domainString += d + ", ";
                 var d_ = d.replace(/\./g, "_");
                 var domain_template = document.getElementById("signing_template").cloneNode(true);
@@ -441,15 +443,15 @@ function validateCSR(e){
 document.getElementById("validate_csr").addEventListener("click", validateCSR);
 
 // validate initial signatures
-function validateInitialSigs(e){
+function validateInitialSigs(event){
     var status = document.getElementById("validate_initial_sigs_status");
     function fail(msg, fail_all){
         failConsole();
         if(fail_all){
-            ACCOUNT_EMAIL = undefined;
-            ACCOUNT_PUBKEY = undefined;
-            CSR = undefined;
-            DOMAINS = undefined;
+            ACCOUNT_EMAIL = null;
+            ACCOUNT_PUBKEY = null;
+            CSR = null;
+            DOMAINS = null;
         }
         status.style.display = "inline";
         status.className = "error";
@@ -477,6 +479,7 @@ function validateInitialSigs(e){
 
     // parse new-authz signatures
     for(var d in DOMAINS){
+        if(!DOMAINS.hasOwnProperty(d)) continue;
         var d_ = d.replace(/\./g, "_");
         var domain_sig = hex2b64(document.getElementById("domain_sig_" + d_).value);
         if(domain_sig === null){
@@ -493,8 +496,9 @@ function validateInitialSigs(e){
     CSR['sig'] = csr_sig;
 
     // request challenges for each domain
-    var domains = []
+    var domains = [];
     for(var d in DOMAINS){
+        if(!DOMAINS.hasOwnProperty(d)) continue;
         domains.push(d);
     }
     var i = 0;
@@ -503,7 +507,7 @@ function validateInitialSigs(e){
         var d_ = d.replace(/\./g, "_");
         var domain_xhr = new XMLHttpRequest();
         domain_xhr.onreadystatechange = function(){
-            if(domain_xhr.readyState === 4){
+            if(domain_xhr.readyState === XMLHttpRequest.DONE){
                 if(domain_xhr.status === 201){
 
                     // compile the challenge payloads
@@ -656,7 +660,7 @@ function validateInitialSigs(e){
     document.getElementById("challenge_domains").innerHTML = "";
     var account_xhr = new XMLHttpRequest();
     account_xhr.onreadystatechange = function(){
-        if(account_xhr.readyState === 4){
+        if(account_xhr.readyState === XMLHttpRequest.DONE){
             if(account_xhr.status === 201 || account_xhr.status === 409){
                 status.innerHTML = "account registered...";
                 requestChallenges();
@@ -678,7 +682,7 @@ function validateInitialSigs(e){
 document.getElementById("validate_initial_sigs").addEventListener("click", validateInitialSigs);
 
 // confirm domain check is running
-function confirmDomainCheckIsRunning(e){
+function confirmDomainCheckIsRunning(event){
 
     // get domain information for this challenge
     var d = e.target.dataset.domain;
@@ -689,10 +693,10 @@ function confirmDomainCheckIsRunning(e){
     function fail(msg, fail_all){
         failConsole();
         if(fail_all){
-            ACCOUNT_EMAIL = undefined;
-            ACCOUNT_PUBKEY = undefined;
-            CSR = undefined;
-            DOMAINS = undefined;
+            ACCOUNT_EMAIL = null;
+            ACCOUNT_PUBKEY = null;
+            CSR = null;
+            DOMAINS = null;
         }
         status.style.display = "inline";
         status.className = "error";
@@ -722,7 +726,7 @@ function confirmDomainCheckIsRunning(e){
         status.innerHTML = "checking on status...";
         var check_xhr = new XMLHttpRequest();
         check_xhr.onreadystatechange = function(){
-            if(check_xhr.readyState === 4){
+            if(check_xhr.readyState === XMLHttpRequest.DONE){
                 if(check_xhr.status === 202){
                     var check = JSON.parse(check_xhr.responseText);
                     if(check['status'] === "pending"){
@@ -753,7 +757,7 @@ function confirmDomainCheckIsRunning(e){
     status.innerHTML = "testing...";
     var challenge_xhr = new XMLHttpRequest();
     challenge_xhr.onreadystatechange = function(){
-        if(challenge_xhr.readyState === 4){
+        if(challenge_xhr.readyState === XMLHttpRequest.DONE){
             if(challenge_xhr.status === 202){
                 window.setTimeout(checkOnChallenge, 1000);
             }
@@ -776,6 +780,7 @@ function checkAllDomains(){
     // check to see if all confirmed
     var all_confirmed = true;
     for(var domain in DOMAINS){
+        if(!DOMAINS.hasOwnProperty(domain)) continue;
         if(DOMAINS[domain]['confirmed'] !== true){
             all_confirmed = false;
         }
@@ -791,10 +796,10 @@ function checkAllDomains(){
     function fail(msg, fail_all){
         failConsole();
         if(fail_all){
-            ACCOUNT_EMAIL = undefined;
-            ACCOUNT_PUBKEY = undefined;
-            CSR = undefined;
-            DOMAINS = undefined;
+            ACCOUNT_EMAIL = null;
+            ACCOUNT_PUBKEY = null;
+            CSR = null;
+            DOMAINS = null;
         }
         status.style.display = "inline";
         status.className = "error";
@@ -806,7 +811,7 @@ function checkAllDomains(){
     status.innerHTML = "signing certificate...";
     var cert_xhr = new XMLHttpRequest();
     cert_xhr.onreadystatechange = function(){
-        if(cert_xhr.readyState === 4){
+        if(cert_xhr.readyState === XMLHttpRequest.DONE){
             if(cert_xhr.status === 201){
 
                 // alert when navigating away
@@ -820,8 +825,9 @@ function checkAllDomains(){
                 // format cert into PEM format
                 var crt64 = window.btoa(String.fromCharCode.apply(null, new Uint8Array(cert_xhr.response)));
                 var pem = "-----BEGIN CERTIFICATE-----\n";
-                for(var i = 0; i < Math.ceil(crt64.length / 64.0); i++){
-                    pem += crt64.substr(i * 64, 64) + "\n";
+                var lineLength = 64;
+                for(var i = 0; i < Math.ceil(crt64.length / lineLength); i++){
+                    pem += crt64.substr(i * lineLength, lineLength) + "\n";
                 }
                 pem += "-----END CERTIFICATE-----";
                 document.getElementById("crt").value = pem;

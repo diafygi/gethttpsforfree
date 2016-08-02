@@ -24,7 +24,7 @@ Released under MIT License. Enjoy!
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style>
         *{box-sizing:border-box;}
-        div{margin:15px 0px;}
+        div{margin:15px 0;}
         .error{color:#ff1111;}
         .field{width:100%;max-width:600px;}
         body{background-color:#fafafa;}
@@ -35,13 +35,13 @@ Released under MIT License. Enjoy!
         .help{float:right;font-size:12px;text-decoration:underline;cursor:pointer;}
         .help-checkbox{display:none;}
         .help-checkbox:checked + .help-content{display:inline-block;}
-        .help-content{display:none;width:100%;max-width:600px;margin:5px 0px 10px 0px;padding:10px;background-color:#eeeeee;border:2px solid #bbbbbb;}
-        code{display:inline-block;margin:5px 0px;padding:5px;background-color:#ffffff;}
-        pre{margin:5px 0px;padding:5px;overflow:auto;background-color:#ffffff;}
-        .tabs > label{display:inline-block;margin:0px;padding:6px 12px;font-size:13px;text-decoration:underline;cursor:pointer;}
+        .help-content{display:none;width:100%;max-width:600px;margin:5px 0 10px 0;padding:10px;background-color:#eeeeee;border:2px solid #bbbbbb;}
+        code{display:inline-block;margin:5px 0;padding:5px;background-color:#ffffff;}
+        pre{margin:5px 0;padding:5px;overflow:auto;background-color:#ffffff;}
+        .tabs > label{display:inline-block;margin:0;padding:6px 12px;font-size:13px;text-decoration:underline;cursor:pointer;}
         .tabs input[type=radio]{display:none;}
         .tabs input[type=radio]:checked + label{background-color:#eeeeee;}
-        .tab{display:none;background-color:#eeeeee;padding:15px 15px 1px 15px;margin:0px 0px 15px 0px;}
+        .tab{display:none;background-color:#eeeeee;padding:15px 15px 1px 15px;margin:0 0 15px 0;}
         .tab .help-content{background-color:#ffffff;}
         .tab .help-content a{display:inline-block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
         .tab code{background-color:#eeeeee;}
@@ -160,8 +160,8 @@ Released under MIT License. Enjoy!
                     <code>openssl genrsa 4096 > domain.key</code>
                 </li>
                 <li>
-                    Generate a CSR for your the domains you want certs for:</br>
-                    (replace "foo.com" with your domain)</br>
+                    Generate a CSR for your the domains you want certs for:<br/>
+                    (replace "foo.com" with your domain)<br/>
                     Linux:
                     <pre>
 #change "/etc/ssl/openssl.cnf" as needed:
