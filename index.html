@@ -107,6 +107,10 @@ Released under MIT License. Enjoy!
         your certificates. <i><b>Keep your account private key secret!</b> Anyone who has it
         can impersonate you when making requests to Let’s Encrypt!</i>
     </p>
+    <h4>Renewal Note</h4>
+    <p>
+        If you’re renewing a certificate, use the same account email and public key as you did for the initial certificate request.
+    </p>
 
     <div class="field">
         <label for="email">Account Email:</label><br/>
@@ -153,6 +157,10 @@ Released under MIT License. Enjoy!
         in order to issue you a signed certificate. It contains the website domains you
         want to issue certs for and the public key of your TLS private key. <i><b>Keep your
         TLS private key secret!</b> Anyone who has it can man-in-the-middle your website!</i>
+    </p>
+    <h4>Renewal Note</h4>
+    <p>
+        If you’re renewing a certificate, you can use the same CSR as you did for the original request, or create a new one.
     </p>
 
     <div class="field">
@@ -261,6 +269,10 @@ openssl req -new -sha256 -key domain.key -subj "/" \
             this are generated below so you can copy-and-paste them into your terminal.
             <i>Be sure to change the account private key location so it points to your real
             private key.</i>
+        </p>
+        <h4>Renewal Note</h4>
+        <p>
+            If you’re renewing a certificate, previously used the file-based method, and did not delete the verification file from your server, you should not need to regenerate the signature but can simply verify using the existing file.
         </p>
 
         <div id="challenge_domains">
@@ -455,6 +467,7 @@ server {
                     </li>
                 </ol>
                 <h3>Apache installation instructions:</h3>
+                <p><b>Renewal note:</b> if you did not change the private key or CSR, then you only need to replace the “domain.crt” file described below.</p>
                 <ol>
                     <li>
                         Copy and paste the below domain certificate into file “domain.crt”.
