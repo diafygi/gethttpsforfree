@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <!--
 Welcome to the source code for gethttpsforfree.com!
 
@@ -72,7 +72,7 @@ Released under MIT License. Enjoy!
         needs WebCryptoAPI’s crypto.subtle.digest()). Please upgrade to a modern
         browser (Firefox, Chrome, Safari, IE 11+).
     </h2>
-    <div>
+    <p>
         You can now get free https certificates from the non-profit certificate
         authority <a href="https://letsencrypt.org/" target="_blank">Let’s Encrypt</a>!
         This is a website that will take you through the manual steps to get your free
@@ -83,16 +83,16 @@ Released under MIT License. Enjoy!
         <!--TODO-->
         <!--<a href="renew.html">Click here</a> to renew certs.-->
         <!--<a href="revoke.html">Click here</a> to revoke certs.-->
-    </div>
+    </p>
 
-    <div>
+    <p>
         <b>NOTE: This website is for people who know how to generate certificate signing
         requests (CSRs)!</b> If you’re not familiar with how to do this, please use the
         official Let’s Encrypt <a href="https://github.com/letsencrypt/letsencrypt" target="_blank">client</a>
         that can automatically issue and install https certificates for you. This
         website is designed for people who know what they are doing and just want to get
         their free https certificate.
-    </div>
+    </p>
 
     <hr/>
 
@@ -100,13 +100,13 @@ Released under MIT License. Enjoy!
     <!--##  Step 1: Account Info  ##-->
     <!--############################-->
     <h2>Step 1: Account Info</h2>
-    <div>
+    <p>
         Let’s Encrypt requires that you register an account email and public key before
         issuing a certificate. The email is so that they can contact you if needed, and
         the public key is so you can securely sign your requests to issue/revoke/renew
         your certificates. <i><b>Keep your account private key secret!</b> Anyone who has it
         can impersonate you when making requests to Let’s Encrypt!</i>
-    </div>
+    </p>
 
     <div class="field">
         <label for="email">Account Email:</label><br/>
@@ -148,12 +148,12 @@ Released under MIT License. Enjoy!
     <!--##  Step 2: Certificate Signing Request  ##-->
     <!--###########################################-->
     <h2>Step 2: Certificate Signing Request</h2>
-    <div>
+    <p>
         This is the certificate signing request (CSR) that you send to Let’s Encrypt
         in order to issue you a signed certificate. It contains the website domains you
         want to issue certs for and the public key of your TLS private key. <i><b>Keep your
         TLS private key secret!</b> Anyone who has it can man-in-the-middle your website!</i>
-    </div>
+    </p>
 
     <div class="field">
         <label for="howto_csr" class="help">(how do I generate this?)</label>
@@ -167,8 +167,8 @@ Released under MIT License. Enjoy!
                     <code>openssl genrsa 4096 > domain.key</code>
                 </li>
                 <li>
-                    Generate a CSR for your the domains you want certs for:</br>
-                    (replace “foo.com” with your domain)</br>
+                    Generate a CSR for your the domains you want certs for:<br/>
+                    (replace “foo.com” with your domain)<br/>
                     Linux:
                     <pre>
 #change “/etc/ssl/openssl.cnf” as needed:
@@ -202,13 +202,13 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--#############################-->
     <h2>Step 3: Sign API Requests<span id="step3_pending"> (waiting…)</span></h2>
     <div id="step3" style="display:none;">
-        <div>
+        <p>
             Let’s Encrypt requires that you sign all of your requests to them with your
             account private key. Below are the requests that you will need to sign. The
             commands to do this are generated below so you can copy-and-paste them into your
             terminal. <i>Be sure to change the account private key location so it points to
             your real private key.</i>
-        </div>
+        </p>
 
         <div class="field">
             <label for="howto_sign1" class="help">(how do I do this?)</label>
@@ -249,7 +249,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--##########################-->
     <h2>Step 4: Verify Ownership<span id="step4_pending"> (waiting…)</span></h2>
     <div id="step4" style="display:none;">
-        <div>
+        <p>
             Let’s Encrypt requires you prove you own the domains you have in your CSR. You
             can do this by serving a specific file at a specific url under your domains.
             Below are the files you need to serve along with some copy-and-paste commands
@@ -261,7 +261,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
             this are generated below so you can copy-and-paste them into your terminal.
             <i>Be sure to change the account private key location so it points to your real
             private key.</i>
-        </div>
+        </p>
 
         <div id="challenge_domains">
         </div>
@@ -400,16 +400,16 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--#################################-->
     <h2>Step 5: Install Certificate (<span id="step5_pending">waiting…</span>)</h2>
     <div id="step5" style="display:none;">
-        <div>
+        <p>
             Congratulations! Let’s Encrypt has issued you a certificate for your domains!
             Below is the signed certificate you can use for your website.
-        </div>
+        </p>
 
         <div class="field">
             <label for="howto_install" class="help">(how do I install this?)</label>
             <input id="howto_install" type="checkbox" class="help-checkbox"/>
             <div class="help-content">
-                Nginx installation instructions:<br/>
+                <h3>Nginx installation instructions:</h3>
                 <ol>
                     <li>
                         Copy and paste both the below domain certificate and the below
@@ -454,7 +454,7 @@ server {
 </pre>
                     </li>
                 </ol>
-                Apache installation instructions:<br/>
+                <h3>Apache installation instructions:</h3>
                 <ol>
                     <li>
                         Copy and paste the below domain certificate into file “domain.crt”.
