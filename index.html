@@ -4,7 +4,7 @@
 Welcome to the source code for gethttpsforfree.com!
 
 This is an open source website that is meant to be auditable. Please read
-through the code to see what's going on!
+through the code to see what’s going on!
 
 Original files:
     /index.html - This page
@@ -69,12 +69,12 @@ Released under MIT License. Enjoy!
     <h1>Get HTTPS for free!</h1>
     <h2 id="digest_error" class="error" style="display:none;">
         ERROR: Your browser is not compatible with this website (this website
-        needs WebCryptoAPI's crypto.subtle.digest()). Please upgrade to a modern
+        needs WebCryptoAPI’s crypto.subtle.digest()). Please upgrade to a modern
         browser (Firefox, Chrome, Safari, IE 11+).
     </h2>
     <div>
         You can now get free https certificates from the non-profit certificate
-        authority <a href="https://letsencrypt.org/" target="_blank">Let's Encrypt</a>!
+        authority <a href="https://letsencrypt.org/" target="_blank">Let’s Encrypt</a>!
         This is a website that will take you through the manual steps to get your free
         https certificate so you can make your own website use https! This website is
         <a href="https://github.com/diafygi/howtogetfreehttps" target="_blank">open source</a>
@@ -87,8 +87,8 @@ Released under MIT License. Enjoy!
 
     <div>
         <b>NOTE: This website is for people who know how to generate certificate signing
-        requests (CSRs)!</b> If you're not familiar with how to do this, please use the
-        official Let's Encrypt <a href="https://github.com/letsencrypt/letsencrypt" target="_blank">client</a>
+        requests (CSRs)!</b> If you’re not familiar with how to do this, please use the
+        official Let’s Encrypt <a href="https://github.com/letsencrypt/letsencrypt" target="_blank">client</a>
         that can automatically issue and install https certificates for you. This
         website is designed for people who know what they are doing and just want to get
         their free https certificate.
@@ -101,11 +101,11 @@ Released under MIT License. Enjoy!
     <!--############################-->
     <h2>Step 1: Account Info</h2>
     <div>
-        Let's Encrypt requires that you register an account email and public key before
+        Let’s Encrypt requires that you register an account email and public key before
         issuing a certificate. The email is so that they can contact you if needed, and
         the public key is so you can securely sign your requests to issue/revoke/renew
         your certificates. <i><b>Keep your account private key secret!</b> Anyone who has it
-        can impersonate you when making requests to Let's Encrypt!</i>
+        can impersonate you when making requests to Let’s Encrypt!</i>
     </div>
 
     <div class="field">
@@ -120,7 +120,7 @@ Released under MIT License. Enjoy!
             How to generate a new account keypair using openssl:<br/>
             <ol>
                 <li>
-                    Generate an account private key if you don't have one:<br/>
+                    Generate an account private key if you don’t have one:<br/>
                     (KEEP ACCOUNT.KEY SECRET!)<br/>
                     <code>openssl genrsa 4096 > account.key</code>
                 </li>
@@ -134,7 +134,7 @@ Released under MIT License. Enjoy!
             </ol>
         </div>
         <label for="pubkey">Account Public Key:</label><br/>
-        <textarea id="pubkey" placeholder="-----BEGIN PUBLIC KEY----- ..."></textarea>
+        <textarea id="pubkey" placeholder="-----BEGIN PUBLIC KEY----- …"></textarea>
     </div>
 
     <div class="field">
@@ -149,7 +149,7 @@ Released under MIT License. Enjoy!
     <!--###########################################-->
     <h2>Step 2: Certificate Signing Request</h2>
     <div>
-        This is the certificate signing request (CSR) that you send to Let's Encrypt
+        This is the certificate signing request (CSR) that you send to Let’s Encrypt
         in order to issue you a signed certificate. It contains the website domains you
         want to issue certs for and the public key of your TLS private key. <i><b>Keep your
         TLS private key secret!</b> Anyone who has it can man-in-the-middle your website!</i>
@@ -162,16 +162,16 @@ Released under MIT License. Enjoy!
             How to generate a new Certificate Signing Request (CSR):<br/>
             <ol>
                 <li>
-                    Generate a TLS private key if you don't have one:<br/>
+                    Generate a TLS private key if you don’t have one:<br/>
                     (KEEP DOMAIN.KEY SECRET!)<br/>
                     <code>openssl genrsa 4096 > domain.key</code>
                 </li>
                 <li>
                     Generate a CSR for your the domains you want certs for:</br>
-                    (replace "foo.com" with your domain)</br>
+                    (replace “foo.com” with your domain)</br>
                     Linux:
                     <pre>
-#change "/etc/ssl/openssl.cnf" as needed:
+#change “/etc/ssl/openssl.cnf” as needed:
 #  Debian: /etc/ssl/openssl.cnf
 #  RHEL and CentOS: /etc/pki/tls/openssl.cnf
 #  Mac OSX: /System/Library/OpenSSL/openssl.cnf
@@ -187,7 +187,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
             </ol>
         </div>
         <label for="csr">Certificate Signing Request:</label><br/>
-        <textarea id="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..."></textarea>
+        <textarea id="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- …"></textarea>
     </div>
 
     <div class="field">
@@ -200,10 +200,10 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--#############################-->
     <!--##  Step 3: Sign Requests  ##-->
     <!--#############################-->
-    <h2>Step 3: Sign API Requests<span id="step3_pending"> (waiting...)</span></h2>
+    <h2>Step 3: Sign API Requests<span id="step3_pending"> (waiting…)</span></h2>
     <div id="step3" style="display:none;">
         <div>
-            Let's Encrypt requires that you sign all of your requests to them with your
+            Let’s Encrypt requires that you sign all of your requests to them with your
             account private key. Below are the requests that you will need to sign. The
             commands to do this are generated below so you can copy-and-paste them into your
             terminal. <i>Be sure to change the account private key location so it points to
@@ -218,7 +218,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                 <ol>
                     <li>
                         Copy and paste each command below into your terminal (if your
-                        account private key isn't at "./account.key", change "./account.key"
+                        account private key isn’t at “./account.key”, change “./account.key”
                         in the command to wherever it exists).
                     </li>
                     <li>
@@ -231,8 +231,8 @@ openssl req -new -sha256 -key domain.key -subj "/" \
             <span id="step3_commands">
             </span>
             <span id="signing_template" style="display:none;">
-                <input type="text" value="echo ..." readonly/><br/>
-                <input id="challenge_sig_foobar_com" type="text" placeholder='Paste the hex output here (e.g. "(stdin)= f2cf67e4...")'/><br/>
+                <input type="text" value="echo …" readonly/><br/>
+                <input id="challenge_sig_foobar_com" type="text" placeholder='Paste the hex output here (e.g. "(stdin)= f2cf67e4…")'/><br/>
             </span>
         </div>
 
@@ -247,15 +247,15 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--##########################-->
     <!--##  Step 4: Challenges  ##-->
     <!--##########################-->
-    <h2>Step 4: Verify Ownership<span id="step4_pending"> (waiting...)</span></h2>
+    <h2>Step 4: Verify Ownership<span id="step4_pending"> (waiting…)</span></h2>
     <div id="step4" style="display:none;">
         <div>
-            Let's Encrypt requires you prove you own the domains you have in your CSR. You
+            Let’s Encrypt requires you prove you own the domains you have in your CSR. You
             can do this by serving a specific file at a specific url under your domains.
             Below are the files you need to serve along with some copy-and-paste commands
             you can run on your website to start serving the file. Once you are serving
-            the file on your website, click "I'm now running this on...". After that, you
-            need to tell Let's Encrypt to check the above files to verify ownership of your
+            the file on your website, click “I’m now running this on…”. After that, you
+            need to tell Let’s Encrypt to check the above files to verify ownership of your
             domains. This request needs to be signed with your account private key. Below
             are the verification requests that you will need to sign. The commands to do
             this are generated below so you can copy-and-paste them into your terminal.
@@ -281,7 +281,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                         </li>
                         <li>
                             Copy and paste each command below into your terminal (if your
-                            account private key isn't named "account.key", change "account.key"
+                            account private key isn’t named “account.key”, change “account.key”
                             in the command to whatever you named it).
                         </li>
                         <li>
@@ -326,19 +326,19 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                                 challenge response. You only need to keep this running briefly.
                             </li>
                             <li>
-                                Open the link in a new window to make sure it's working:<br/>
+                                Open the link in a new window to make sure it’s working:<br/>
                                 <a target="_blank"></a>
                             </li>
                             <li>
-                                Click "I'm now running this command..." button when the file is being
+                                Click “I’m now running this command…” button when the file is being
                                 served on your domain.
                             </li>
                         </ol>
                     </div>
-                    <label>Run this command on <span class="domain">foobar.com</span>'s server:</label><br/>
+                    <label>Run this command on <span class="domain">foobar.com</span>’s server:</label><br/>
                     <textarea readonly></textarea>
                     <div>
-                        <input type="submit" value="I'm now running this command on foobar.com"/>
+                        <input type="submit" value="I’m now running this command on foobar.com"/>
                         <span style="display:none;"></span>
                     </div>
                 </div>
@@ -355,25 +355,25 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                                 <pre class="ssh">ssh ubuntu@foobar.com</pre>
                             </li>
                             <li>
-                                Create the ".well-known/acme-challenge/" directory
-                                in your webserver's static file path:<br/>
+                                Create the “.well-known/acme-challenge/” directory
+                                in your webserver’s static file path:<br/>
                                 <pre class="wwwdir">mkdir -p /path/to/www/.well-known/acme-challenge/</pre>
                             </li>
                             <li>
-                                Add the static folder to your webserver's config
-                                (if you haven't already):<br/>
-                                <pre class="nginx_location">server {...</pre>
+                                Add the static folder to your webserver’s config
+                                (if you haven’t already):<br/>
+                                <pre class="nginx_location">server {…</pre>
                             </li>
                             <li>
                                 Create the file with the necessary contents:<br/>
-                                <pre class="file_cmd">echo ...</pre>
+                                <pre class="file_cmd">echo …</pre>
                             </li>
                             <li>
-                                Open the link in a new window to make sure it's working:<br/>
+                                Open the link in a new window to make sure it’s working:<br/>
                                 <a target="_blank"></a>
                             </li>
                             <li>
-                                Click "I'm now serving this file..." button when the file is being
+                                Click “I’m now serving this file…” button when the file is being
                                 served on your domain.
                             </li>
                         </ol>
@@ -385,7 +385,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                         <input type="text" class="file_data" value="" readonly/>
                     </div>
                     <div>
-                        <input type="submit" class="file_submit" value="I'm now serving this file on foobar.com"/>
+                        <input type="submit" class="file_submit" value="I’m now serving this file on foobar.com"/>
                         <span style="display:none;"></span>
                     </div>
                 </div>
@@ -398,10 +398,10 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--#################################-->
     <!--##  Step 5: Issue Certificate  ##-->
     <!--#################################-->
-    <h2>Step 5: Install Certificate (<span id="step5_pending">waiting...</span>)</h2>
+    <h2>Step 5: Install Certificate (<span id="step5_pending">waiting…</span>)</h2>
     <div id="step5" style="display:none;">
         <div>
-            Congratulations! Let's Encrypt has issued you a certificate for your domains!
+            Congratulations! Let’s Encrypt has issued you a certificate for your domains!
             Below is the signed certificate you can use for your website.
         </div>
 
@@ -413,21 +413,21 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                 <ol>
                     <li>
                         Copy and paste both the below domain certificate and the below
-                        intermediate certificate into the same text file called "chained.pem".
+                        intermediate certificate into the same text file called “chained.pem”.
                     </li>
                     <li>
                         If not done already, generate non-default dhparams.<br/>
                         <code>openssl dhparam -out dhparam.pem 4096</code>
                     </li>
                     <li>
-                        Copy "chained.pem" and "dhparam.pem" to /etc/ssl/certs/.<br/>
+                        Copy “chained.pem” and “dhparam.pem” to /etc/ssl/certs/.<br/>
                         <pre>
 scp chained.pem root@foo.com:/etc/ssl/certs/chained.pem
 scp dhparam.pem root@foo.com:/etc/ssl/certs/dhparam.pem
 </pre>
                     </li>
                     <li>
-                        Copy "domain.key" /etc/ssl/private/.<br/>
+                        Copy “domain.key” /etc/ssl/private/.<br/>
                         <code>scp domain.key root@foo.com:/etc/ssl/private/domain.key</code><br/>
                     </li>
                     <li>
@@ -457,20 +457,20 @@ server {
                 Apache installation instructions:<br/>
                 <ol>
                     <li>
-                        Copy and paste the below domain certificate into file "domain.crt".
+                        Copy and paste the below domain certificate into file “domain.crt”.
                     </li>
                     <li>
-                        Copy and paste the below intermediate certificate into file "intermediate.pem".
+                        Copy and paste the below intermediate certificate into file “intermediate.pem”.
                     </li>
                     <li>
-                        Copy "domain.crt" and "intermediate.pem" to /etc/ssl/certs/.<br/>
+                        Copy “domain.crt” and “intermediate.pem” to /etc/ssl/certs/.<br/>
                         <pre>
 scp domain.crt root@foo.com:/etc/ssl/certs/domain.crt
 scp intermediate.pem root@foo.com:/etc/ssl/certs/intermediate.pem
 </pre>
                     </li>
                     <li>
-                        Copy "domain.key" /etc/ssl/private/.<br/>
+                        Copy “domain.key” /etc/ssl/private/.<br/>
                         <code>scp domain.key root@foo.com:/etc/ssl/private/domain.key</code><br/>
                     </li>
                     <li>
@@ -546,7 +546,7 @@ KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==
     <hr/>
 
     <div class="footer">
-        This website is static, so it can be saved and loaded locally. Just right-click and "Save Page As.."!<br/>
+        This website is static, so it can be saved and loaded locally. Just right-click and “Save Page As…”!<br/>
         Released under MIT license | Source code: <a href="https://github.com/diafygi/gethttpsforfree" target="_blank">https://github.com/diafygi/gethttpsforfree</a>
     </div>
     <script src="js/index.js"></script>
