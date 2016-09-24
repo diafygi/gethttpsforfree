@@ -497,7 +497,7 @@ scp intermediate.pem root@foo.com:/etc/ssl/certs/intermediate.pem
 
         <div class="field">
             <label for="csr">Intermediate Certificate:</label><br/>
-<textarea readonly>
+<textarea id="icrt" readonly>
 -----BEGIN CERTIFICATE-----
 MIIEkjCCA3qgAwIBAgIQCgFBQgAAAVOFc2oLheynCDANBgkqhkiG9w0BAQsFADA/
 MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT
@@ -529,6 +529,7 @@ KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==
         </div>
 
         <div class="field">
+            <a id="downloadfullchain">Download fullchain</a>
             <form action="https://www.ssllabs.com/ssltest/analyze.html" target="_blank">
                 <input id="ssltest_domain" type="hidden" name="d" value="foobar.com">
                 <input type="submit" value="Test my install"/>
