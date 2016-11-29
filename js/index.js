@@ -139,7 +139,7 @@ function validateAccount(e){
     var email_re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
     var email = document.getElementById("email").value;
     if(!email_re.test(email)){
-        return fail("Account email doesn't look valid.");
+        return fail("Account email does not look valid.");
     }
 
     // parse account public key
@@ -149,7 +149,7 @@ function validateAccount(e){
     }
     var unarmor = /-----BEGIN PUBLIC KEY-----([A-Za-z0-9+\/=\s]+)-----END PUBLIC KEY-----/;
     if(!unarmor.test(pubkey)){
-        return fail("Your public key isn't formatted correctly.");
+        return fail("Your public key is not formatted correctly.");
     }
 
     // find RSA modulus and exponent
@@ -240,7 +240,7 @@ function validateCSR(e){
     }
     var unarmor = /-----BEGIN CERTIFICATE REQUEST-----([A-Za-z0-9+\/=\s]+)-----END CERTIFICATE REQUEST-----/;
     if(!unarmor.test(csr)){
-        return fail("Your CSR isn't formatted correctly.");
+        return fail("Your CSR is not formatted correctly.");
     }
 
     // find domains in the csr
@@ -310,7 +310,7 @@ function validateCSR(e){
 
     // reject CSRs with no domains
     if(domains.length === 0){
-        return fail("Couldn't find any domains in the CSR.");
+        return fail("Could not find any domains in the CSR.");
     }
 
     // update the globals
@@ -575,7 +575,7 @@ function validateInitialSigs(e){
                         "    s.serve_forever()\"";
                     python_content.querySelector("input[type=submit]").id = "python_submit_" + d_;
                     python_content.querySelector("input[type=submit]").dataset.domain = d;
-                    python_content.querySelector("input[type=submit]").value = "I'm now running this command on " + d;
+                    python_content.querySelector("input[type=submit]").value = "I am now running this command on " + d;
 
                     // file-based tab
                     var file_tab_id = "tab_" + d_ + "_file";
@@ -610,7 +610,7 @@ function validateInitialSigs(e){
                     file_content.querySelector(".file_data").value = DOMAINS[d]['server_data'];
                     file_content.querySelector("input[type=submit]").id = "file_submit_" + d_;
                     file_content.querySelector("input[type=submit]").dataset.domain = d;
-                    file_content.querySelector("input[type=submit]").value = "I'm now serving this file on " + d;
+                    file_content.querySelector("input[type=submit]").value = "I am now serving this file on " + d;
 
                     // append this domain to step 4
                     template.id = "challenge_" + d_;
@@ -781,7 +781,7 @@ function checkAllDomains(){
         }
     }
 
-    // not all confirmed, so don't request certificate yet
+    // not all confirmed, so do not request certificate yet
     if(!all_confirmed){
         return;
     }
