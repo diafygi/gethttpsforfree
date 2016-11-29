@@ -423,17 +423,22 @@ function validateCSR(e){
             csr_template.querySelectorAll("input")[1].value = "";
             csr_template.style.display = null;
             document.getElementById("step3_commands").appendChild(csr_template);
-
-            // show the success text and step 3
-            status.style.display = "inline";
-            status.classNsame = "";
-            status.innerHTML = "";
-            status.appendChild(document.createTextNode(
-                "Found domains! Proceed to Step 3! (" +
-                domainString.substr(0, domainString.length - 2) +
-                ")"));
-            document.getElementById("step3").style.display = null;
-            document.getElementById("step3_pending").innerHTML = "";
+        
+            // proceed to step 3 only if domains were found in the csr
+            domainString = domainString.substr(0, domainString.length - 2);
+            if (domainString.length > 0) {
+                status.style.display = "inline";
+                status.classNsame = "";
+                status.innerHTML = "";
+                status.appendChild(document.createTextNode(
+                    "Found domains! Proceed to Step 3! (" +
+                    domainString.substr(0, domainString.length - 2) +")"));
+                document.getElementById("step3").style.display = null;
+                document.getElementById("step3_pending").innerHTML = "";
+            }
+            else {
+                fail("Submitted CSR doesn't contain any domain names!");
+            }
         }
     }
     window.setTimeout(waitForPayloads, 1000);
