@@ -24,12 +24,14 @@ Released under MIT License. Enjoy!
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style>
         *{box-sizing:border-box;}
-        div{margin:15px 0px;}
+        body{background-color:#222;color:#eee;}
+        div {font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;}
+        div.container{padding: 15px; background-color: #eee; color: #333333;border-bottom-right-radius: 3px;border-bottom-left-radius: 3px;}
         .error{color:#ff1111;}
         .field{width:100%;max-width:600px;}
-        body{background-color:#fafafa;}
         li{margin-bottom:10px;}
-        h1{border-bottom:solid black 1px;padding-bottom:15px;}
+        h1 {margin-bottom: 14px;}
+        h1,h2,h3,h4{font-family:'Optima','Segoe',"Segoe UI",'Candara','Calibri','Arial',sans-serif;}
         input[type="text"]{width:100%;}
         textarea{width:100%;height:120px;white-space:pre;}
         .help{float:right;font-size:12px;text-decoration:underline;cursor:pointer;}
@@ -48,6 +50,17 @@ Released under MIT License. Enjoy!
         .tab pre{background-color:#eeeeee;}
         .tab textarea{height:105px;}
         .footer{font-size:12px;}
+        .center{width:50%;margin-left:auto;margin-right:auto;}
+        .hbox{margin: 0;padding:15px;background-color: #444444;color:white;border-top-right-radius: 5px;border-top-left-radius: 5px;}
+        .hbox h2 {margin:0;}
+        hr {border:none;border-top: solid 1px #333;box-shadow: #000 0 -1px 0; margin:0; margin-bottom: 30px;}
+        a {color: mediumaquamarine;}
+        a:visited {color: aquamarine;}
+        .pending {font-size: 13px; float: right; font-weight: normal;margin-top: 7px;}
+        .box {margin-bottom:15px; }
+        input[type=text],input[type=email],input[type=password],textarea{padding: 5px;font-family:'Optima','Segoe',"Segoe UI",'Candara','Calibri','Arial',sans-serif;border:none;border:1px solid #aaa;border-radius:3px;}
+        input[type=submit],input[type=button]{border:none;border-radius:2px;background-color: #777777;color:white; padding: 6px;font-family:'Optima','Segoe',"Segoe UI",'Candara','Calibri','Arial',sans-serif;margin-top:5px;cursor:pointer;transition:background-color, 0.2s;}
+        input[type=submit]:hover,input[type=button]:hover{background-color: #555555;}
     </style>
     <script src="js/asn1js/int10.js"></script>
     <script src="js/asn1js/base64.js"></script>
@@ -55,11 +68,12 @@ Released under MIT License. Enjoy!
     <script src="js/asn1js/asn1.js"></script>
 </head>
 <body>
-
+<div class="center">
     <!--#############-->
     <!--##  Intro  ##-->
     <!--#############-->
     <h1>Get HTTPS for free!</h1>
+    <hr>
     <h2 id="digest_error" class="error" style="display:none;">
         ERROR: Your browser is not compatible with this website (this website
         needs WebCryptoAPI's crypto.subtle.digest()). Please upgrade to a modern
@@ -87,19 +101,23 @@ Released under MIT License. Enjoy!
         their free https certificate.
     </div>
 
-    <hr/>
-
+    <br>
+    <br>
+    
     <!--############################-->
     <!--##  Step 1: Account Info  ##-->
     <!--############################-->
+    <div class="box">
+    <div class="hbox">
+    
     <h2>Step 1: Account Info</h2>
-    <div>
+    </div><div class="container">
         Let's Encrypt requires that you register an account email and public key before
         issuing a certificate. The email is so that they can contact you if needed, and
         the public key is so you can securely sign your requests to issue/revoke/renew
         your certificates. <i><b>Keep your account private key secret!</b> Anyone who has it
         can impersonate you when making requests to Let's Encrypt!</i>
-    </div>
+    <br><br>
 
     <div class="field">
         <label for="email">Account Email:</label><br/>
@@ -125,7 +143,7 @@ Released under MIT License. Enjoy!
                     Copy and paste the public key into the box below.<br/>
                 </li>
             </ol>
-        </div>
+        </div><br>
         <label for="pubkey">Account Public Key:</label><br/>
         <textarea id="pubkey" placeholder="-----BEGIN PUBLIC KEY----- ..."></textarea>
     </div>
@@ -134,19 +152,22 @@ Released under MIT License. Enjoy!
         <input id="validate_account" type="submit" value="Validate Account Info"/>
         <span id="validate_account_status" style="display:none;"></span>
     </div>
-
-    <hr/>
+</div>
+    </div>
 
     <!--###########################################-->
     <!--##  Step 2: Certificate Signing Request  ##-->
     <!--###########################################-->
+  <div class="box">
+        <div class="hbox">
     <h2>Step 2: Certificate Signing Request</h2>
-    <div>
+        </div>
+      <div class="container">
         This is the certificate signing request (CSR) that you send to Let's Encrypt
         in order to issue you a signed certificate. It contains the website domains you
         want to issue certs for and the public key of your TLS private key. <i><b>Keep your
         TLS private key secret!</b> Anyone who has it can man-in-the-middle your website!</i>
-    </div>
+    
 
     <div class="field">
         <label for="howto_csr" class="help">(how do I generate this?)</label>
@@ -178,7 +199,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                     Copy and paste the CSR into the box below.<br/>
                 </li>
             </ol>
-        </div>
+        </div><br>
         <label for="csr">Certificate Signing Request:</label><br/>
         <textarea id="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..."></textarea>
     </div>
@@ -187,14 +208,17 @@ openssl req -new -sha256 -key domain.key -subj "/" \
         <input id="validate_csr" type="submit" value="Validate CSR"/>
         <span id="validate_csr_status" style="display:none;"></span>
     </div>
-
-    <hr/>
+</div>
+    </div>
 
     <!--#############################-->
     <!--##  Step 3: Sign Requests  ##-->
     <!--#############################-->
-    <h2>Step 3: Sign API Requests<span id="step3_pending"> (waiting...)</span></h2>
-    <div id="step3" style="display:none;">
+<div class="box">
+<div class="hbox">
+    <h2>Step 3: Sign API Requests<span id="step3_pending" class="pending"> waiting...</span></h2>
+</div>
+<div class="container" id="step3" style="display:none;">
         <div>
             Let's Encrypt requires that you sign all of your requests to them with your
             account private key. Below are the requests that you will need to sign. The
@@ -235,13 +259,16 @@ openssl req -new -sha256 -key domain.key -subj "/" \
         </div>
     </div>
 
-    <hr/>
+</div>
 
     <!--##########################-->
     <!--##  Step 4: Challenges  ##-->
     <!--##########################-->
-    <h2>Step 4: Verify Ownership<span id="step4_pending"> (waiting...)</span></h2>
-    <div id="step4" style="display:none;">
+<div class="box">
+<div class="hbox">
+    <h2>Step 4: Verify Ownership<span id="step4_pending" class="pending"> waiting...</span></h2>
+    </div>
+    <div id="step4" style="display:none;" class="container">
         <div>
             Let's Encrypt requires you prove you own the domains you have in your CSR. You
             can do this by serving a specific file at a specific url under your domains.
@@ -385,14 +412,16 @@ openssl req -new -sha256 -key domain.key -subj "/" \
             </div>
         </div>
     </div>
-
-    <hr/>
+</div>
 
     <!--#################################-->
     <!--##  Step 5: Issue Certificate  ##-->
     <!--#################################-->
-    <h2>Step 5: Install Certificate (<span id="step5_pending">waiting...</span>)</h2>
-    <div id="step5" style="display:none;">
+<div class="box">
+<div class="hbox">
+    <h2>Step 5: Install Certificate <span id="step5_pending" class="pending">waiting...</span></h2>
+</div>
+    <div id="step5" style="display:none;" class="container">
         <div>
             Congratulations! Let's Encrypt has issued you a certificate for your domains!
             Below is the signed certificate you can use for your website.
@@ -535,13 +564,16 @@ KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==
             </form>
         </div>
     </div>
-
-    <hr/>
-
-    <div class="footer">
+</div>
+<br>
+<hr>
+<div class="footer">
         This website is static, so it can be saved and loaded locally. Just right-click and "Save Page As.."!<br/>
-        Released under MIT license | Source code: <a href="https://github.com/diafygi/gethttpsforfree" target="_blank">https://github.com/diafygi/gethttpsforfree</a>
+        Released under MIT license | Source&nbsp; code: <a href="https://github.com/diafygi/gethttpsforfree" target="_blank">https://github.com/diafygi/gethttpsforfree</a>
     </div>
+<br>
+</div>
+    
     <script src="js/index.js"></script>
 </body>
 </html>
