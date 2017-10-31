@@ -386,12 +386,15 @@ function validateCSR(e){
 
             // build the account registration signature command
             var account_template = document.getElementById("signing_template").cloneNode(true);
+            account_template.querySelectorAll("input")[0].id = "account_sig_cmd";
             account_template.querySelectorAll("input")[0].value = "" +
                 "PRIV_KEY=./account.key; " +
                 "echo -n \"" + ACCOUNT_PUBKEY['protected'] + "." + ACCOUNT_PUBKEY['payload'] + "\" | " +
                 "openssl dgst -sha256 -hex -sign $PRIV_KEY";
-            account_template.querySelectorAll("input")[1].id = "account_sig";
-            account_template.querySelectorAll("input")[1].value = "";
+            account_template.querySelectorAll("input")[1].addEventListener('click',copyChallenge,false);
+            account_template.querySelectorAll("input")[1].fnParam = "account_sig_cmd";
+            account_template.querySelectorAll("input")[2].id = "account_sig";
+            account_template.querySelectorAll("input")[2].value = "";
             account_template.style.display = null;
             document.getElementById("step3_commands").appendChild(account_template);
             document.getElementById("step3_commands").appendChild(document.createElement("br"));
@@ -402,12 +405,15 @@ function validateCSR(e){
                 domainString += d + ", ";
                 var d_ = d.replace(/\./g, "_");
                 var domain_template = document.getElementById("signing_template").cloneNode(true);
+                domain_template.querySelectorAll("input")[0].id = "domain_sig_" + d_+"cmd";
                 domain_template.querySelectorAll("input")[0].value = "" +
                     "PRIV_KEY=./account.key; " +
                     "echo -n \"" + DOMAINS[d]['request_protected'] + "." + DOMAINS[d]['request_payload'] + "\" | " +
                     "openssl dgst -sha256 -hex -sign $PRIV_KEY";
-                domain_template.querySelectorAll("input")[1].id = "domain_sig_" + d_;
-                domain_template.querySelectorAll("input")[1].value = "";
+                domain_template.querySelectorAll("input")[1].addEventListener('click',copyChallenge,false);
+                domain_template.querySelectorAll("input")[1].fnParam = "domain_sig_" + d_+"cmd";
+                domain_template.querySelectorAll("input")[2].id = "domain_sig_" + d_;
+                domain_template.querySelectorAll("input")[2].value = "";
                 domain_template.style.display = null;
                 document.getElementById("step3_commands").appendChild(domain_template);
                 document.getElementById("step3_commands").appendChild(document.createElement("br"));
@@ -415,12 +421,15 @@ function validateCSR(e){
 
             // build the csr registration signature command
             var csr_template = document.getElementById("signing_template").cloneNode(true);
+            csr_template.querySelectorAll("input")[0].id = "csr_sig_cmd";
             csr_template.querySelectorAll("input")[0].value = "" +
                     "PRIV_KEY=./account.key; " +
                     "echo -n \"" + CSR['protected'] + "." + CSR['payload'] + "\" | " +
                     "openssl dgst -sha256 -hex -sign $PRIV_KEY";
-            csr_template.querySelectorAll("input")[1].id = "csr_sig";
-            csr_template.querySelectorAll("input")[1].value = "";
+            csr_template.querySelectorAll("input")[1].addEventListener('click',copyChallenge,false);
+            csr_template.querySelectorAll("input")[1].fnParam = "csr_sig_cmd";
+            csr_template.querySelectorAll("input")[2].id = "csr_sig";
+            csr_template.querySelectorAll("input")[2].value = "";
             csr_template.style.display = null;
             document.getElementById("step3_commands").appendChild(csr_template);
 
@@ -845,4 +854,10 @@ function checkAllDomains(){
         "signature": CSR['sig'],
     }));
 }
+
+function copyChallenge(elem) {
+  var copyText = document.getElementById(elem.target.fnParam);
+  copyText.select();
+  document.execCommand("Copy");
+} 
 
