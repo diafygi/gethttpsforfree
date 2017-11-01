@@ -547,12 +547,15 @@ function validateInitialSigs(e){
 
                     // build step 4 commands for this domain
                     var challenge_cmd = document.getElementById("signing_template").cloneNode(true);
+                    challenge_cmd.querySelectorAll("input")[0].id = "challenge_sig_" + d_+"cmd";
                     challenge_cmd.querySelectorAll("input")[0].value = "" +
                         "PRIV_KEY=./account.key; " +
                         "echo -n \"" + DOMAINS[d]['challenge_protected'] + "." + DOMAINS[d]['challenge_payload'] + "\" | " +
                         "openssl dgst -sha256 -hex -sign $PRIV_KEY";
-                    challenge_cmd.querySelectorAll("input")[1].id = "challenge_sig_" + d_;
-                    challenge_cmd.querySelectorAll("input")[1].value = "";
+                    challenge_cmd.querySelectorAll("input")[1].addEventListener('click',copyChallenge,false);
+                    challenge_cmd.querySelectorAll("input")[1].fnParam = "challenge_sig_" + d_+"cmd";
+                    challenge_cmd.querySelectorAll("input")[2].id = "challenge_sig_" + d_;
+                    challenge_cmd.querySelectorAll("input")[2].value = "";
                     challenge_cmd.style.display = null;
                     template.querySelector(".step4_commands").appendChild(challenge_cmd);
 
