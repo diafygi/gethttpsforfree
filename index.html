@@ -171,7 +171,7 @@ Released under MIT License. Enjoy!
 
 openssl req -new -sha256 -key domain.key -subj "/" \
   -reqexts SAN -config &lt;(cat /etc/ssl/openssl.cnf \
-  &lt;(printf "[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))
+  &lt;(printf "\n[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))
 </pre>
                 </li>
                 <li>
