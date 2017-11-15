@@ -5,7 +5,6 @@
 // global variables
 var //CA = "https://acme-staging.api.letsencrypt.org",
     CA = "https://acme-v01.api.letsencrypt.org",
-    TERMS = "https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf",
     ACCOUNT_EMAIL, // "bar@foo.com"
     ACCOUNT_PUBKEY, // {
                     //   "pubkey": "-----BEGIN PUBLIC KEY...",
@@ -108,10 +107,11 @@ function getNonce(callback){
     var cachebuster = b64(window.crypto.getRandomValues(new Uint8Array(8)));
     var xhr = new XMLHttpRequest();
     xhr.onload = function(){
-        callback(xhr.getResponseHeader("Replay-Nonce"), undefined);
+        var directory = JSON.parse(xhr.responseText);
+        callback(xhr.getResponseHeader("Replay-Nonce"), undefined, directory);
     };
     xhr.onerror = function(){
-        callback(undefined, xhr);
+        callback(undefined, xhr, undefined);
     };
     xhr.open("GET", CA + "/directory?cachebuster=" + cachebuster);
     xhr.send();
@@ -326,17 +326,17 @@ function validateCSR(e){
     document.getElementById("ssltest_domain").value = shortest_domain;
 
     //build account registration payload
-    getNonce(function(nonce, err){
+    getNonce(function(nonce, err, directory){
         ACCOUNT_PUBKEY['protected'] = b64(JSON.stringify({nonce: nonce}));
         ACCOUNT_PUBKEY['payload'] = b64(JSON.stringify({
             resource: "new-reg",
             contact: ["mailto:" + ACCOUNT_EMAIL],
-            agreement: TERMS,
+            agreement: directory['meta']['terms-of-service'],
         }));
     });
 
     //build csr payload
-    getNonce(function(nonce, err){
+    getNonce(function(nonce, err, directory){
         CSR['protected'] = b64(JSON.stringify({nonce: nonce}));
         CSR['payload'] = b64(JSON.stringify({
             resource: "new-cert",
@@ -346,7 +346,7 @@ function validateCSR(e){
 
     //build domain payloads
     function buildDomain(domain){
-        getNonce(function(nonce, err){
+        getNonce(function(nonce, err, directory){
             DOMAINS[domain]['request_protected'] = b64(JSON.stringify({nonce: nonce}));
             DOMAINS[domain]['request_payload'] = b64(JSON.stringify({
                 resource: "new-authz",
