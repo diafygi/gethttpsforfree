@@ -7,14 +7,14 @@ having to install any software or having to share your private keys with anyone.
 It uses the non-profit [Let's Encrypt](https://letsencrypt.org/) certificate
 authority to issue the free certificates. Hooray for free certs!
 
-##Donate
+## Donate
 
 If this script is useful to you, please donate to the EFF. I don't work there,
 but they do fantastic work.
 
 [https://eff.org/donate/](https://eff.org/donate/)
 
-##How to use this website
+## How to use this website
 
 Go to: https://gethttpsforfree.com
 
@@ -35,14 +35,14 @@ These should all be installed by default in Linux and Mac OSX. If you're
 running Windows, you might need to install [Cygwin](https://cygwin.com/install.html)
 to get openssl and echo working on Windows.
 
-##How this website works
+## How this website works
 
 This website works by making requests to the Let's Encrypt [API](https://acme-v01.api.letsencrypt.org)
 (using the [ACME](https://github.com/ietf-wg-acme/acme) protocol). There's 5 steps to the process,
 which are explained below. Also, I encourage you to read the source code (it's not that long) and
 pop open your browser's debugger to see the ajax requests that are going on. Please, audit this!
 
-###Step 1: Account Info
+### Step 1: Account Info
 
 First, the ACME protocol requires you register a public key and contact information
 so you can sign all the requests you make to the API. In this step, you need to
@@ -80,7 +80,7 @@ This step converts it to this JWK:
 }
 ```
 
-###Step 2: Certificate Signing Request
+### Step 2: Certificate Signing Request
 
 Second, you need to specify the domains you want certificates for. That's done
 through a certificate signing request ([CSR](https://en.wikipedia.org/wiki/Certificate_signing_request)).
@@ -88,7 +88,7 @@ The javascript in this section uses the [ASN1.js](https://lapo.it/asn1js/) libra
 to parse the CSR and read the domains. NOTE: the private key for the domain cert
 cannot be the same as your account private key, according to ACME.
 
-###Step 3: Sign API Requests
+### Step 3: Sign API Requests
 
 Third, you need tell the Let's Encrypt API that you want to register and get certs
 for some domains. These requests must be signed with your account private key, so
@@ -97,6 +97,7 @@ challenges for each domain, so if you want both `example.com` and `www.example.c
 need to make two new-authz calls.
 
 Here's the list of requests that need to be made to the API:
+
 * `/acme/new-reg` - Register the account public key (discarded if already registered)
 * `/acme/new-authz` - Asks for challenges for the domain for which you want a cert.
 * `/acme/new-authz` - (...needs to be called for each domain)
@@ -121,7 +122,7 @@ ajax requests to the above endpoints for `new-reg` and each `new-authz`. If the
 account public key has already been registered the `new-reg` response is a 409
 Conflict, which is ignored.
 
-###Step 4: Verify Ownership
+### Step 4: Verify Ownership
 
 The response for each `/new-authz` has some challenges you need perform to
 prove you own the domain. The challenge that this website chooses is "http-01",
@@ -146,13 +147,13 @@ challenge url to tell Let's Encrypt to verify the domain. Once this is done for
 all the domains in your CSR, an ajax request is made to `/new-cert` with the
 previously signed payload from step 3.
 
-###Step 5: Install Certificate
+### Step 5: Install Certificate
 
 The response from `/new-cert` should be your new certificate! Congrats! This
 step prints the certificate and also prints the intermediate certificate you
 need to chain this certificate to the root certificate.
 
-##Privacy
+## Privacy
 
 This website is entirely static files and only makes ajax requests to the
 Let's Encrypt API. It does not track or remember anything when you leave.
@@ -163,7 +164,7 @@ Finally, since this website is completely static, it's un-hostable! Just
 right-click and "Save Page As...", save the complete website to your local
 computer, then open it in a browser. It still works when hosted locally!
 
-##Feedback/Contributing
+## Feedback/Contributing
 
 I'd love to receive feedback, issues, and pull requests to make this script
 better. The main script itself, `js/index.js`, is less than 800 lines of code, so
@@ -177,7 +178,7 @@ TODO (pull requests welcome):
 * ~~Installation instructions for Apache~~
 * Accept GPG public keys as account public keys
 
-##What's NOT on the Roadmap
+## What's NOT on the Roadmap
 
 * Third party libraries (asn1.js is the only one)
 * Fonts or images
