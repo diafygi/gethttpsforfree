@@ -319,7 +319,7 @@ function validateCSR(e){
     var shortest_domain = domains[0];
     for(var d = 0; d < domains.length; d++){
         DOMAINS[domains[d]] = {};
-        if(shortest_domain.length < domains[d].length){
+        if(shortest_domain.length > domains[d].length){
             shortest_domain = domains[d];
         }
     }
