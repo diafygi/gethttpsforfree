@@ -56,7 +56,9 @@ if(window.crypto && window.crypto.webkitSubtle){
     window.crypto.subtle = window.crypto.webkitSubtle; //for Safari
 }
 var DIGEST = window.crypto ? (window.crypto.subtle ? window.crypto.subtle.digest : undefined) : undefined;
-document.getElementById("digest_error").style.display = DIGEST ? "none" : "block";
+if (!DIGEST) {
+    document.getElementById("digest_error").classList.remove('hidden');
+}
 
 // SHA-256 shim for standard promise-based and IE11 event-based
 function sha256(bytes, callback){
@@ -393,6 +395,7 @@ function validateCSR(e){
             account_template.querySelectorAll("input")[1].id = "account_sig";
             account_template.querySelectorAll("input")[1].value = "";
             account_template.style.display = null;
+            account_template.classList.remove("hidden");
             document.getElementById("step3_commands").appendChild(account_template);
             document.getElementById("step3_commands").appendChild(document.createElement("br"));
 
@@ -409,6 +412,7 @@ function validateCSR(e){
                 domain_template.querySelectorAll("input")[1].id = "domain_sig_" + d_;
                 domain_template.querySelectorAll("input")[1].value = "";
                 domain_template.style.display = null;
+                domain_template.classList.remove("hidden");
                 document.getElementById("step3_commands").appendChild(domain_template);
                 document.getElementById("step3_commands").appendChild(document.createElement("br"));
             }
@@ -422,6 +426,7 @@ function validateCSR(e){
             csr_template.querySelectorAll("input")[1].id = "csr_sig";
             csr_template.querySelectorAll("input")[1].value = "";
             csr_template.style.display = null;
+            csr_template.classList.remove("hidden");
             document.getElementById("step3_commands").appendChild(csr_template);
 
             // show the success text and step 3
@@ -433,6 +438,7 @@ function validateCSR(e){
                 domainString.substr(0, domainString.length - 2) +
                 ")"));
             document.getElementById("step3").style.display = null;
+            document.getElementById("step3").classList.remove("hidden");
             document.getElementById("step3_pending").innerHTML = "";
         }
     }
@@ -545,6 +551,7 @@ function validateInitialSigs(e){
                     challenge_cmd.querySelectorAll("input")[1].id = "challenge_sig_" + d_;
                     challenge_cmd.querySelectorAll("input")[1].value = "";
                     challenge_cmd.style.display = null;
+                    challenge_cmd.classList.remove("hidden");
                     template.querySelector(".step4_commands").appendChild(challenge_cmd);
 
                     // python server tab
@@ -615,6 +622,7 @@ function validateInitialSigs(e){
                     // append this domain to step 4
                     template.id = "challenge_" + d_;
                     template.style.display = null;
+                    template.classList.remove("hidden");
                     document.getElementById("challenge_domains").appendChild(template);
                     document.getElementById("python_submit_" + d_).addEventListener("click", confirmDomainCheckIsRunning);
                     document.getElementById("file_submit_" + d_).addEventListener("click", confirmDomainCheckIsRunning);
@@ -633,6 +641,7 @@ function validateInitialSigs(e){
                         status.className = "";
                         status.innerHTML = "Step 3 complete! Please proceed to Step 4.";
                         document.getElementById("step4").style.display = null;
+                        document.getElementById("step4").classList.remove("hidden");
                         document.getElementById("step4_pending").innerHTML = "";
                     }
                 }
@@ -829,6 +838,7 @@ function checkAllDomains(){
                 // show certificate field
                 status.innerHTML = "see below";
                 document.getElementById("step5").style.display = null;
+                document.getElementById("step5").classList.remove("hidden");
             }
             else{
                 fail("Certificate signature failed. Please start back at Step 1. " +

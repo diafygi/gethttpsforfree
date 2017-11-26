@@ -1,0 +1,26 @@
+*{box-sizing:border-box;}
+div{margin:15px 0px;}
+.error{color:#ff1111;}
+.field{width:100%;max-width:600px;}
+body{background-color:#fafafa;}
+li{margin-bottom:10px;}
+h1{border-bottom:solid black 1px;padding-bottom:15px;}
+input[type="text"]{width:100%;}
+textarea{width:100%;height:120px;white-space:pre;}
+.hidden{display:none;}
+.help{float:right;font-size:12px;text-decoration:underline;cursor:pointer;}
+.help-checkbox{display:none;}
+.help-checkbox:checked + .help-content{display:inline-block;}
+.help-content{display:none;width:100%;max-width:600px;margin:5px 0px 10px 0px;padding:10px;background-color:#eeeeee;border:2px solid #bbbbbb;}
+code{display:inline-block;margin:5px 0px;padding:5px;background-color:#ffffff;}
+pre{margin:5px 0px;padding:5px;overflow:auto;background-color:#ffffff;}
+.tabs > label{display:inline-block;margin:0px;padding:6px 12px;font-size:13px;text-decoration:underline;cursor:pointer;}
+.tabs input[type=radio]{display:none;}
+.tabs input[type=radio]:checked + label{background-color:#eeeeee;}
+.tab{display:none;background-color:#eeeeee;padding:15px 15px 1px 15px;margin:0px 0px 15px 0px;}
+.tab .help-content{background-color:#ffffff;}
+.tab .help-content a{display:inline-block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tab code{background-color:#eeeeee;}
+.tab pre{background-color:#eeeeee;}
+.tab textarea{height:105px;}
+.footer{font-size:12px;}
