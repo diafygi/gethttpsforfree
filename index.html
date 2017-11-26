@@ -22,7 +22,7 @@ Released under MIT License. Enjoy!
 <head>
     <title>Get HTTPS for free!</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://acme-v01.api.letsencrypt.org;">
     <link rel="stylesheet" href="style.css" type="text/css">
     <script src="js/asn1js/int10.js"></script>
     <script src="js/asn1js/base64.js"></script>
@@ -35,7 +35,7 @@ Released under MIT License. Enjoy!
     <!--##  Intro  ##-->
     <!--#############-->
     <h1>Get HTTPS for free!</h1>
-    <h2 id="digest_error" class="error" class="hidden">
+    <h2 id="digest_error" class="error hidden">
         ERROR: Your browser is not compatible with this website (this website
         needs WebCryptoAPI's crypto.subtle.digest()). Please upgrade to a modern
         browser (Firefox, Chrome, Safari, IE 11+).
