@@ -32,6 +32,7 @@ Released under MIT License. Enjoy!
         h1{border-bottom:solid black 1px;padding-bottom:15px;}
         input[type="text"]{width:100%;}
         textarea{width:100%;height:120px;white-space:pre;}
+        .hidden{display:none;}
         .help{float:right;font-size:12px;text-decoration:underline;cursor:pointer;}
         .help-checkbox{display:none;}
         .help-checkbox:checked + .help-content{display:inline-block;}
@@ -60,7 +61,7 @@ Released under MIT License. Enjoy!
     <!--##  Intro  ##-->
     <!--#############-->
     <h1>Get HTTPS for free!</h1>
-    <h2 id="digest_error" class="error" style="display:none;">
+    <h2 id="digest_error" class="error" class="hidden">
         ERROR: Your browser is not compatible with this website (this website
         needs WebCryptoAPI's crypto.subtle.digest()). Please upgrade to a modern
         browser (Firefox, Chrome, Safari, IE 11+).
@@ -132,7 +133,7 @@ Released under MIT License. Enjoy!
 
     <div class="field">
         <input id="validate_account" type="submit" value="Validate Account Info"/>
-        <span id="validate_account_status" style="display:none;"></span>
+        <span id="validate_account_status" class="hidden"></span>
     </div>
 
     <hr/>
@@ -185,7 +186,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
 
     <div class="field">
         <input id="validate_csr" type="submit" value="Validate CSR"/>
-        <span id="validate_csr_status" style="display:none;"></span>
+        <span id="validate_csr_status" class="hidden"></span>
     </div>
 
     <hr/>
@@ -194,7 +195,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--##  Step 3: Sign Requests  ##-->
     <!--#############################-->
     <h2>Step 3: Sign API Requests<span id="step3_pending"> (waiting...)</span></h2>
-    <div id="step3" style="display:none;">
+    <div id="step3" class="hidden">
         <div>
             Let's Encrypt requires that you sign all of your requests to them with your
             account private key. Below are the requests that you will need to sign. The
@@ -223,7 +224,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
             <label>Run these signature commands in your terminal:</label><br/>
             <span id="step3_commands">
             </span>
-            <span id="signing_template" style="display:none;">
+            <span id="signing_template" class="hidden">
                 <input type="text" value="echo ..." readonly/><br/>
                 <input id="challenge_sig_foobar_com" type="text" placeholder='Paste the hex output here (e.g. "(stdin)= f2cf67e4...")'/><br/>
             </span>
@@ -231,7 +232,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
 
         <div class="field">
             <input id="validate_initial_sigs" type="submit" value="Validate Signatures"/>
-            <span id="validate_initial_sigs_status" style="display:none;"></span>
+            <span id="validate_initial_sigs_status" class="hidden"></span>
         </div>
     </div>
 
@@ -241,7 +242,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--##  Step 4: Challenges  ##-->
     <!--##########################-->
     <h2>Step 4: Verify Ownership<span id="step4_pending"> (waiting...)</span></h2>
-    <div id="step4" style="display:none;">
+    <div id="step4" class="hidden">
         <div>
             Let's Encrypt requires you prove you own the domains you have in your CSR. You
             can do this by serving a specific file at a specific url under your domains.
@@ -259,7 +260,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
         <div id="challenge_domains">
         </div>
 
-        <div id="challenge_template" style="display:none;">
+        <div id="challenge_template" class="hidden">
             <h3>Domain: <span class="domain">foobar.com</span></h3>
 
             <div class="field">
@@ -332,7 +333,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                     <textarea readonly></textarea>
                     <div>
                         <input type="submit" value="I'm now running this command on foobar.com"/>
-                        <span style="display:none;"></span>
+                        <span class="hidden"></span>
                     </div>
                 </div>
 
@@ -379,7 +380,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                     </div>
                     <div>
                         <input type="submit" class="file_submit" value="I'm now serving this file on foobar.com"/>
-                        <span style="display:none;"></span>
+                        <span class="hidden"></span>
                     </div>
                 </div>
             </div>
@@ -392,7 +393,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
     <!--##  Step 5: Issue Certificate  ##-->
     <!--#################################-->
     <h2>Step 5: Install Certificate (<span id="step5_pending">waiting...</span>)</h2>
-    <div id="step5" style="display:none;">
+    <div id="step5" class="hidden">
         <div>
             Congratulations! Let's Encrypt has issued you a certificate for your domains!
             Below is the signed certificate you can use for your website.
