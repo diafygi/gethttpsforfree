@@ -25,6 +25,7 @@ Released under MIT License. Enjoy!
     <style>
         *{box-sizing:border-box;}
         div{margin:15px 0px;}
+        .small{font-size:14px;font-weight:normal;}
         .error{color:#ff1111;}
         .field{width:100%;max-width:600px;}
         body{background-color:#fafafa;}
@@ -41,6 +42,9 @@ Released under MIT License. Enjoy!
         .tabs > label{display:inline-block;margin:0px;padding:6px 12px;font-size:13px;text-decoration:underline;cursor:pointer;}
         .tabs input[type=radio]{display:none;}
         .tabs input[type=radio]:checked + label{background-color:#eeeeee;}
+        .tabs input[type=radio].challenge_python:checked ~ .tab.challenge_python{display:block;}
+        .tabs input[type=radio].challenge_file:checked ~ .tab.challenge_file{display:block;}
+        .tabs input[type=radio].challenge_dns:checked ~ .tab.challenge_dns{display:block;}
         .tab{display:none;background-color:#eeeeee;padding:15px 15px 1px 15px;margin:0px 0px 15px 0px;}
         .tab .help-content{background-color:#ffffff;}
         .tab .help-content a{display:inline-block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -59,32 +63,38 @@ Released under MIT License. Enjoy!
     <!--#############-->
     <!--##  Intro  ##-->
     <!--#############-->
-    <h1>Get HTTPS for free!</h1>
+    <h1>
+        Get HTTPS for free!
+        <span class="small">Update: Added wildcard certificate support!</span>
+    </h1>
     <h2 id="digest_error" class="error" style="display:none;">
         ERROR: Your browser is not compatible with this website (this website
         needs WebCryptoAPI's crypto.subtle.digest()). Please upgrade to a modern
-        browser (Firefox, Chrome, Safari, IE 11+).
+        browser (Firefox, Chrome, Safari, Edge, IE 11+).
     </h2>
     <div>
-        You can now get free https certificates from the non-profit certificate
-        authority <a href="https://letsencrypt.org/" target="_blank">Let's Encrypt</a>!
+        You can now get free https certificates (incuding wildcard certificates)
+        from the non-profit certificate authority
+        <a href="https://letsencrypt.org/" target="_blank" rel="noopener noreferrer">Let's Encrypt</a>!
         This is a website that will take you through the manual steps to get your free
         https certificate so you can make your own website use https! This website is
-        <a href="https://github.com/diafygi/howtogetfreehttps" target="_blank">open source</a>
+        <a href="https://github.com/diafygi/howtogetfreehttps" target="_blank" rel="noopener noreferrer">open source</a>
         and <strong>NEVER</strong> asks for your private keys. Never trust a website
         that asks for your private keys!
-        <!--TODO-->
-        <!--<a href="renew.html">Click here</a> to renew certs.-->
         <!--<a href="revoke.html">Click here</a> to revoke certs.-->
     </div>
 
     <div>
         <b>NOTE: This website is for people who know how to generate certificate signing
         requests (CSRs)!</b> If you're not familiar with how to do this, please use the
-        official Let's Encrypt <a href="https://github.com/letsencrypt/letsencrypt" target="_blank">client</a>
+        official Let's Encrypt <a href="https://github.com/certbot/certbot" target="_blank" rel="noopener noreferrer">official client</a>
         that can automatically issue and install https certificates for you. This
         website is designed for people who know what they are doing and just want to get
         their free https certificate.
+    </div>
+
+    <div>
+        If you need to renew a certificate, simply complete these steps below again.
     </div>
 
     <hr/>
@@ -101,39 +111,41 @@ Released under MIT License. Enjoy!
         can impersonate you when making requests to Let's Encrypt!</i>
     </div>
 
-    <div class="field">
-        <label for="email">Account Email:</label><br/>
-        <input id="email" type="text" placeholder="(e.g. webmaster@yourdomain.com)"/>
-    </div>
-
-    <div class="field">
-        <label for="howto_pubkey" class="help">(how do I generate this?)</label>
-        <input id="howto_pubkey" type="checkbox" class="help-checkbox"/>
-        <div class="help-content">
-            How to generate a new account keypair using openssl:<br/>
-            <ol>
-                <li>
-                    Generate an account private key if you don't have one:<br/>
-                    (KEEP ACCOUNT.KEY SECRET!)<br/>
-                    <code>openssl genrsa 4096 > account.key</code>
-                </li>
-                <li>
-                    Print your public key:<br/>
-                    <code>openssl rsa -in account.key -pubout</code>
-                </li>
-                <li>
-                    Copy and paste the public key into the box below.<br/>
-                </li>
-            </ol>
+    <form id="validate_account">
+        <div class="field">
+            <label for="email">Account Email:</label><br/>
+            <input id="email" type="text" placeholder="(e.g. webmaster@yourdomain.com)"/>
         </div>
-        <label for="pubkey">Account Public Key:</label><br/>
-        <textarea id="pubkey" placeholder="-----BEGIN PUBLIC KEY----- ..."></textarea>
-    </div>
 
-    <div class="field">
-        <input id="validate_account" type="submit" value="Validate Account Info"/>
-        <span id="validate_account_status" style="display:none;"></span>
-    </div>
+        <div class="field">
+            <label for="howto_pubkey" class="help">(how do I generate this?)</label>
+            <input id="howto_pubkey" type="checkbox" class="help-checkbox"/>
+            <div class="help-content">
+                How to generate a new account keypair using openssl:<br/>
+                <ol>
+                    <li>
+                        Generate an account private key if you don't have one:<br/>
+                        (KEEP ACCOUNT.KEY SECRET!)<br/>
+                        <code>openssl genrsa 4096 > account.key</code>
+                    </li>
+                    <li>
+                        Print your public key:<br/>
+                        <code>openssl rsa -in account.key -pubout</code>
+                    </li>
+                    <li>
+                        Copy and paste the public key into the box below.<br/>
+                    </li>
+                </ol>
+            </div>
+            <label for="pubkey">Account Public Key:</label><br/>
+            <textarea id="pubkey" placeholder="-----BEGIN PUBLIC KEY----- ..."></textarea>
+        </div>
+
+        <div class="field">
+            <input id="validate_account_submit" type="submit" value="Validate Account Info" disabled/>
+            <span id="validate_account_status" style="display:none;"></span>
+        </div>
+    </form>
 
     <hr/>
 
@@ -148,45 +160,47 @@ Released under MIT License. Enjoy!
         TLS private key secret!</b> Anyone who has it can man-in-the-middle your website!</i>
     </div>
 
-    <div class="field">
-        <label for="howto_csr" class="help">(how do I generate this?)</label>
-        <input id="howto_csr" type="checkbox" class="help-checkbox"/>
-        <div class="help-content">
-            How to generate a new Certificate Signing Request (CSR):<br/>
-            <ol>
-                <li>
-                    Generate a TLS private key if you don't have one:<br/>
-                    (KEEP DOMAIN.KEY SECRET!)<br/>
-                    <code>openssl genrsa 4096 > domain.key</code>
-                </li>
-                <li>
-                    Generate a CSR for your the domains you want certs for:</br>
-                    (replace "foo.com" with your domain)</br>
-                    Linux:
-                    <pre>
-#change "/etc/ssl/openssl.cnf" as needed:
-#  Debian: /etc/ssl/openssl.cnf
-#  RHEL and CentOS: /etc/pki/tls/openssl.cnf
-#  Mac OSX: /System/Library/OpenSSL/openssl.cnf
+    <form id="validate_csr">
+        <div class="field">
+            <label for="howto_csr" class="help">(how do I generate this?)</label>
+            <input id="howto_csr" type="checkbox" class="help-checkbox"/>
+            <div class="help-content">
+                How to generate a new Certificate Signing Request (CSR):<br/>
+                <ol>
+                    <li>
+                        Generate a TLS private key if you don't have one:<br/>
+                        (KEEP DOMAIN.KEY SECRET!)<br/>
+                        <code>openssl genrsa 4096 > domain.key</code>
+                    </li>
+                    <li>
+                        Generate a CSR for your the domains you want certs for:</br>
+                        (replace "foo.com" with your domain)</br>
+                        Linux:
+                        <pre>
+    #change "/etc/ssl/openssl.cnf" as needed:
+    #  Debian: /etc/ssl/openssl.cnf
+    #  RHEL and CentOS: /etc/pki/tls/openssl.cnf
+    #  Mac OSX: /System/Library/OpenSSL/openssl.cnf
 
-openssl req -new -sha256 -key domain.key -subj "/" \
-  -reqexts SAN -config &lt;(cat /etc/ssl/openssl.cnf \
-  &lt;(printf "\n[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))
-</pre>
-                </li>
-                <li>
-                    Copy and paste the CSR into the box below.<br/>
-                </li>
-            </ol>
+    openssl req -new -sha256 -key domain.key -subj "/" \
+      -reqexts SAN -config &lt;(cat /etc/ssl/openssl.cnf \
+      &lt;(printf "\n[SAN]\nsubjectAltName=DNS:foo.com,DNS:www.foo.com"))
+    </pre>
+                    </li>
+                    <li>
+                        Copy and paste the CSR into the box below.<br/>
+                    </li>
+                </ol>
+            </div>
+            <label for="csr">Certificate Signing Request:</label><br/>
+            <textarea id="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..."></textarea>
         </div>
-        <label for="csr">Certificate Signing Request:</label><br/>
-        <textarea id="csr" placeholder="-----BEGIN CERTIFICATE REQUEST----- ..."></textarea>
-    </div>
 
-    <div class="field">
-        <input id="validate_csr" type="submit" value="Validate CSR"/>
-        <span id="validate_csr_status" style="display:none;"></span>
-    </div>
+        <div class="field">
+            <input id="validate_csr_submit" type="submit" value="Validate CSR" disabled/>
+            <span id="validate_csr_status" style="display:none;"></span>
+        </div>
+    </form>
 
     <hr/>
 
@@ -203,36 +217,109 @@ openssl req -new -sha256 -key domain.key -subj "/" \
             your real private key.</i>
         </div>
 
-        <div class="field">
-            <label for="howto_sign1" class="help">(how do I do this?)</label>
-            <input id="howto_sign1" type="checkbox" class="help-checkbox"/>
-            <div class="help-content">
-                How to generate the needed signatures:<br/>
-                <ol>
-                    <li>
-                        Copy and paste each command below into your terminal (if your
-                        account private key isn't at "./account.key", change "./account.key"
-                        in the command to wherever it exists).
-                    </li>
-                    <li>
-                        Copy and paste the hex encoded signature output from the command
-                        into the text field below that command.
-                    </li>
-                </ol>
+        <!-- Account Registration and Accept Terms -->
+        <form id="validate_registration">
+            <div class="field">
+                <label for="howto_registration" class="help">(how do I do this?)</label>
+                <input id="howto_registration" type="checkbox" class="help-checkbox"/>
+                <div class="help-content">
+                    This command asks to register your account key (or look it up if
+                    you have already registered) and accepts the
+                    <a id="howto_tos" href="#" target="_blank" rel="noopener noreferrer">terms and conditions</a>
+                    for Let's Encrypt.<br/>
+                    <br/>
+                    How to generate this signature:<br/>
+                    <ol>
+                        <li>
+                            Copy and paste the command below into your terminal (if your
+                            account private key isn't at "./account.key", change "./account.key"
+                            in the command to wherever it exists).
+                        </li>
+                        <li>
+                            Copy and paste the hex encoded signature output from the command
+                            into the text field below that command.
+                        </li>
+                    </ol>
+                </div>
+                <label>
+                    Accept the Let's Encrypt
+                    <a id="tos" href="#" target="_blank" rel="noopener noreferrer">terms and conditions</a>:
+                </label><br/>
+                <input id="registration_sig_cmd" type="text" value="echo ..." readonly/><br/>
+                <input id="registration_sig" type="text" placeholder='Paste the hex output here (e.g. "(stdin)= f2cf67e4...")'/><br/>
             </div>
-            <label>Run these signature commands in your terminal:</label><br/>
-            <span id="step3_commands">
-            </span>
-            <span id="signing_template" style="display:none;">
-                <input type="text" value="echo ..." readonly/><br/>
-                <input id="challenge_sig_foobar_com" type="text" placeholder='Paste the hex output here (e.g. "(stdin)= f2cf67e4...")'/><br/>
-            </span>
-        </div>
+            <div class="field">
+                <input id="validate_registration_sig" type="submit" value="Accept Terms"/>
+                <span id="validate_registration_sig_status"></span>
+            </div>
+        </form>
 
-        <div class="field">
-            <input id="validate_initial_sigs" type="submit" value="Validate Signatures"/>
-            <span id="validate_initial_sigs_status" style="display:none;"></span>
-        </div>
+        <!-- Account Update Contact Email -->
+        <form id="validate_update">
+            <div class="field">
+                <label for="howto_update" class="help">(how do I do this?)</label>
+                <input id="howto_update" type="checkbox" class="help-checkbox"/>
+                <div class="help-content">
+                    This command sets your account contact email to what you put
+                    in Step 1. If you had already set this email when you ran these
+                    commands previously, this command will simply set the same email
+                    again.<br/>
+                    <br/>
+                    How to generate this signature:<br/>
+                    <ol>
+                        <li>
+                            Copy and paste the command below into your terminal (if your
+                            account private key isn't at "./account.key", change "./account.key"
+                            in the command to wherever it exists).
+                        </li>
+                        <li>
+                            Copy and paste the hex encoded signature output from the command
+                            into the text field below that command.
+                        </li>
+                    </ol>
+                </div>
+                <label>Update your account email (<span id="account_email">foo@foo.com</span>):</label><br/>
+                <input id="update_sig_cmd" type="text" value="waiting until terms are accepted..." disabled/><br/>
+                <input id="update_sig" type="text" placeholder="waiting until terms are accepted..." disabled/><br/>
+            </div>
+            <div class="field">
+                <input id="validate_update_sig" type="submit" value="Update Account" disabled/>
+                <span id="validate_update_sig_status"></span>
+            </div>
+        </form>
+
+        <!-- New Order Creation -->
+        <form id="validate_order">
+            <div class="field">
+                <label for="howto_order" class="help">(how do I do this?)</label>
+                <input id="howto_order" type="checkbox" class="help-checkbox"/>
+                <div class="help-content">
+                    This command creates an order for the domains you included in
+                    your certificate signing request (CSR) in Step 2.<br/>
+                    <br/>
+                    How to generate this signature:<br/>
+                    <ol>
+                        <li>
+                            Copy and paste the command below into your terminal (if your
+                            account private key isn't at "./account.key", change "./account.key"
+                            in the command to wherever it exists).
+                        </li>
+                        <li>
+                            Copy and paste the hex encoded signature output from the command
+                            into the text field below that command.
+                        </li>
+                    </ol>
+                </div>
+                <label>Create your certificate order:</label><br/>
+                <input id="order_sig_cmd" type="text" value="waiting until account contact is updated..." disabled/><br/>
+                <input id="order_sig" type="text" placeholder="waiting until account contact is updated..." disabled/><br/>
+            </div>
+            <div class="field">
+                <input id="validate_order_sig" type="submit" value="Create Order" disabled/>
+                <span id="validate_order_sig_status"></span>
+            </div>
+        </form>
+
     </div>
 
     <hr/>
@@ -259,47 +346,25 @@ openssl req -new -sha256 -key domain.key -subj "/" \
         <div id="challenge_domains">
         </div>
 
-        <div id="challenge_template" style="display:none;">
+        <div id="challenge_examplecom_template" style="display:none;">
             <h3>Domain: <span class="domain">foobar.com</span></h3>
 
-            <div class="field">
-                <label class="howto_sign_label help">(how do I do this?)</label>
-                <input class="howto_sign help-checkbox" type="checkbox"/>
-                <div class="help-content">
-                    How to generate the needed signatures:<br/>
-                    <ol>
-                        <li>
-                            Navigate in the terminal to the directory with account private
-                            key ("account.key" or whatever you named it).
-                        </li>
-                        <li>
-                            Copy and paste each command below into your terminal (if your
-                            account private key isn't named "account.key", change "account.key"
-                            in the command to whatever you named it).
-                        </li>
-                        <li>
-                            Copy and paste the hex encoded signature output from the command
-                            into the text field below that command.
-                        </li>
-                    </ol>
-                </div>
-                <label>Run this signature command in your terminal:</label><br/>
-                <span class="step4_commands">
-                </span>
-            </div>
-
             <div class="field tabs">
-                <input type="radio" checked/>
-                <label>Option 1 - python server</label>
+                <input id="radio_examplecom_python" name="radio_examplecom" type="radio" class="challenge_python" checked/>
+                <label for="radio_examplecom_python" class="challenge_python">Option 1 - python server</label>
 
-                <input type="radio">
-                <label>Option 2 - file-based</label>
+                <input id="radio_examplecom_file" name="radio_examplecom" type="radio" class="challenge_file">
+                <label for="radio_examplecom_file" class="challenge_file">Option 2 - file-based</label>
+
+                <input id="radio_examplecom_dns" name="radio_examplecom" type="radio" class="challenge_dns">
+                <label for="radio_examplecom_dns" class="challenge_dns">Option 3 - DNS record</label>
 
                 <br/>
 
-                <div class="tab">
-                    <label class="howto_serve_label help">(how do I do this?)</label>
-                    <input class="howto_serve help-checkbox" type="checkbox"/>
+                <!-- Option 1: python server method -->
+                <div class="tab challenge_python">
+                    <label for="howto_examplecom_python" class="howto_python_label help">(how do I do this?)</label>
+                    <input id="howto_examplecom_python" class="howto_python help-checkbox" type="checkbox"/>
                     <div class="help-content">
                         How to serve the challenge response on your domain:<br/>
                         <ol>
@@ -320,7 +385,7 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                             </li>
                             <li>
                                 Open the link in a new window to make sure it's working:<br/>
-                                <a target="_blank"></a>
+                                <a class="python_link" href="#" target="_blank" rel="noopener noreferrer">http://foo.com/.well-known/acme-challenge/aaaaaaaaaaa</a>
                             </li>
                             <li>
                                 Click "I'm now running this command..." button when the file is being
@@ -328,17 +393,56 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                             </li>
                         </ol>
                     </div>
-                    <label>Run this command on <span class="domain">foobar.com</span>'s server:</label><br/>
-                    <textarea readonly></textarea>
-                    <div>
-                        <input type="submit" value="I'm now running this command on foobar.com"/>
-                        <span style="display:none;"></span>
-                    </div>
+
+                    <label>Run this command on <span class="python_domain">foobar.com</span>'s server:</label><br/>
+                    <textarea class="python_server" readonly></textarea>
+                    <form class="confirm_python">
+                        <div>
+                            <input type="submit" class="confirm_python_submit" data-option="python" value="I'm now running this command on foobar.com"/>
+                            <span class="confirm_python_status"></span>
+                        </div>
+                    </form>
+
+                    <form class="validate_python_sig">
+                        <div class="field">
+                            <label for="howto_examplecom_python_sig" class="howto_python_sig_label help">(how do I do this?)</label>
+                            <input id="howto_examplecom_python_sig" type="checkbox" class="howto_python_sig help-checkbox"/>
+                            <div class="help-content">
+                                This step tells Let's Encrypt that you're serving
+                                the correct data for this challenge on your server.
+                                When Let's Encrypt receives this submission, they
+                                will make a request to your server to verify you are
+                                serving the data correctly.<br/>
+                                <br/>
+                                How to generate this signature:<br/>
+                                <ol>
+                                    <li>
+                                        Copy and paste the command below into your terminal (if your
+                                        account private key isn't at "./account.key", change "./account.key"
+                                        in the command to wherever it exists).
+                                    </li>
+                                    <li>
+                                        Copy and paste the hex encoded signature output from the command
+                                        into the text field below that command.
+                                    </li>
+                                </ol>
+                            </div>
+                            <label>Sign challenge command:</label><br/>
+                            <input type="text" class="python_sig_cmd" value="waiting until you confirm the above command is running..." disabled/><br/>
+                            <input type="text" class="python_sig" placeholder="waiting until you confirm the above command is running..." disabled/><br/>
+                        </div>
+                        <div class="field">
+                            <input type="submit" class="validate_python_sig_submit" data-option="python" value="Submit challenge for foobar.com" disabled/>
+                            <span class="python_sig_status"></span>
+                        </div>
+                    </form>
+
                 </div>
 
-                <div class="tab">
-                    <label class="howto_file_label help">(how do I do this?)</label>
-                    <input class="howto_file help-checkbox" type="checkbox"/>
+                <!-- Option 2: file-based method -->
+                <div class="tab challenge_file">
+                    <label for="howto_examplecom_file" class="howto_file_label help">(how do I do this?)</label>
+                    <input id="howto_examplecom_file" class="howto_file help-checkbox" type="checkbox"/>
                     <div class="help-content">
                         How to host this file on your server:<br/>
                         <ol>
@@ -355,15 +459,15 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                             <li>
                                 Add the static folder to your webserver's config
                                 (if you haven't already):<br/>
-                                <pre class="nginx_location">server {...</pre>
+                                <pre class="file_config">server {...</pre>
                             </li>
                             <li>
                                 Create the file with the necessary contents:<br/>
-                                <pre class="file_cmd">echo ...</pre>
+                                <pre class="file_echo">echo ...</pre>
                             </li>
                             <li>
                                 Open the link in a new window to make sure it's working:<br/>
-                                <a target="_blank"></a>
+                                <a class="file_link" href="#" target="_blank" rel="noopener noreferrer">http://foo.com/.well-known/acme-challenge/aaaaaaaaaaa</a>
                             </li>
                             <li>
                                 Click "I'm now serving this file..." button when the file is being
@@ -377,13 +481,164 @@ openssl req -new -sha256 -key domain.key -subj "/" \
                         <label>Serve this content:</label>
                         <input type="text" class="file_data" value="" readonly/>
                     </div>
-                    <div>
-                        <input type="submit" class="file_submit" value="I'm now serving this file on foobar.com"/>
-                        <span style="display:none;"></span>
-                    </div>
+                    <form class="confirm_file">
+                        <div>
+                            <input type="submit" class="confirm_file_submit" data-option="file" value="I'm now serving this file on foobar.com"/>
+                            <span class="confirm_file_status"></span>
+                        </div>
+                    </form>
+
+                    <form class="validate_file_sig">
+                        <div class="field">
+                            <label for="howto_examplecom_file_sig" class="howto_file_sig_label help">(how do I do this?)</label>
+                            <input id="howto_examplecom_file_sig" type="checkbox" class="howto_file_sig help-checkbox"/>
+                            <div class="help-content">
+                                This step tells Let's Encrypt that you're serving
+                                the correct data for this challenge on your server.
+                                When Let's Encrypt receives this submission, they
+                                will make a request to your server to verify you are
+                                serving the data correctly.<br/>
+                                <br/>
+                                How to generate this signature:<br/>
+                                <ol>
+                                    <li>
+                                        Copy and paste the command below into your terminal (if your
+                                        account private key isn't at "./account.key", change "./account.key"
+                                        in the command to wherever it exists).
+                                    </li>
+                                    <li>
+                                        Copy and paste the hex encoded signature output from the command
+                                        into the text field below that command.
+                                    </li>
+                                </ol>
+                            </div>
+                            <label>Sign challenge command:</label><br/>
+                            <input type="text" class="file_sig_cmd" value="waiting until you confirm the file is being served..." disabled/><br/>
+                            <input type="text" class="file_sig" placeholder="waiting until you confirm the file is being served..." disabled/><br/>
+                        </div>
+                        <div class="field">
+                            <input type="submit" class="validate_file_sig_submit" data-option="file" value="Submit challenge for foobar.com" disabled/>
+                            <span class="file_sig_status"></span>
+                        </div>
+                    </form>
+
                 </div>
+
+                <!-- Option 3: DNS TXT record -->
+                <div class="tab challenge_dns">
+                    <label for="howto_examplecom_dns" class="howto_dns_label help">(how do I do this?)</label>
+                    <input id="howto_examplecom_dns" class="howto_dns help-checkbox" type="checkbox"/>
+                    <div class="help-content">
+                        How to host this file on your server:<br/>
+                        <ol>
+                            <li>
+                                Log into your domain name provider.
+                            </li>
+                            <li>
+                                Create a new DNS record on <span class="dns_domain">foo.com</span>:<br/>
+                                Type:<br/>
+                                <pre>TXT</pre>
+                                Name/Host/Alias:<br/>
+                                <pre>_acme-challenge</pre>
+                                Value/Answer/Destination:<br/>
+                                <pre class="dns_value">aaaaaaaaaaaaaaaaaaaaaa</pre>
+                                Time to Live (TTL):<br/>
+                                <pre>900</pre>
+                            </li>
+                            <li>
+                                Wait until the TXT record is being served (this can take a while).<br/>
+                                <pre class="dns_dig">dig +short @ns.yournameserver.com _acme_challenge.foo.com TXT</pre>
+                            </li>
+                            <li>
+                                Click "I can see the TXT record..." button when you can
+                                see that new TXT record has propagated.
+                            </li>
+                        </ol>
+                    </div>
+                    <label>Under this DNS domain:</label><br/>
+                    <input type="text" class="dns_subdomain" value="" readonly/>
+                    <div>
+                        <label>Set this TXT record:</label>
+                        <input type="text" class="dns_data" value="" readonly/>
+                    </div>
+                    <form class="confirm_dns">
+                        <div>
+                            <input type="submit" class="confirm_dns_submit" data-option="dns" value="I can see the TXT record for foobar.com"/>
+                            <span class="confirm_dns_status"></span>
+                        </div>
+                    </form>
+
+                    <form class="validate_dns_sig" data-option="dns" data-section="challenge_examplecom" data-auth="http..." data-challenge="http...">
+                        <div class="field">
+                            <label for="howto_examplecom_dns_sig" class="howto_dns_sig_label help">(how do I do this?)</label>
+                            <input id="howto_examplecom_dns_sig" type="checkbox" class="howto_dns_sig help-checkbox"/>
+                            <div class="help-content">
+                                This step tells Let's Encrypt that you're serving
+                                the correct data for this challenge on your server.
+                                When Let's Encrypt receives this submission, they
+                                will make a request to your server to verify you are
+                                serving the data correctly.<br/>
+                                <br/>
+                                How to generate this signature:<br/>
+                                <ol>
+                                    <li>
+                                        Copy and paste the command below into your terminal (if your
+                                        account private key isn't at "./account.key", change "./account.key"
+                                        in the command to wherever it exists).
+                                    </li>
+                                    <li>
+                                        Copy and paste the hex encoded signature output from the command
+                                        into the text field below that command.
+                                    </li>
+                                </ol>
+                            </div>
+                            <label>Sign challenge command:</label><br/>
+                            <input type="text" class="dns_sig_cmd" value="waiting until you confirm the TXT record is visible..." disabled/><br/>
+                            <input type="text" class="dns_sig" placeholder="waiting until you confirm the TXT record is visible..." disabled/><br/>
+                        </div>
+                        <div class="field">
+                            <input type="submit" class="validate_dns_sig_submit" value="Submit challenge for foobar.com" disabled/>
+                            <span class="dns_sig_status"></span>
+                        </div>
+                    </form>
+
+                </div>
+
             </div>
         </div>
+
+        <!-- New Order Creation -->
+        <form id="validate_finalize">
+            <div class="field">
+                <label for="howto_finalize" class="help">(how do I do this?)</label>
+                <input id="howto_finalize" type="checkbox" class="help-checkbox"/>
+                <div class="help-content">
+                    This command finalizes your order and tells Let's Encrypt to
+                    generate your new certificate.<br/>
+                    <br/>
+                    How to generate this signature:<br/>
+                    <ol>
+                        <li>
+                            Copy and paste the command below into your terminal (if your
+                            account private key isn't at "./account.key", change "./account.key"
+                            in the command to wherever it exists).
+                        </li>
+                        <li>
+                            Copy and paste the hex encoded signature output from the command
+                            into the text field below that command.
+                        </li>
+                    </ol>
+                </div>
+                <label>Finalize order and generate certificate:</label><br/>
+                <input id="finalize_sig_cmd" type="text" value="waiting until challenges are done..." disabled/><br/>
+                <input id="finalize_sig" type="text" placeholder="waiting until challenges are done..." disabled/><br/>
+            </div>
+            <div class="field">
+                <input id="validate_finalize_sig" type="submit" value="Generate Certificate" disabled/>
+                <span id="validate_finalize_sig_status"></span>
+            </div>
+        </form>
+
     </div>
 
     <hr/>
@@ -491,47 +746,14 @@ scp intermediate.pem root@foo.com:/etc/ssl/certs/intermediate.pem
                     </li>
                 </ol>
             </div>
-            <label for="csr">Signed Certificate:</label><br/>
+            <label for="crt">Signed Certificate Chain:</label><br/>
             <textarea id="crt" readonly></textarea>
         </div>
 
         <div class="field">
-            <label for="csr">Intermediate Certificate:</label><br/>
-<textarea readonly>
------BEGIN CERTIFICATE-----
-MIIEkjCCA3qgAwIBAgIQCgFBQgAAAVOFc2oLheynCDANBgkqhkiG9w0BAQsFADA/
-MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT
-DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow
-SjELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUxldCdzIEVuY3J5cHQxIzAhBgNVBAMT
-GkxldCdzIEVuY3J5cHQgQXV0aG9yaXR5IFgzMIIBIjANBgkqhkiG9w0BAQEFAAOC
-AQ8AMIIBCgKCAQEAnNMM8FrlLke3cl03g7NoYzDq1zUmGSXhvb418XCSL7e4S0EF
-q6meNQhY7LEqxGiHC6PjdeTm86dicbp5gWAf15Gan/PQeGdxyGkOlZHP/uaZ6WA8
-SMx+yk13EiSdRxta67nsHjcAHJyse6cF6s5K671B5TaYucv9bTyWaN8jKkKQDIZ0
-Z8h/pZq4UmEUEz9l6YKHy9v6Dlb2honzhT+Xhq+w3Brvaw2VFn3EK6BlspkENnWA
-a6xK8xuQSXgvopZPKiAlKQTGdMDQMc2PMTiVFrqoM7hD8bEfwzB/onkxEz0tNvjj
-/PIzark5McWvxI0NHWQWM6r6hCm21AvA2H3DkwIDAQABo4IBfTCCAXkwEgYDVR0T
-AQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAYYwfwYIKwYBBQUHAQEEczBxMDIG
-CCsGAQUFBzABhiZodHRwOi8vaXNyZy50cnVzdGlkLm9jc3AuaWRlbnRydXN0LmNv
-bTA7BggrBgEFBQcwAoYvaHR0cDovL2FwcHMuaWRlbnRydXN0LmNvbS9yb290cy9k
-c3Ryb290Y2F4My5wN2MwHwYDVR0jBBgwFoAUxKexpHsscfrb4UuQdf/EFWCFiRAw
-VAYDVR0gBE0wSzAIBgZngQwBAgEwPwYLKwYBBAGC3xMBAQEwMDAuBggrBgEFBQcC
-ARYiaHR0cDovL2Nwcy5yb290LXgxLmxldHNlbmNyeXB0Lm9yZzA8BgNVHR8ENTAz
-MDGgL6AthitodHRwOi8vY3JsLmlkZW50cnVzdC5jb20vRFNUUk9PVENBWDNDUkwu
-Y3JsMB0GA1UdDgQWBBSoSmpjBH3duubRObemRWXv86jsoTANBgkqhkiG9w0BAQsF
-AAOCAQEA3TPXEfNjWDjdGBX7CVW+dla5cEilaUcne8IkCJLxWh9KEik3JHRRHGJo
-uM2VcGfl96S8TihRzZvoroed6ti6WqEBmtzw3Wodatg+VyOeph4EYpr/1wXKtx8/
-wApIvJSwtmVi4MFU5aMqrSDE6ea73Mj2tcMyo5jMd6jmeWUHK8so/joWUoHOUgwu
-X4Po1QYz+3dszkDqMp4fklxBwXRsW10KXzPMTZ+sOPAveyxindmjkW8lGy+QsRlG
-PfZ+G6Z6h7mjem0Y+iWlkYcV4PIWL1iwBi8saCbGS5jN2p8M+X+Q7UNKEkROb3N6
-KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==
------END CERTIFICATE-----
-</textarea>
-        </div>
-
-        <div class="field">
-            <form action="https://www.ssllabs.com/ssltest/analyze.html" target="_blank">
-                <input id="ssltest_domain" type="hidden" name="d" value="foobar.com">
-                <input type="submit" value="Test my install"/>
+            <form action="https://www.ssllabs.com/ssltest/analyze.html" target="_blank" rel="noopener noreferrer">
+                <input id="ssltest_domain" type="hidden" name="d" value="example.com">
+                <input type="submit" value="Test my install"/> (opens SSL Labs in new window)
             </form>
         </div>
     </div>
@@ -540,7 +762,8 @@ KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==
 
     <div class="footer">
         This website is static, so it can be saved and loaded locally. Just right-click and "Save Page As.."!<br/>
-        Released under MIT license | Source code: <a href="https://github.com/diafygi/gethttpsforfree" target="_blank">https://github.com/diafygi/gethttpsforfree</a>
+        Released under MIT license |
+        Source code: <a href="https://github.com/diafygi/gethttpsforfree" target="_blank" rel="noopener noreferrer">https://github.com/diafygi/gethttpsforfree</a>
     </div>
     <script src="js/index.js"></script>
 </body>

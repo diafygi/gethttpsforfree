@@ -37,7 +37,7 @@ to get openssl and echo working on Windows.
 
 ## How this website works
 
-This website works by making requests to the Let's Encrypt [API](https://acme-v01.api.letsencrypt.org)
+This website works by making requests to the Let's Encrypt [API](https://acme-v02.api.letsencrypt.org/directory)
 (using the [ACME](https://github.com/ietf-wg-acme/acme) protocol). There's 5 steps to the process,
 which are explained below. Also, I encourage you to read the source code (it's not that long) and
 pop open your browser's debugger to see the ajax requests that are going on. Please, audit this!
@@ -90,21 +90,19 @@ cannot be the same as your account private key, according to ACME.
 
 ### Step 3: Sign API Requests
 
-Third, you need tell the Let's Encrypt API that you want to register and get certs
-for some domains. These requests must be signed with your account private key, so
-this steps compiles the request payloads that need signatures. You need to ask for
-challenges for each domain, so if you want both `example.com` and `www.example.com`, you
-need to make two new-authz calls.
+Third, you need tell the Let's Encrypt API that you want to register and create an order
+for a certificate (your CSR). These requests must be signed with your account private key, so
+this steps compiles the request payloads that need signatures to get the domain challenges
+you need to fulfill.
 
 Here's the list of requests that need to be made to the API:
 
-* `/acme/new-reg` - Register the account public key (discarded if already registered)
-* `/acme/new-authz` - Asks for challenges for the domain for which you want a cert.
-* `/acme/new-authz` - (...needs to be called for each domain)
-* `/acme/new-cert` - Asking for your CSR to be signed.
+* `/acme/new-acct` - Register the account public key and accept the terms (discarded if already registered)
+* `/acme/acct/...` - Update the account with your email address
+* `/acme/new-order` - Creates a new order for a certificate for your domains in your CSR
 
 NOTE: Each request also requires an anti-replay nonce, so the javascript gets
-those by making ajax requests to the `/directory` endpoint.
+those by making ajax requests to the `/acme/new-nonce` endpoint.
 
 For each request the payload must be signed, and since this website doesn't ask
 for your private keys, you must copy-and-paste the signature commands into your
@@ -118,15 +116,16 @@ PRIV_KEY=./account.key; \                      #set the location of your account
 ```
 
 Once these signatures are pasted back into the inputs, the javascript makes the
-ajax requests to the above endpoints for `new-reg` and each `new-authz`. If the
-account public key has already been registered the `new-reg` response is a 409
-Conflict, which is ignored.
+ajax requests to the above endpoints for `new-acct` and each `new-order`. If the
+account public key has already been registered the `new-acct` response is a 204
+No Content, which is ignored.
 
 ### Step 4: Verify Ownership
 
-The response for each `/new-authz` has some challenges you need perform to
-prove you own the domain. The challenge that this website chooses is "http-01",
-which requires that you host a specific file at a specific location. So, for
+The response for the `/new-order` has links to the authorization challenges needed
+prove you own the domain. The challenge that this website chooses is "http-01" or
+"dns-01", which requires that you host a specific file at a specific location
+or set a specific TXT value in your DNS for that domain. So, for
 each domain, this step shows you the file you need to host and the url you need
 to host it at.
 
@@ -134,22 +133,23 @@ After the file is being hosted, you need to tell Let's Encrypt to check the
 verify the challenge for that domain. That request must also be signed so
 there's one more signature that must be performed. The reason why this wasn't
 included in step 3 is because the payload contains something in the response of
-`/new-authz`.
+`/new-order`.
 
-There's two options this website offers as copy-and-paste commands: python and
-file-based. The python command is a mini server you can copy-and-paste into your
+There's three options this website offers as copy-and-paste commands: python, file-based,
+and dns. The python command is a mini server you can copy-and-paste into your
 server's command line (NOTE: this needs sudo permissions!). The file-base option
 just lists the url where the challenge will check and the file contents that the
-file needs to contain. It's up to you to figure out how to make that happen.
+file needs to contain. The DNS option lists the value you need to set as a TXT
+entry in your DNS. It's up to you to figure out how to make that happen.
 
 When you confirm that you're hosting the files, an ajax request is made to the
 challenge url to tell Let's Encrypt to verify the domain. Once this is done for
-all the domains in your CSR, an ajax request is made to `/new-cert` with the
-previously signed payload from step 3.
+all the domains in your CSR, the final signature is to finalize the order and
+sign your certificate.
 
 ### Step 5: Install Certificate
 
-The response from `/new-cert` should be your new certificate! Congrats! This
+The response from finalizing should be your new certificate! Congrats! This
 step prints the certificate and also prints the intermediate certificate you
 need to chain this certificate to the root certificate.
 
@@ -172,7 +172,6 @@ feel free to read through it! I tried to comment things well and make it crystal
 clear what it's doing.
 
 TODO (pull requests welcome):
-* `renew.html` - A page with steps for renewing certificates
 * `revoke.html` - A page with steps for revoking certificates
 * ~~Alternative file-based command instead of python server~~
 * ~~Installation instructions for Apache~~
