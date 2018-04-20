@@ -980,7 +980,7 @@ function validateOrder(e){
                                 var dns_data = b64(hash);
 
                                 // populate dns option
-                                var dig = "dig +short @ns.yournameserver.com _acme_challenge." + d + " TXT";
+                                var dig = "dig +short @ns.yournameserver.com _acme-challenge." + d + " TXT";
                                 template.querySelector(".dns_dig").innerHTML = "";
                                 template.querySelector(".dns_dig").appendChild(document.createTextNode(dig));
                                 template.querySelector(".dns_domain").innerHTML = "";
