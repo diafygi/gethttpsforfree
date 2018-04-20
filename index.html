@@ -660,8 +660,9 @@ Released under MIT License. Enjoy!
                 Nginx installation instructions:<br/>
                 <ol>
                     <li>
-                        Copy and paste both the below domain certificate and the below
-                        intermediate certificate into the same text file called "chained.pem".
+                        Copy and paste the below certificates (the text contains
+                        both your domain certificate and intermediate certificate)
+                        into a text file called "chained.pem".
                     </li>
                     <li>
                         If not done already, generate non-default dhparams.<br/>
@@ -705,10 +706,14 @@ server {
                 Apache installation instructions:<br/>
                 <ol>
                     <li>
-                        Copy and paste the below domain certificate into file "domain.crt".
+                        Copy and paste the first certificate section (e.g. the first
+                        "-----BEGIN CERTIFICATE-----" section) into a text file
+                        named "domain.crt".
                     </li>
                     <li>
-                        Copy and paste the below intermediate certificate into file "intermediate.pem".
+                        Copy and paste the second certificate section (e.g. the second
+                        "-----BEGIN CERTIFICATE-----" section) into a text file
+                        named "intermediate.pem".
                     </li>
                     <li>
                         Copy "domain.crt" and "intermediate.pem" to /etc/ssl/certs/.<br/>
