@@ -1,6 +1,7 @@
 # Get HTTPS for free!
 
 Website: https://gethttpsforfree.com
+Chinese Website: https://translate.breword.com/pages/d5d2e95d515140f3a345fe17e8405296
 
 This is a project that allows you to get a free HTTPS certificate without
 having to install any software or having to share your private keys with anyone.
