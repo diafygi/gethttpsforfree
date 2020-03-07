@@ -39,13 +39,17 @@ Released under MIT License. Enjoy!
         .help-content{display:none;width:100%;max-width:600px;margin:5px 0px 10px 0px;padding:10px;background-color:#eeeeee;border:2px solid #bbbbbb;}
         code{display:inline-block;margin:5px 0px;padding:5px;background-color:#ffffff;}
         pre{margin:5px 0px;padding:5px;overflow:auto;background-color:#ffffff;}
-        .tabs > label{display:inline-block;margin:0px;padding:6px 12px;font-size:13px;text-decoration:underline;cursor:pointer;}
+        .challenges-wrapper{border:1px solid;width:100%;max-width:600px;}
+        .challenges-status,.challenges-domain{padding-left:15px;font-size:14px;}
+        .challenges{margin-bottom:0;}
+        .tabs{margin-bottom:0;}
+        .tabs > label{display:inline-block;margin:0px;padding:6px 12px 12px 12px;font-size:13px;text-decoration:underline;cursor:pointer;}
         .tabs input[type=radio]{display:none;}
         .tabs input[type=radio]:checked + label{background-color:#eeeeee;}
         .tabs input[type=radio].challenge_python:checked ~ .tab.challenge_python{display:block;}
         .tabs input[type=radio].challenge_file:checked ~ .tab.challenge_file{display:block;}
         .tabs input[type=radio].challenge_dns:checked ~ .tab.challenge_dns{display:block;}
-        .tab{display:none;background-color:#eeeeee;padding:15px 15px 1px 15px;margin:0px 0px 15px 0px;}
+        .tab{display:none;background-color:#eeeeee;padding:15px 15px 1px 15px;margin-top:0;margin-bottom:0;}
         .tab .help-content{background-color:#ffffff;}
         .tab .help-content a{display:inline-block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
         .tab code{background-color:#eeeeee;}
@@ -343,271 +347,414 @@ Released under MIT License. Enjoy!
             private key.</i>
         </div>
 
-        <div id="challenge_domains">
+        <div id="auths">
         </div>
 
-        <div id="challenge_examplecom_template" style="display:none;">
-            <h3>Domain: <span class="domain">foobar.com</span></h3>
+        <div id="auth_template" style="display:none;">
 
-            <div class="field tabs">
-                <input id="radio_examplecom_python" name="radio_examplecom" type="radio" class="challenge_python" checked/>
-                <label for="radio_examplecom_python" class="challenge_python">Option 1 - python server</label>
-
-                <input id="radio_examplecom_file" name="radio_examplecom" type="radio" class="challenge_file">
-                <label for="radio_examplecom_file" class="challenge_file">Option 2 - file-based</label>
-
-                <input id="radio_examplecom_dns" name="radio_examplecom" type="radio" class="challenge_dns">
-                <label for="radio_examplecom_dns" class="challenge_dns">Option 3 - DNS record</label>
-
-                <br/>
-
-                <!-- Option 1: python server method -->
-                <div class="tab challenge_python">
-                    <label for="howto_examplecom_python" class="howto_python_label help">(how do I do this?)</label>
-                    <input id="howto_examplecom_python" class="howto_python help-checkbox" type="checkbox"/>
+            <!-- GET-as-POST Authorization -->
+            <form class="auth_form">
+                <div class="field">
+                    <label class="howto_auth_sig_label help">(how do I do this?)</label>
+                    <input type="checkbox" class="howto_auth_sig help-checkbox"/>
                     <div class="help-content">
-                        How to serve the challenge response on your domain:<br/>
+                        This command requests the challenges you need to complete in order
+                        to make sure you control a domain in your certificate order.<br/>
+                        <br/>
+                        How to generate this signature:<br/>
                         <ol>
                             <li>
-                                SSH into your domain as someone with sudo permissions:<br/>
-                                <code class="ssh">ssh ubuntu@foobar.com</code>
+                                Copy and paste the command below into your terminal (if your
+                                account private key isn't at "./account.key", change "./account.key"
+                                in the command to wherever it exists).
                             </li>
                             <li>
-                                Stop any webserver running on port 80, if any. If you had previously
-                                been running another python command, you can kill it with Ctrl+C):<br/>
-                                <code>sudo service nginx stop</code> &lt;-- example for nginx<br/>
-                                <code>sudo apachectl -k graceful-stop</code> &lt;-- example for apache
-                            </li>
-                            <li>
-                                Copy and paste the python command below into your terminal. This
-                                command starts a temporary webserver that serves nothing but the
-                                challenge response. You only need to keep this running briefly.
-                            </li>
-                            <li>
-                                Open the link in a new window to make sure it's working:<br/>
-                                <a class="python_link" href="#" target="_blank" rel="noopener noreferrer">http://foo.com/.well-known/acme-challenge/aaaaaaaaaaa</a>
-                            </li>
-                            <li>
-                                Click "I'm now running this command..." button when the file is being
-                                served on your domain.
+                                Copy and paste the hex encoded signature output from the command
+                                into the text field below that command.
                             </li>
                         </ol>
                     </div>
+                    <label>Load set of challenges (<span class="auth_i"></span>/<span class="auth_count"></span>):</label><br/>
+                    <input class="auth_sig_cmd" type="text" value="waiting until previous challenges are complete..." disabled/><br/>
+                    <input class="auth_sig" type="text" placeholder="waiting until previous challenges are complete..." disabled/><br/>
+                </div>
+                <div class="field">
+                    <input class="validate_auth_sig" type="submit" value="Load Challenges" disabled/>
+                    <span class="validate_auth_sig_status"></span>
+                </div>
+            </form>
 
-                    <label>Run this command on <span class="python_domain">foobar.com</span>'s server:</label><br/>
-                    <textarea class="python_server" readonly></textarea>
-                    <form class="confirm_python">
-                        <div>
-                            <input type="submit" class="confirm_python_submit" data-option="python" value="I'm now running this command on foobar.com"/>
-                            <span class="confirm_python_status"></span>
-                        </div>
-                    </form>
+            <!-- Authorization challenges -->
+            <div class="challenges-wrapper">
+                <div class="challenges-status">
+                    <i>Challenges: not loaded yet</i>
+                </div>
+                <div class="challenges" style="display:none;">
+                    <div class="challenges-domain">
+                        <i>Challenges for:</i>
+                        <b class="domain">foobar.com</b>
+                    </div>
+                    <div class="field tabs">
+                        <input type="radio" class="challenge_python" checked/>
+                        <label class="challenge_python">Option 1 - python server</label>
 
-                    <form class="validate_python_sig">
-                        <div class="field">
-                            <label for="howto_examplecom_python_sig" class="howto_python_sig_label help">(how do I do this?)</label>
-                            <input id="howto_examplecom_python_sig" type="checkbox" class="howto_python_sig help-checkbox"/>
+                        <input type="radio" class="challenge_file">
+                        <label class="challenge_file">Option 2 - file-based</label>
+
+                        <input type="radio" class="challenge_dns">
+                        <label class="challenge_dns">Option 3 - DNS record</label>
+
+                        <br/>
+
+                        <!-- Option 1: python server method -->
+                        <div class="tab challenge_python">
+                            <label class="howto_python_label help">(how do I do this?)</label>
+                            <input class="howto_python help-checkbox" type="checkbox"/>
                             <div class="help-content">
-                                This step tells Let's Encrypt that you're serving
-                                the correct data for this challenge on your server.
-                                When Let's Encrypt receives this submission, they
-                                will make a request to your server to verify you are
-                                serving the data correctly.<br/>
-                                <br/>
-                                How to generate this signature:<br/>
+                                How to serve the challenge response on your domain:<br/>
                                 <ol>
                                     <li>
-                                        Copy and paste the command below into your terminal (if your
-                                        account private key isn't at "./account.key", change "./account.key"
-                                        in the command to wherever it exists).
+                                        SSH into your domain as someone with sudo permissions:<br/>
+                                        <code class="ssh">ssh ubuntu@foobar.com</code>
                                     </li>
                                     <li>
-                                        Copy and paste the hex encoded signature output from the command
-                                        into the text field below that command.
+                                        Stop any webserver running on port 80, if any. If you had previously
+                                        been running another python command, you can kill it with Ctrl+C):<br/>
+                                        <code>sudo service nginx stop</code> &lt;-- example for nginx<br/>
+                                        <code>sudo apachectl -k graceful-stop</code> &lt;-- example for apache
+                                    </li>
+                                    <li>
+                                        Copy and paste the python command below into your terminal. This
+                                        command starts a temporary webserver that serves nothing but the
+                                        challenge response. You only need to keep this running briefly.
+                                    </li>
+                                    <li>
+                                        Open the link in a new window to make sure it's working:<br/>
+                                        <a class="python_link" href="#" target="_blank" rel="noopener noreferrer">http://foo.com/.well-known/acme-challenge/aaaaaaaaaaa</a>
+                                    </li>
+                                    <li>
+                                        Click "I'm now running this command..." button when the file is being
+                                        served on your domain.
                                     </li>
                                 </ol>
                             </div>
-                            <label>Sign challenge command:</label><br/>
-                            <input type="text" class="python_sig_cmd" value="waiting until you confirm the above command is running..." disabled/><br/>
-                            <input type="text" class="python_sig" placeholder="waiting until you confirm the above command is running..." disabled/><br/>
-                        </div>
-                        <div class="field">
-                            <input type="submit" class="validate_python_sig_submit" data-option="python" value="Submit challenge for foobar.com" disabled/>
-                            <span class="python_sig_status"></span>
-                        </div>
-                    </form>
 
-                </div>
+                            <label>Run this command on <span class="python_domain">foobar.com</span>'s server:</label><br/>
+                            <textarea class="python_server" readonly></textarea>
+                            <form class="confirm_python">
+                                <div>
+                                    <input type="submit" class="confirm_python_submit" value="I'm now running this command on foobar.com"/>
+                                    <span class="confirm_python_status"></span>
+                                </div>
+                            </form>
 
-                <!-- Option 2: file-based method -->
-                <div class="tab challenge_file">
-                    <label for="howto_examplecom_file" class="howto_file_label help">(how do I do this?)</label>
-                    <input id="howto_examplecom_file" class="howto_file help-checkbox" type="checkbox"/>
-                    <div class="help-content">
-                        How to host this file on your server:<br/>
-                        <ol>
-                            <li>
-                                SSH into your domain as someone with write access to
-                                your static web directory:<br/>
-                                <pre class="ssh">ssh ubuntu@foobar.com</pre>
-                            </li>
-                            <li>
-                                Create the ".well-known/acme-challenge/" directory
-                                in your webserver's static file path:<br/>
-                                <pre class="wwwdir">mkdir -p /path/to/www/.well-known/acme-challenge/</pre>
-                            </li>
-                            <li>
-                                Add the static folder to your webserver's config
-                                (if you haven't already):<br/>
-                                <pre class="file_config">server {...</pre>
-                            </li>
-                            <li>
-                                Create the file with the necessary contents:<br/>
-                                <pre class="file_echo">echo ...</pre>
-                            </li>
-                            <li>
-                                Open the link in a new window to make sure it's working:<br/>
-                                <a class="file_link" href="#" target="_blank" rel="noopener noreferrer">http://foo.com/.well-known/acme-challenge/aaaaaaaaaaa</a>
-                            </li>
-                            <li>
-                                Click "I'm now serving this file..." button when the file is being
-                                served on your domain.
-                            </li>
-                        </ol>
-                    </div>
-                    <label>Under this url:</label><br/>
-                    <input type="text" class="file_url" value="" readonly/>
-                    <div>
-                        <label>Serve this content:</label>
-                        <input type="text" class="file_data" value="" readonly/>
-                    </div>
-                    <form class="confirm_file">
-                        <div>
-                            <input type="submit" class="confirm_file_submit" data-option="file" value="I'm now serving this file on foobar.com"/>
-                            <span class="confirm_file_status"></span>
+                            <!-- Submit challenge -->
+                            <form class="validate_python_sig">
+                                <div class="field">
+                                    <label class="howto_python_sig_label help">(how do I do this?)</label>
+                                    <input type="checkbox" class="howto_python_sig help-checkbox"/>
+                                    <div class="help-content">
+                                        This step tells Let's Encrypt that you're serving
+                                        the correct data for this challenge on your server.
+                                        When Let's Encrypt receives this submission, they
+                                        will make a request to your server to verify you are
+                                        serving the data correctly.<br/>
+                                        <br/>
+                                        How to generate this signature:<br/>
+                                        <ol>
+                                            <li>
+                                                Copy and paste the command below into your terminal (if your
+                                                account private key isn't at "./account.key", change "./account.key"
+                                                in the command to wherever it exists).
+                                            </li>
+                                            <li>
+                                                Copy and paste the hex encoded signature output from the command
+                                                into the text field below that command.
+                                            </li>
+                                        </ol>
+                                    </div>
+                                    <label>Sign challenge command:</label><br/>
+                                    <input type="text" class="python_sig_cmd" value="waiting until you confirm the above command is running..." disabled/><br/>
+                                    <input type="text" class="python_sig" placeholder="waiting until you confirm the above command is running..." disabled/><br/>
+                                </div>
+                                <div class="field">
+                                    <input type="submit" class="validate_python_sig_submit" value="Submit challenge for foobar.com" disabled/>
+                                    <span class="python_sig_status"></span>
+                                </div>
+                            </form>
+
+                            <!-- Check authorization status -->
+                            <form class="validate_recheck_auth_python_sig">
+                                <div class="field">
+                                    <label class="howto_recheck_auth_python_sig_label help">(how do I do this?)</label>
+                                    <input type="checkbox" class="howto_recheck_auth_python_sig help-checkbox"/>
+                                    <div class="help-content">
+                                        This step checks to see if Let's Encrypt has marked the
+                                        challenge for this domain as complete.<br/>
+                                        <br/>
+                                        How to generate this signature:<br/>
+                                        <ol>
+                                            <li>
+                                                Copy and paste the command below into your terminal (if your
+                                                account private key isn't at "./account.key", change "./account.key"
+                                                in the command to wherever it exists).
+                                            </li>
+                                            <li>
+                                                Copy and paste the hex encoded signature output from the command
+                                                into the text field below that command.
+                                            </li>
+                                        </ol>
+                                    </div>
+                                    <label>Check challenge status command:</label><br/>
+                                    <input type="text" class="recheck_auth_python_sig_cmd" value="waiting until you submit the challenge above..." disabled/><br/>
+                                    <input type="text" class="recheck_auth_python_sig" placeholder="waiting until you submit the challenge above..." disabled/><br/>
+                                </div>
+                                <div class="field">
+                                    <input type="submit" class="validate_recheck_auth_python_sig_submit" value="Check challenge status" disabled/>
+                                    <span class="validate_recheck_auth_python_sig_status"></span>
+                                </div>
+                            </form>
+
                         </div>
-                    </form>
 
-                    <form class="validate_file_sig">
-                        <div class="field">
-                            <label for="howto_examplecom_file_sig" class="howto_file_sig_label help">(how do I do this?)</label>
-                            <input id="howto_examplecom_file_sig" type="checkbox" class="howto_file_sig help-checkbox"/>
+                        <!-- Option 2: file-based method -->
+                        <div class="tab challenge_file">
+                            <label class="howto_file_label help">(how do I do this?)</label>
+                            <input class="howto_file help-checkbox" type="checkbox"/>
                             <div class="help-content">
-                                This step tells Let's Encrypt that you're serving
-                                the correct data for this challenge on your server.
-                                When Let's Encrypt receives this submission, they
-                                will make a request to your server to verify you are
-                                serving the data correctly.<br/>
-                                <br/>
-                                How to generate this signature:<br/>
+                                How to host this file on your server:<br/>
                                 <ol>
                                     <li>
-                                        Copy and paste the command below into your terminal (if your
-                                        account private key isn't at "./account.key", change "./account.key"
-                                        in the command to wherever it exists).
+                                        SSH into your domain as someone with write access to
+                                        your static web directory:<br/>
+                                        <pre class="ssh">ssh ubuntu@foobar.com</pre>
                                     </li>
                                     <li>
-                                        Copy and paste the hex encoded signature output from the command
-                                        into the text field below that command.
+                                        Create the ".well-known/acme-challenge/" directory
+                                        in your webserver's static file path:<br/>
+                                        <pre class="wwwdir">mkdir -p /path/to/www/.well-known/acme-challenge/</pre>
+                                    </li>
+                                    <li>
+                                        Add the static folder to your webserver's config
+                                        (if you haven't already):<br/>
+                                        <pre class="file_config">server {...</pre>
+                                    </li>
+                                    <li>
+                                        Create the file with the necessary contents:<br/>
+                                        <pre class="file_echo">echo ...</pre>
+                                    </li>
+                                    <li>
+                                        Open the link in a new window to make sure it's working:<br/>
+                                        <a class="file_link" href="#" target="_blank" rel="noopener noreferrer">http://foo.com/.well-known/acme-challenge/aaaaaaaaaaa</a>
+                                    </li>
+                                    <li>
+                                        Click "I'm now serving this file..." button when the file is being
+                                        served on your domain.
                                     </li>
                                 </ol>
                             </div>
-                            <label>Sign challenge command:</label><br/>
-                            <input type="text" class="file_sig_cmd" value="waiting until you confirm the file is being served..." disabled/><br/>
-                            <input type="text" class="file_sig" placeholder="waiting until you confirm the file is being served..." disabled/><br/>
-                        </div>
-                        <div class="field">
-                            <input type="submit" class="validate_file_sig_submit" data-option="file" value="Submit challenge for foobar.com" disabled/>
-                            <span class="file_sig_status"></span>
-                        </div>
-                    </form>
+                            <label>Under this url:</label><br/>
+                            <input type="text" class="file_url" value="" readonly/>
+                            <div>
+                                <label>Serve this content:</label>
+                                <input type="text" class="file_data" value="" readonly/>
+                            </div>
+                            <form class="confirm_file">
+                                <div>
+                                    <input type="submit" class="confirm_file_submit" value="I'm now serving this file on foobar.com"/>
+                                    <span class="confirm_file_status"></span>
+                                </div>
+                            </form>
 
-                </div>
+                            <!-- Submit challenge -->
+                            <form class="validate_file_sig">
+                                <div class="field">
+                                    <label class="howto_file_sig_label help">(how do I do this?)</label>
+                                    <input type="checkbox" class="howto_file_sig help-checkbox"/>
+                                    <div class="help-content">
+                                        This step tells Let's Encrypt that you're serving
+                                        the correct data for this challenge on your server.
+                                        When Let's Encrypt receives this submission, they
+                                        will make a request to your server to verify you are
+                                        serving the data correctly.<br/>
+                                        <br/>
+                                        How to generate this signature:<br/>
+                                        <ol>
+                                            <li>
+                                                Copy and paste the command below into your terminal (if your
+                                                account private key isn't at "./account.key", change "./account.key"
+                                                in the command to wherever it exists).
+                                            </li>
+                                            <li>
+                                                Copy and paste the hex encoded signature output from the command
+                                                into the text field below that command.
+                                            </li>
+                                        </ol>
+                                    </div>
+                                    <label>Sign challenge command:</label><br/>
+                                    <input type="text" class="file_sig_cmd" value="waiting until you confirm the file is being served..." disabled/><br/>
+                                    <input type="text" class="file_sig" placeholder="waiting until you confirm the file is being served..." disabled/><br/>
+                                </div>
+                                <div class="field">
+                                    <input type="submit" class="validate_file_sig_submit" value="Submit challenge for foobar.com" disabled/>
+                                    <span class="file_sig_status"></span>
+                                </div>
+                            </form>
 
-                <!-- Option 3: DNS TXT record -->
-                <div class="tab challenge_dns">
-                    <label for="howto_examplecom_dns" class="howto_dns_label help">(how do I do this?)</label>
-                    <input id="howto_examplecom_dns" class="howto_dns help-checkbox" type="checkbox"/>
-                    <div class="help-content">
-                        How to host this file on your server:<br/>
-                        <ol>
-                            <li>
-                                Log into your domain name provider.
-                            </li>
-                            <li>
-                                Create a new DNS record on <span class="dns_domain">foo.com</span>:<br/>
-                                Type:<br/>
-                                <pre>TXT</pre>
-                                Name/Host/Alias:<br/>
-                                <pre>_acme-challenge</pre>
-                                Value/Answer/Destination:<br/>
-                                <pre class="dns_value">aaaaaaaaaaaaaaaaaaaaaa</pre>
-                                Time to Live (TTL):<br/>
-                                <pre>900</pre>
-                            </li>
-                            <li>
-                                Wait until the TXT record is being served (this can take a while).<br/>
-                                <pre class="dns_dig">dig +short @ns.yournameserver.com _acme_challenge.foo.com TXT</pre>
-                            </li>
-                            <li>
-                                Click "I can see the TXT record..." button when you can
-                                see that new TXT record has propagated.
-                            </li>
-                        </ol>
-                    </div>
-                    <label>Under this DNS domain:</label><br/>
-                    <input type="text" class="dns_subdomain" value="" readonly/>
-                    <div>
-                        <label>Set this TXT record:</label>
-                        <input type="text" class="dns_data" value="" readonly/>
-                    </div>
-                    <form class="confirm_dns">
-                        <div>
-                            <input type="submit" class="confirm_dns_submit" data-option="dns" value="I can see the TXT record for foobar.com"/>
-                            <span class="confirm_dns_status"></span>
+                            <!-- Check authorization status -->
+                            <form class="validate_recheck_auth_file_sig">
+                                <div class="field">
+                                    <label class="howto_recheck_auth_file_sig_label help">(how do I do this?)</label>
+                                    <input type="checkbox" class="howto_recheck_auth_file_sig help-checkbox"/>
+                                    <div class="help-content">
+                                        This step checks to see if Let's Encrypt has marked the
+                                        challenge for this domain as complete.<br/>
+                                        <br/>
+                                        How to generate this signature:<br/>
+                                        <ol>
+                                            <li>
+                                                Copy and paste the command below into your terminal (if your
+                                                account private key isn't at "./account.key", change "./account.key"
+                                                in the command to wherever it exists).
+                                            </li>
+                                            <li>
+                                                Copy and paste the hex encoded signature output from the command
+                                                into the text field below that command.
+                                            </li>
+                                        </ol>
+                                    </div>
+                                    <label>Check challenge status command:</label><br/>
+                                    <input type="text" class="recheck_auth_file_sig_cmd" value="waiting until you submit the challenge above..." disabled/><br/>
+                                    <input type="text" class="recheck_auth_file_sig" placeholder="waiting until you submit the challenge above..." disabled/><br/>
+                                </div>
+                                <div class="field">
+                                    <input type="submit" class="validate_recheck_auth_file_sig_submit" value="Check challenge status" disabled/>
+                                    <span class="validate_recheck_auth_file_sig_status"></span>
+                                </div>
+                            </form>
+
                         </div>
-                    </form>
 
-                    <form class="validate_dns_sig" data-option="dns" data-section="challenge_examplecom" data-auth="http..." data-challenge="http...">
-                        <div class="field">
-                            <label for="howto_examplecom_dns_sig" class="howto_dns_sig_label help">(how do I do this?)</label>
-                            <input id="howto_examplecom_dns_sig" type="checkbox" class="howto_dns_sig help-checkbox"/>
+                        <!-- Option 3: DNS TXT record -->
+                        <div class="tab challenge_dns">
+                            <label class="howto_dns_label help">(how do I do this?)</label>
+                            <input class="howto_dns help-checkbox" type="checkbox"/>
                             <div class="help-content">
-                                This step tells Let's Encrypt that you're serving
-                                the correct data for this challenge on your server.
-                                When Let's Encrypt receives this submission, they
-                                will make a request to your server to verify you are
-                                serving the data correctly.<br/>
-                                <br/>
-                                How to generate this signature:<br/>
+                                How to set this DNS record:<br/>
                                 <ol>
                                     <li>
-                                        Copy and paste the command below into your terminal (if your
-                                        account private key isn't at "./account.key", change "./account.key"
-                                        in the command to wherever it exists).
+                                        Log into your domain name provider.
                                     </li>
                                     <li>
-                                        Copy and paste the hex encoded signature output from the command
-                                        into the text field below that command.
+                                        Create a new DNS record on <span class="dns_domain">foo.com</span>:<br/>
+                                        Type:<br/>
+                                        <pre>TXT</pre>
+                                        Name/Host/Alias:<br/>
+                                        <pre>_acme-challenge</pre>
+                                        Value/Answer/Destination:<br/>
+                                        <pre class="dns_value">aaaaaaaaaaaaaaaaaaaaaa</pre>
+                                        Time to Live (TTL):<br/>
+                                        <pre>900</pre>
+                                    </li>
+                                    <li>
+                                        Wait until the TXT record is being served (this can take a while).<br/>
+                                        <pre class="dns_dig">dig +short @ns.yournameserver.com _acme_challenge.foo.com TXT</pre>
+                                    </li>
+                                    <li>
+                                        Click "I can see the TXT record..." button when you can
+                                        see that new TXT record has propagated.
                                     </li>
                                 </ol>
                             </div>
-                            <label>Sign challenge command:</label><br/>
-                            <input type="text" class="dns_sig_cmd" value="waiting until you confirm the TXT record is visible..." disabled/><br/>
-                            <input type="text" class="dns_sig" placeholder="waiting until you confirm the TXT record is visible..." disabled/><br/>
-                        </div>
-                        <div class="field">
-                            <input type="submit" class="validate_dns_sig_submit" value="Submit challenge for foobar.com" disabled/>
-                            <span class="dns_sig_status"></span>
-                        </div>
-                    </form>
+                            <label>Under this DNS domain:</label><br/>
+                            <input type="text" class="dns_subdomain" value="" readonly/>
+                            <div>
+                                <label>Set this TXT record:</label>
+                                <input type="text" class="dns_data" value="" readonly/>
+                            </div>
+                            <form class="confirm_dns">
+                                <div>
+                                    <input type="submit" class="confirm_dns_submit" value="I can see the TXT record for foobar.com"/>
+                                    <span class="confirm_dns_status"></span>
+                                </div>
+                            </form>
 
+                            <!-- Submit challenge -->
+                            <form class="validate_dns_sig">
+                                <div class="field">
+                                    <label class="howto_dns_sig_label help">(how do I do this?)</label>
+                                    <input type="checkbox" class="howto_dns_sig help-checkbox"/>
+                                    <div class="help-content">
+                                        This step tells Let's Encrypt that you're serving
+                                        the correct data for this challenge on your server.
+                                        When Let's Encrypt receives this submission, they
+                                        will make a request to your server to verify you are
+                                        serving the data correctly.<br/>
+                                        <br/>
+                                        How to generate this signature:<br/>
+                                        <ol>
+                                            <li>
+                                                Copy and paste the command below into your terminal (if your
+                                                account private key isn't at "./account.key", change "./account.key"
+                                                in the command to wherever it exists).
+                                            </li>
+                                            <li>
+                                                Copy and paste the hex encoded signature output from the command
+                                                into the text field below that command.
+                                            </li>
+                                        </ol>
+                                    </div>
+                                    <label>Sign challenge command:</label><br/>
+                                    <input type="text" class="dns_sig_cmd" value="waiting until you confirm the TXT record is visible..." disabled/><br/>
+                                    <input type="text" class="dns_sig" placeholder="waiting until you confirm the TXT record is visible..." disabled/><br/>
+                                </div>
+                                <div class="field">
+                                    <input type="submit" class="validate_dns_sig_submit" value="Submit challenge for foobar.com" disabled/>
+                                    <span class="dns_sig_status"></span>
+                                </div>
+                            </form>
+
+                            <!-- Check authorization status -->
+                            <form class="validate_recheck_auth_dns_sig">
+                                <div class="field">
+                                    <label class="howto_recheck_auth_dns_sig_label help">(how do I do this?)</label>
+                                    <input type="checkbox" class="howto_recheck_auth_dns_sig help-checkbox"/>
+                                    <div class="help-content">
+                                        This step checks to see if Let's Encrypt has marked the
+                                        challenge for this domain as complete.<br/>
+                                        <br/>
+                                        How to generate this signature:<br/>
+                                        <ol>
+                                            <li>
+                                                Copy and paste the command below into your terminal (if your
+                                                account private key isn't at "./account.key", change "./account.key"
+                                                in the command to wherever it exists).
+                                            </li>
+                                            <li>
+                                                Copy and paste the hex encoded signature output from the command
+                                                into the text field below that command.
+                                            </li>
+                                        </ol>
+                                    </div>
+                                    <label>Check challenge status command:</label><br/>
+                                    <input type="text" class="recheck_auth_dns_sig_cmd" value="waiting until you submit the challenge above..." disabled/><br/>
+                                    <input type="text" class="recheck_auth_dns_sig" placeholder="waiting until you submit the challenge above..." disabled/><br/>
+                                </div>
+                                <div class="field">
+                                    <input type="submit" class="validate_recheck_auth_dns_sig_submit" value="Check challenge status" disabled/>
+                                    <span class="validate_recheck_auth_dns_sig_status"></span>
+                                </div>
+                            </form>
+
+                        </div>
+
+                    </div>
                 </div>
-
             </div>
+
         </div>
 
-        <!-- New Order Creation -->
+        <!-- Finalize Order -->
         <form id="validate_finalize">
             <div class="field">
                 <label for="howto_finalize" class="help">(how do I do this?)</label>
@@ -634,8 +781,71 @@ Released under MIT License. Enjoy!
                 <input id="finalize_sig" type="text" placeholder="waiting until challenges are done..." disabled/><br/>
             </div>
             <div class="field">
-                <input id="validate_finalize_sig" type="submit" value="Generate Certificate" disabled/>
+                <input id="validate_finalize_sig" type="submit" value="Finalize Order" disabled/>
                 <span id="validate_finalize_sig_status"></span>
+            </div>
+        </form>
+
+        <!-- Re-Check Order -->
+        <form id="validate_recheck_order">
+            <div class="field">
+                <label for="howto_recheck_order" class="help">(how do I do this?)</label>
+                <input id="howto_recheck_order" type="checkbox" class="help-checkbox"/>
+                <div class="help-content">
+                    This command checks the certificate status of
+                    your order to see if it's been generated yet.<br/>
+                    <br/>
+                    How to generate this signature:<br/>
+                    <ol>
+                        <li>
+                            Copy and paste the command below into your terminal (if your
+                            account private key isn't at "./account.key", change "./account.key"
+                            in the command to wherever it exists).
+                        </li>
+                        <li>
+                            Copy and paste the hex encoded signature output from the command
+                            into the text field below that command.
+                        </li>
+                    </ol>
+                </div>
+                <label>Check certificate generation status:</label><br/>
+                <input id="recheck_order_sig_cmd" type="text" value="waiting until challenges are done..." disabled/><br/>
+                <input id="recheck_order_sig" type="text" placeholder="waiting until challenges are done..." disabled/><br/>
+            </div>
+            <div class="field">
+                <input id="validate_recheck_order_sig" type="submit" value="Check Certificate Status" disabled/>
+                <span id="validate_recheck_order_sig_status"></span>
+            </div>
+        </form>
+
+        <!-- Get Certificate -->
+        <form id="validate_cert">
+            <div class="field">
+                <label for="howto_cert" class="help">(how do I do this?)</label>
+                <input id="howto_cert" type="checkbox" class="help-checkbox"/>
+                <div class="help-content">
+                    This command downloads the final generated certificate.<br/>
+                    <br/>
+                    How to generate this signature:<br/>
+                    <ol>
+                        <li>
+                            Copy and paste the command below into your terminal (if your
+                            account private key isn't at "./account.key", change "./account.key"
+                            in the command to wherever it exists).
+                        </li>
+                        <li>
+                            Copy and paste the hex encoded signature output from the command
+                            into the text field below that command.
+                        </li>
+                    </ol>
+                </div>
+                <label>Retrieve the generated certificate:</label><br/>
+                <input id="cert_sig_cmd" type="text" value="waiting until challenges are done..." disabled/><br/>
+                <input id="cert_sig" type="text" placeholder="waiting until challenges are done..." disabled/><br/>
+            </div>
+            <div class="field">
+                <input id="validate_cert_sig" type="submit" value="Retrieve Certificate" disabled/>
+                <span id="validate_cert_sig_status"></span>
             </div>
         </form>
 

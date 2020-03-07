@@ -3,8 +3,8 @@
  */
 
 // global variables
-var DIRECTORY_URL = "https://acme-v02.api.letsencrypt.org/directory";
-//var DIRECTORY_URL = "https://acme-staging-v02.api.letsencrypt.org/directory";
+//var DIRECTORY_URL = "https://acme-v02.api.letsencrypt.org/directory";
+var DIRECTORY_URL = "https://acme-staging-v02.api.letsencrypt.org/directory";
 var DIRECTORY = {
 //  "keyChange": "https://...
 //  "meta": {
@@ -58,12 +58,35 @@ var ORDER = {
 //  "finalize_protected_json": {"url": "...", "alg": "...", "nonce": "...", "kid": "..."},
 //  "finalize_protected_b64": "deadbeef...",
 //  "finalize_sig": "deadbeef...",
-//  "finalize_response": {"status": "valid", "certificate": "...", ...},
+//  "finalize_response": {"status": "pending", "certificate": "...", ...},
+//
+//  // re-check order after finalizing
+//  "recheck_order_payload_json": "", // GET-as-POST has an empty payload
+//  "recheck_order_payload_b64": "",  // GET-as-POST has an empty payload
+//  "recheck_order_protected_json": {"url": "...", "alg": "...", "nonce": "...", "kid": "..."},
+//  "recheck_order_protected_b64": "deadbeef...",
+//  "recheck_order_sig": "deadbeef...",
+//  "recheck_order_response": {"status": "valid", "certificate": "...", ...},
+//
+//  // download the generated certificate
+//  "cert_payload_json": "", // GET-as-POST has an empty payload
+//  "cert_payload_b64": "",  // GET-as-POST has an empty payload
+//  "cert_protected_json": {"url": "...", "alg": "...", "nonce": "...", "kid": "..."},
+//  "cert_protected_b64": "deadbeef...",
+//  "cert_sig": "deadbeef...",
+//  "cert_response": "-----BEGIN CERTIFICATE-----...",
+//  "cert_uri": "https://...",
 };
 var AUTHORIZATIONS = {
 //  // one authorization for each domain
 //  "https://...": {
-//      "authorization": {"status": "valid", "identifier": {...}, "challenges": [...], "wildcard": false, ...},
+//      // get authorization initially
+//      "auth_payload_json": "", // GET-as-POST has an empty payload
+//      "auth_payload_b64": "",  // GET-as-POST has an empty payload
+//      "auth_protected_json": {"url": "...", "alg": "...", "nonce": "...", "kid": "..."},
+//      "auth_protected_b64": "deadbeef...",
+//      "auth_sig": "deadbeef...",
+//      "auth_response": {"status": "valid", "identifier": {...}, "challenges": [...], "wildcard": false, ...},
 //
 //      // python server HTTP challenge
 //      "python_challenge_uri": "https://...",
@@ -88,6 +111,14 @@ var AUTHORIZATIONS = {
 //      "dns_challenge_protected_b64": "deadbeef...",
 //      "dns_challenge_sig": "deadbeef...",
 //      "dns_challenge_response": {"type": "dns-01", "url": "...", "token": "..."},
+//
+//      // post-challenge authorization check
+//      "recheck_auth_payload_json": "", // GET-as-POST has an empty payload
+//      "recheck_auth_payload_b64": "",  // GET-as-POST has an empty payload
+//      "recheck_auth_protected_json": {"url": "...", "alg": "...", "nonce": "...", "kid": "..."},
+//      "recheck_auth_protected_b64": "deadbeef...",
+//      "recheck_auth_sig": "deadbeef...",
+//      "recheck_auth_response": {"status": "valid", "identifier": {...}, "challenges": [...], "wildcard": false, ...},
 //  },
 //  ...
 };
@@ -149,6 +180,16 @@ function b64(bytes){
     var str64 = typeof(bytes) === "string" ? window.btoa(bytes) : window.btoa(String.fromCharCode.apply(null, bytes));
     return str64.replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
 }
+function b64decode(b64string){
+    try { return window.atob(b64string.replace(/_/g, "/").replace(/-/g, "+") + "=="); }
+    catch (err) {
+        if(err.name === "InvalidCharacterError"){
+            return window.atob(b64string.replace(/_/g, "/").replace(/-/g, "+") + "="); // only need one trailing equals
+        } else {
+            throw err;
+        }
+    }
+}
 
 // parse openssl hex output
 var OPENSSL_HEX = /(?:\(stdin\)= |)([a-f0-9]{512,1024})/
@@ -183,52 +224,6 @@ function getNonce(callback){
     xhr.send();
 }
 
-// helper function to get an authorization
-function getAuthorization(auth_url, callback){
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", auth_url + "?" + cachebuster());
-    xhr.onload = function(){
-
-        // update authorization
-        AUTHORIZATIONS[auth_url]['authorization'] = JSON.parse(xhr.responseText);
-
-        // clear stale challenge objects
-        AUTHORIZATIONS[auth_url]['python_challenge_uri'] = undefined;
-        AUTHORIZATIONS[auth_url]['python_challenge_object'] = undefined;
-        AUTHORIZATIONS[auth_url]['file_challenge_uri'] = undefined;
-        AUTHORIZATIONS[auth_url]['file_challenge_object'] = undefined;
-        AUTHORIZATIONS[auth_url]['dns_challenge_uri'] = undefined;
-        AUTHORIZATIONS[auth_url]['dns_challenge_object'] = undefined;
-
-        // update challenges
-        var challenges = AUTHORIZATIONS[auth_url]['authorization']['challenges'];
-        for(var i = 0; i < challenges.length; i++){
-            var challenge = challenges[i];
-
-            // HTTP challenge
-            if(challenge['type'] === "http-01"){
-                AUTHORIZATIONS[auth_url]['python_challenge_uri'] = challenge['url'];
-                AUTHORIZATIONS[auth_url]['python_challenge_object'] = challenge;
-                AUTHORIZATIONS[auth_url]['file_challenge_uri'] = challenge['url'];
-                AUTHORIZATIONS[auth_url]['file_challenge_object'] = challenge;
-            }
-
-            // DNS challenge
-            if(challenge['type'] === "dns-01"){
-                AUTHORIZATIONS[auth_url]['dns_challenge_uri'] = challenge['url'];
-                AUTHORIZATIONS[auth_url]['dns_challenge_object'] = challenge;
-            }
-        }
-
-        // make the callback with the updated authorization
-        callback(AUTHORIZATIONS[auth_url]['authorization'], undefined);
-    };
-    xhr.onerror = function(){
-        callback(undefined, xhr);
-    };
-    xhr.send();
-}
-
 /*
  * Step 0: Let's Encrypt Directory
  */
@@ -252,6 +247,8 @@ function populateDirectory(){
         document.getElementById("validate_update").addEventListener("submit", validateUpdate);
         document.getElementById("validate_order").addEventListener("submit", validateOrder);
         document.getElementById("validate_finalize").addEventListener("submit", validateFinalize);
+        document.getElementById("validate_recheck_order").addEventListener("submit", recheckOrder);
+        document.getElementById("validate_cert").addEventListener("submit", getCertificate);
     };
     xhr.onerror = function(){
         fail(document.getElementById("validate_account_status"), "Let's Encrypt appears to be down. Please try again later.");
@@ -534,6 +531,23 @@ function validateCSR(e){
         "finalize_protected_b64": undefined,
         "finalize_sig": undefined,
         "finalize_response": undefined,
+
+        // order checking after finalizing
+        "recheck_order_payload_json": "", // GET-as-POST has an empty payload
+        "recheck_order_payload_b64": "",  // GET-as-POST has an empty payload
+        "recheck_order_protected_json": undefined,
+        "recheck_order_protected_b64": undefined,
+        "recheck_order_sig": undefined,
+        "recheck_order_response": undefined,
+
+        // certificate downloading
+        "cert_payload_json": "", // GET-as-POST has an empty payload
+        "cert_payload_b64": "",  // GET-as-POST has an empty payload
+        "cert_protected_json": undefined,
+        "cert_protected_b64": undefined,
+        "cert_sig": undefined,
+        "cert_response": undefined,
+        "cert_uri": undefined,
     };
 
     // set the shortest domain for the ssl test at the end
@@ -828,212 +842,81 @@ function validateOrder(e){
 
                 // clear out any previous authorizations and challenge forms
                 AUTHORIZATIONS = {};
-                document.getElementById("challenge_domains").innerHTML = "";
+                document.getElementById("auths").innerHTML = "";
 
-                // recursively render authorizations since asynchronous
-                function buildAuthorization(n, callback){
-                    var auth_url = ORDER['order_response']['authorizations'][n];
-                    AUTHORIZATIONS[auth_url] = {};
-                    getAuthorization(auth_url, function(auth_obj, err){
-                        if(err){
-                            return fail(status, "Failed auth #" + n + " lookup (code: " + err.status + "). " + err.responseText);
-                        }
+                // add a new challenge section per authorization url
+                for(var i = 0; i < ORDER['order_response']['authorizations'].length; i++){
 
-                        // figure out which domain this authorization is checking
-                        var d = auth_obj['identifier']['value']; // domain name (e.g. foo.com)
-                        var d_ = d.replace(/[\.]/g, "_"); // id-friendly domain name (e.g. foo_com)
+                    // populate the authorization object
+                    var auth_url = ORDER['order_response']['authorizations'][i];
+                    var auth_b64 = b64(auth_url);
+                    AUTHORIZATIONS[auth_url] = {
+                        // load authorization
+                        "auth_payload_json": "", // GET-as-POST has an empty payload
+                        "auth_payload_b64": "",  // GET-as-POST has an empty payload
+                        "auth_protected_json": undefined,
+                        "auth_protected_b64": undefined,
+                        "auth_sig": undefined,
+                        "auth_response": undefined,
 
-                        // distinguish wildcard cert authorizations
-                        if(auth_obj['wildcard']){
-                            d_ = "__" + d_;
-                        }
+                        // python server HTTP challenge
+                        "python_challenge_uri": undefined,
+                        "python_challenge_object": undefined,
+                        "python_challenge_protected_json": undefined,
+                        "python_challenge_protected_b64": undefined,
+                        "python_challenge_sig": undefined,
+                        "python_challenge_response": undefined,
 
-                        // make challenge section for this authorization
-                        var template = document.getElementById("challenge_examplecom_template").cloneNode(true);
+                        // file-based HTTP challenge
+                        "file_challenge_uri": undefined,
+                        "file_challenge_object": undefined,
+                        "file_challenge_protected_json": undefined,
+                        "file_challenge_protected_b64": undefined,
+                        "file_challenge_sig": undefined,
+                        "file_challenge_response": undefined,
 
-                        // section
-                        var section_id = "challenge_" + d_;
-                        template.setAttribute("id", section_id);
-                        template.style.display = "block";
-                        template.querySelector(".domain").innerHTML = "";
-                        template.querySelector(".domain").appendChild(document.createTextNode(auth_obj['wildcard'] ? "*." + d : d));
+                        // DNS challenge
+                        "dns_challenge_uri": undefined,
+                        "dns_challenge_object": undefined,
+                        "dns_challenge_protected_json": undefined,
+                        "dns_challenge_protected_b64": undefined,
+                        "dns_challenge_sig": undefined,
+                        "dns_challenge_response": undefined,
 
-                        // tabs
-                        template.querySelector("input.challenge_python").setAttribute("name", "radio_" + d_);
-                        template.querySelector("input.challenge_python").setAttribute("id", "radio_" + d_ + "_python");
-                        template.querySelector("label.challenge_python").setAttribute("for", "radio_" + d_ + "_python");
-                        template.querySelector("label.challenge_python").style.display = "none";
-                        template.querySelector("input.challenge_file").setAttribute("name", "radio_" + d_);
-                        template.querySelector("input.challenge_file").setAttribute("id", "radio_" + d_ + "_file");
-                        template.querySelector("label.challenge_file").setAttribute("for", "radio_" + d_ + "_file");
-                        template.querySelector("label.challenge_file").style.display = "none";
-                        template.querySelector("input.challenge_dns").setAttribute("name", "radio_" + d_);
-                        template.querySelector("input.challenge_dns").setAttribute("id", "radio_" + d_ + "_dns");
-                        template.querySelector("label.challenge_dns").setAttribute("for", "radio_" + d_ + "_dns");
-                        template.querySelector("label.challenge_dns").style.display = "none";
+                        // post-challenge authorization check
+                        "recheck_auth_payload_json": "", // GET-as-POST has an empty payload
+                        "recheck_auth_payload_b64": "",  // GET-as-POST has an empty payload
+                        "recheck_auth_protected_json": undefined,
+                        "recheck_auth_protected_b64": undefined,
+                        "recheck_auth_sig": undefined,
+                        "recheck_auth_response": undefined,
+                    };
 
-                        // help texts
-                        template.querySelector(".howto_python").setAttribute("id", "howto_" + d_ + "_python");
-                        template.querySelector(".howto_python_label").setAttribute("for", "howto_" + d_ + "_python");
-                        template.querySelector(".howto_python_sig").setAttribute("id", "howto_" + d_ + "_python_sig");
-                        template.querySelector(".howto_python_sig_label").setAttribute("for", "howto_" + d_ + "_python_sig");
-                        template.querySelector(".howto_file").setAttribute("id", "howto_" + d_ + "_file");
-                        template.querySelector(".howto_file_label").setAttribute("for", "howto_" + d_ + "_file");
-                        template.querySelector(".howto_file_sig").setAttribute("id", "howto_" + d_ + "_file_sig");
-                        template.querySelector(".howto_file_sig_label").setAttribute("for", "howto_" + d_ + "_file_sig");
-                        template.querySelector(".howto_dns").setAttribute("id", "howto_" + d_ + "_dns");
-                        template.querySelector(".howto_dns_label").setAttribute("for", "howto_" + d_ + "_dns");
-                        template.querySelector(".howto_dns_sig").setAttribute("id", "howto_" + d_ + "_dns_sig");
-                        template.querySelector(".howto_dns_sig_label").setAttribute("for", "howto_" + d_ + "_dns_sig");
+                    // copy template for this authorization
+                    var template = document.getElementById("auth_template").cloneNode(true);
+                    template.querySelector(".auth_i").innerHTML = (i + 1);
+                    template.querySelector(".auth_count").innerHTML = ORDER['order_response']['authorizations'].length;
 
-                        // event listeners
-                        template.querySelector(".confirm_python").addEventListener("submit", confirmChallenge);
-                        template.querySelector(".confirm_file").addEventListener("submit", confirmChallenge);
-                        template.querySelector(".confirm_dns").addEventListener("submit", confirmChallenge);
-                        template.querySelector(".validate_python_sig").addEventListener("submit", validateChallenge);
-                        template.querySelector(".validate_file_sig").addEventListener("submit", validateChallenge);
-                        template.querySelector(".validate_dns_sig").addEventListener("submit", validateChallenge);
+                    // set unique ids for this authorization section
+                    template.setAttribute("id", "auth_" + auth_b64);
+                    template.querySelector(".auth_form").setAttribute("id", "auth_" + auth_b64 + "_form");
+                    template.querySelector(".howto_auth_sig").setAttribute("id", "howto_" + auth_b64 + "_auth_sig");
+                    template.querySelector(".howto_auth_sig_label").setAttribute("for", "howto_" + auth_b64 + "_auth_sig");
+                    template.querySelector(".howto_auth_sig").setAttribute("id", "howto_" + auth_b64 + "_auth_sig");
+                    template.querySelector(".howto_auth_sig_label").setAttribute("for", "howto_" + auth_b64 + "_auth_sig");
+                    template.querySelector(".auth_sig_cmd").setAttribute("id", auth_b64 + "_auth_sig_cmd");
+                    template.querySelector(".auth_sig").setAttribute("id", auth_b64 + "_auth_sig");
+                    template.querySelector(".validate_auth_sig").setAttribute("id", "validate_" + auth_b64 + "_auth_sig");
+                    template.querySelector(".validate_auth_sig_status").setAttribute("id", "validate_" + auth_b64 + "_auth_sig_status");
+                    template.querySelector(".challenges").setAttribute("id", "challenges_" + auth_b64);
 
-                        // python option data
-                        if(AUTHORIZATIONS[auth_url]['python_challenge_object'] !== undefined){
-
-                            // populate values
-                            var token = AUTHORIZATIONS[auth_url]['python_challenge_object']['token'];
-                            var keyauth = token + "." + ACCOUNT['thumbprint'];
-                            var link = "http://" + d + "/.well-known/acme-challenge/" + token;
-                            template.querySelector(".python_link").innerHTML = "";
-                            template.querySelector(".python_link").appendChild(document.createTextNode(link));
-                            template.querySelector(".python_link").setAttribute("href", link);
-                            template.querySelector(".python_domain").innerHTML = "";
-                            template.querySelector(".python_domain").appendChild(document.createTextNode(d));
-                            template.querySelector(".python_server").value = "" +
-                                "sudo python2 -c \"import BaseHTTPServer; \\\n" +
-                                "    h = BaseHTTPServer.BaseHTTPRequestHandler; \\\n" +
-                                "    h.do_GET = lambda r: r.send_response(200) or r.end_headers() " +
-                                        "or r.wfile.write('" + keyauth + "'); \\\n" +
-                                "    s = BaseHTTPServer.HTTPServer(('0.0.0.0', 80), h); \\\n" +
-                                "    s.serve_forever()\"";
-                            template.querySelector(".confirm_python_submit").value = "I'm now running this command on " + d;
-                            template.querySelector(".validate_python_sig_submit").value = "Submit challenge for " + d;
-                            template.querySelector("label.challenge_python").style.display = "inline";
-
-                            // set data attributes
-                            var challenge_url = AUTHORIZATIONS[auth_url]['python_challenge_object']['url'];
-                            template.querySelector(".confirm_python").dataset.option = "python";
-                            template.querySelector(".confirm_python").dataset.section = section_id;
-                            template.querySelector(".confirm_python").dataset.auth = auth_url;
-                            template.querySelector(".confirm_python").dataset.challenge = challenge_url;
-                        }
-
-                        // file-based option data
-                        if(AUTHORIZATIONS[auth_url]['file_challenge_object'] !== undefined){
-
-                            // populate values
-                            var token = AUTHORIZATIONS[auth_url]['file_challenge_object']['token'];
-
-                            var keyauth = token + "." + ACCOUNT['thumbprint'];
-                            var link = "http://" + d + "/.well-known/acme-challenge/" + token;
-                            var server_config = "" +
-                                "#nginx example\n" +
-                                "location /.well-known/acme-challenge/ {\n" +
-                                "    alias /path/to/www/;\n" +
-                                "    try_files $uri =404;\n" +
-                                "}\n\n" +
-                                "#apache example\n" +
-                                "Alias /.well-known/acme-challenge /path/to/www/.well-known/acme-challenge";
-                            var echo = "echo -n \"" + keyauth + "\" > /path/to/www/.well-known/acme-challenge/" + token;
-                            template.querySelector(".file_config").innerHTML = "";
-                            template.querySelector(".file_config").appendChild(document.createTextNode(server_config));
-                            template.querySelector(".file_echo").innerHTML = "";
-                            template.querySelector(".file_echo").appendChild(document.createTextNode(echo));
-                            template.querySelector(".file_link").innerHTML = "";
-                            template.querySelector(".file_link").appendChild(document.createTextNode(link));
-                            template.querySelector(".file_link").setAttribute("href", link);
-                            template.querySelector(".file_url").value = link;
-                            template.querySelector(".file_data").value = keyauth;
-                            template.querySelector(".confirm_file_submit").value = "I'm now serving this file on " + d;
-                            template.querySelector(".validate_file_sig_submit").value = "Submit challenge for " + d;
-                            template.querySelector("label.challenge_file").style.display = "inline";
-
-                            // set data attributes
-                            var challenge_url = AUTHORIZATIONS[auth_url]['file_challenge_object']['url'];
-                            template.querySelector(".confirm_file").dataset.option = "file";
-                            template.querySelector(".confirm_file").dataset.section = section_id;
-                            template.querySelector(".confirm_file").dataset.auth = auth_url;
-                            template.querySelector(".confirm_file").dataset.challenge = challenge_url;
-                        }
-
-                        // DNS option data
-                        if(AUTHORIZATIONS[auth_url]['dns_challenge_object'] !== undefined){
-
-                            // SHA-256 digest of keyauth
-                            var token = AUTHORIZATIONS[auth_url]['dns_challenge_object']['token'];
-                            var keyauth = token + "." + ACCOUNT['thumbprint'];
-                            var keyauth_bytes = [];
-                            for(var i = 0; i < keyauth.length; i++){
-                                keyauth_bytes.push(keyauth.charCodeAt(i));
-                            }
-                            sha256(new Uint8Array(keyauth_bytes), function(hash, err){
-                                if(err){
-                                    return fail(status, "Generating DNS data failed: " + err.message);
-                                }
-                                var dns_data = b64(hash);
-
-                                // populate dns option
-                                var dig = "dig +short @ns.yournameserver.com _acme-challenge." + d + " TXT";
-                                template.querySelector(".dns_dig").innerHTML = "";
-                                template.querySelector(".dns_dig").appendChild(document.createTextNode(dig));
-                                template.querySelector(".dns_domain").innerHTML = "";
-                                template.querySelector(".dns_domain").appendChild(document.createTextNode(d));
-                                template.querySelector(".dns_value").innerHTML = "";
-                                template.querySelector(".dns_value").appendChild(document.createTextNode(dns_data));
-                                template.querySelector(".dns_subdomain").value = "_acme-challenge." + d;
-                                template.querySelector(".dns_data").value = dns_data;
-                                template.querySelector(".confirm_dns_submit").value = "I can see the TXT record for " + d;
-                                template.querySelector(".validate_dns_sig_submit").value = "Submit challenge for " + d;
-                                template.querySelector("label.challenge_dns").style.display = "inline";
-
-                                // data attributes
-                                var challenge_url = AUTHORIZATIONS[auth_url]['dns_challenge_object']['url'];
-                                template.querySelector(".confirm_dns").dataset.option = "dns";
-                                template.querySelector(".confirm_dns").dataset.section = section_id;
-                                template.querySelector(".confirm_dns").dataset.auth = auth_url;
-                                template.querySelector(".confirm_dns").dataset.challenge = challenge_url;
-
-                                // auto-select Option 3 if no other options
-                                if(AUTHORIZATIONS[auth_url]['python_challenge_object'] === undefined
-                                && AUTHORIZATIONS[auth_url]['file_challenge_object'] === undefined){
-                                    template.querySelector("input.challenge_python").removeAttribute("checked");
-                                    template.querySelector("input.challenge_dns").setAttribute("checked", "");
-                                    template.querySelector("label.challenge_dns").innerHTML = "Option 1 - DNS record (wildcard)";
-                                }
-
-                                // recurse if needed
-                                document.getElementById("challenge_domains").appendChild(template);
-                                if((n + 1) < ORDER['order_response']['authorizations'].length){
-                                    return buildAuthorization(n + 1, callback);
-                                }
-                                else{
-                                    return callback();
-                                }
-                            });
-                        }
-
-                        // no DNS option, so recurse without hashing anything
-                        else{
-                            document.getElementById("challenge_domains").appendChild(template);
-                            if((n + 1) < ORDER['order_response']['authorizations'].length){
-                                return buildAuthorization(n + 1, callback);
-                            }
-                            else{
-                                return callback();
-                            }
-                        }
-                    });
+                    // append auth template to page
+                    template.style.display = "block";
+                    document.getElementById("auths").appendChild(template);
                 }
 
-                // kickoff rendering authorization html
-                buildAuthorization(0, function(){
+                // populate the first authorization request
+                buildAuthorization(0, status, function(){
 
                     // show step 4
                     document.getElementById("step4").style.display = "block";
@@ -1042,6 +925,7 @@ function validateOrder(e){
                     // complete step 3c
                     status.innerHTML = "Ordered! Proceed to Step 4!";
                 });
+
             }
 
             // error registering
@@ -1058,16 +942,425 @@ function validateOrder(e){
 }
 
 /*
- * Step 4a: Confirm Challenge
+ * Step 4a: Sign request for getting an Authorization
+ */
+function buildAuthorization(n, status, callback){
+
+    // get the authorization from global order
+    var auth_url = ORDER['order_response']['authorizations'][n];
+    var auth_b64 = b64(auth_url);
+
+    // form fields
+    var validate_form = document.getElementById("auth_" + auth_b64 + "_form");
+    var validate_cmd = document.getElementById(auth_b64 + "_auth_sig_cmd");
+    var validate_input = document.getElementById(auth_b64 + "_auth_sig");
+    var validate_submit = document.getElementById("validate_" + auth_b64 + "_auth_sig");
+
+    // hide following steps
+    document.getElementById("step5").style.display = "none";
+    document.getElementById("step5_pending").style.display = "inline";
+
+    // hide challenges section until loaded
+    var challenges = document.getElementById("challenges_" + auth_b64);
+    challenges.style.display = "none";
+
+    // reset finalize signature
+    document.getElementById("finalize_sig_cmd").value = "waiting until challenges are done...";
+    document.getElementById("finalize_sig_cmd").removeAttribute("readonly");
+    document.getElementById("finalize_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("finalize_sig").value = "";
+    document.getElementById("finalize_sig").setAttribute("placeholder", "waiting until challenges are done...");
+    document.getElementById("finalize_sig").setAttribute("disabled", "");
+    document.getElementById("validate_finalize_sig").setAttribute("disabled", "");
+    document.getElementById("validate_finalize_sig_status").style.display = "none";
+    document.getElementById("validate_finalize_sig_status").className = "";
+    document.getElementById("validate_finalize_sig_status").innerHTML = "";
+
+    // reset recheck_order signature
+    document.getElementById("recheck_order_sig_cmd").value = "waiting until order is finalized...";
+    document.getElementById("recheck_order_sig_cmd").removeAttribute("readonly");
+    document.getElementById("recheck_order_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("recheck_order_sig").value = "";
+    document.getElementById("recheck_order_sig").setAttribute("placeholder", "waiting until order is finalized...");
+    document.getElementById("recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig_status").style.display = "none";
+    document.getElementById("validate_recheck_order_sig_status").className = "";
+    document.getElementById("validate_recheck_order_sig_status").innerHTML = "";
+
+    // reset get cert signature
+    document.getElementById("cert_sig_cmd").value = "waiting until certificate is generated...";
+    document.getElementById("cert_sig_cmd").removeAttribute("readonly");
+    document.getElementById("cert_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("cert_sig").value = "";
+    document.getElementById("cert_sig").setAttribute("placeholder", "waiting until certificate is generated...");
+    document.getElementById("cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig_status").style.display = "none";
+    document.getElementById("validate_cert_sig_status").className = "";
+    document.getElementById("validate_cert_sig_status").innerHTML = "";
+
+    // status update
+    status.innerHTML = "loading nonce...";
+
+    // get nonce for loading the authorization request
+    getNonce(function(nonce, err){
+        if(err){
+            return fail(status, "Failed authorization nonce request (auth: " + auth_url + ") (code: " + err.status + "). " + err.responseText);
+        }
+
+        // populate authorization request signature (payload is empty "")
+        var protected_json = {
+            "url": auth_url,
+            "alg": ACCOUNT['alg'],
+            "nonce": nonce,
+            "kid": ACCOUNT['account_uri'],
+        };
+        var protected_b64 = b64(JSON.stringify(protected_json));
+        AUTHORIZATIONS[auth_url]['auth_protected_json'] = protected_json
+        AUTHORIZATIONS[auth_url]['auth_protected_b64'] = protected_b64;
+        validate_cmd.value = "" +
+            "PRIV_KEY=./account.key; " +
+            "echo -n \"" + protected_b64 + "." + AUTHORIZATIONS[auth_url]['auth_payload_b64'] + "\" | " +
+            "openssl dgst -sha256 -hex -sign $PRIV_KEY";
+        validate_cmd.setAttribute("readonly", "");
+        validate_cmd.removeAttribute("disabled");
+        validate_input.value = "";
+        validate_input.setAttribute("placeholder", RESULT_PLACEHOLDER);
+        validate_input.removeAttribute("disabled");
+        validate_submit.removeAttribute("disabled");
+
+        // set data properties so validateAuthorization() knows which challenge this is
+        validate_form.dataset.authurl = auth_url;
+        validate_form.addEventListener("submit", validateAuthorization);
+
+        // let the caller know loading the nonce and populating the form is done
+        callback();
+    });
+}
+
+
+/*
+ * Step 4b: Load the Authorization to get its challenges (GET-as-POST /auth['url'])
+ */
+function validateAuthorization(e){
+    e.preventDefault();
+
+    // clear previous status
+    var auth_url = e.target.dataset.authurl;
+    var auth_b64 = b64(auth_url);
+    var status = document.getElementById("validate_" + auth_b64 + "_auth_sig_status");
+    var section_id = "auth_" + auth_b64;
+    var auth_section = document.getElementById(section_id);
+    status.style.display = "inline";
+    status.className = "validate_auth_sig_status";
+    status.innerHTML = "Loading challenges...";
+
+    // hide following steps
+    document.getElementById("step5").style.display = "none";
+    document.getElementById("step5_pending").style.display = "inline";
+
+    // hide challenges section until re-populated
+    var challenges = document.getElementById("challenges_" + auth_b64);
+    challenges.style.display = "none";
+
+    // reset finalize signature
+    document.getElementById("finalize_sig_cmd").value = "waiting until challenges are done...";
+    document.getElementById("finalize_sig_cmd").removeAttribute("readonly");
+    document.getElementById("finalize_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("finalize_sig").value = "";
+    document.getElementById("finalize_sig").setAttribute("placeholder", "waiting until challenges are done...");
+    document.getElementById("finalize_sig").setAttribute("disabled", "");
+    document.getElementById("validate_finalize_sig").setAttribute("disabled", "");
+    document.getElementById("validate_finalize_sig_status").style.display = "none";
+    document.getElementById("validate_finalize_sig_status").className = "";
+    document.getElementById("validate_finalize_sig_status").innerHTML = "";
+
+    // reset recheck_order signature
+    document.getElementById("recheck_order_sig_cmd").value = "waiting until order is finalized...";
+    document.getElementById("recheck_order_sig_cmd").removeAttribute("readonly");
+    document.getElementById("recheck_order_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("recheck_order_sig").value = "";
+    document.getElementById("recheck_order_sig").setAttribute("placeholder", "waiting until order is finalized...");
+    document.getElementById("recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig_status").style.display = "none";
+    document.getElementById("validate_recheck_order_sig_status").className = "";
+    document.getElementById("validate_recheck_order_sig_status").innerHTML = "";
+
+    // reset get cert signature
+    document.getElementById("cert_sig_cmd").value = "waiting until certificate is generated...";
+    document.getElementById("cert_sig_cmd").removeAttribute("readonly");
+    document.getElementById("cert_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("cert_sig").value = "";
+    document.getElementById("cert_sig").setAttribute("placeholder", "waiting until certificate is generated...");
+    document.getElementById("cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig_status").style.display = "none";
+    document.getElementById("validate_cert_sig_status").className = "";
+    document.getElementById("validate_cert_sig_status").innerHTML = "";
+
+    // validate auth payload exists
+    if(AUTHORIZATIONS[auth_url]['auth_payload_b64'] === undefined){
+        return fail(status, "Update payload not found. Please go back to Step 1.");
+    }
+
+    // validate the signature
+    var auth_sig = hex2b64(document.getElementById(auth_b64 + "_auth_sig").value);
+    if(auth_sig === null){
+        return fail(status, "You need to run the above commands and paste the output in the text boxes below each command.");
+    }
+    AUTHORIZATIONS[auth_url]['auth_sig'] = auth_sig;
+
+    // send request to CA to get the authorization
+    var auth_xhr = new XMLHttpRequest();
+    auth_xhr.open("POST", auth_url);
+    auth_xhr.setRequestHeader("Content-Type", "application/jose+json");
+    auth_xhr.onreadystatechange = function(){
+        if(auth_xhr.readyState === 4){
+
+            // successful load
+            if(auth_xhr.status === 200){
+
+                // set auth response and uri
+                var auth_obj = JSON.parse(auth_xhr.responseText);
+                AUTHORIZATIONS[auth_url]['auth_response'] = auth_obj;
+
+                // clear stale challenge objects
+                AUTHORIZATIONS[auth_url]['python_challenge_uri'] = undefined;
+                AUTHORIZATIONS[auth_url]['python_challenge_object'] = undefined;
+                AUTHORIZATIONS[auth_url]['file_challenge_uri'] = undefined;
+                AUTHORIZATIONS[auth_url]['file_challenge_object'] = undefined;
+                AUTHORIZATIONS[auth_url]['dns_challenge_uri'] = undefined;
+                AUTHORIZATIONS[auth_url]['dns_challenge_object'] = undefined;
+
+                // update challenges in global
+                var challenge_dicts = AUTHORIZATIONS[auth_url]['auth_response']['challenges'];
+                for(var i = 0; i < challenge_dicts.length; i++){
+                    var challenge_dict = challenge_dicts[i];
+
+                    // HTTP challenge
+                    if(challenge_dict['type'] === "http-01"){
+                        AUTHORIZATIONS[auth_url]['python_challenge_uri'] = challenge_dict['url'];
+                        AUTHORIZATIONS[auth_url]['python_challenge_object'] = challenge_dict;
+                        AUTHORIZATIONS[auth_url]['file_challenge_uri'] = challenge_dict['url'];
+                        AUTHORIZATIONS[auth_url]['file_challenge_object'] = challenge_dict;
+                    }
+
+                    // DNS challenge
+                    if(challenge_dict['type'] === "dns-01"){
+                        AUTHORIZATIONS[auth_url]['dns_challenge_uri'] = challenge_dict['url'];
+                        AUTHORIZATIONS[auth_url]['dns_challenge_object'] = challenge_dict;
+                    }
+                }
+
+                // figure out which domain this authorization is checking
+                var domain = auth_obj['identifier']['value']; // domain name (e.g. foo.com)
+
+                // domain name
+                challenges.querySelector(".domain").innerHTML = "";
+                challenges.querySelector(".domain").appendChild(document.createTextNode(auth_obj['wildcard'] ? "*." + domain : domain));
+
+                // tabs
+                challenges.querySelector("input.challenge_python").setAttribute("name", "radio_" + auth_b64);
+                challenges.querySelector("input.challenge_python").setAttribute("id", "radio_" + auth_b64 + "_python");
+                challenges.querySelector("label.challenge_python").setAttribute("for", "radio_" + auth_b64 + "_python");
+                challenges.querySelector("label.challenge_python").style.display = "none";
+                challenges.querySelector("input.challenge_file").setAttribute("name", "radio_" + auth_b64);
+                challenges.querySelector("input.challenge_file").setAttribute("id", "radio_" + auth_b64 + "_file");
+                challenges.querySelector("label.challenge_file").setAttribute("for", "radio_" + auth_b64 + "_file");
+                challenges.querySelector("label.challenge_file").style.display = "none";
+                challenges.querySelector("input.challenge_dns").setAttribute("name", "radio_" + auth_b64);
+                challenges.querySelector("input.challenge_dns").setAttribute("id", "radio_" + auth_b64 + "_dns");
+                challenges.querySelector("label.challenge_dns").setAttribute("for", "radio_" + auth_b64 + "_dns");
+                challenges.querySelector("label.challenge_dns").style.display = "none";
+
+                // help texts
+                challenges.querySelector(".howto_python").setAttribute("id", "howto_" + auth_b64 + "_python");
+                challenges.querySelector(".howto_python_label").setAttribute("for", "howto_" + auth_b64 + "_python");
+                challenges.querySelector(".howto_python_sig").setAttribute("id", "howto_" + auth_b64 + "_python_sig");
+                challenges.querySelector(".howto_python_sig_label").setAttribute("for", "howto_" + auth_b64 + "_python_sig");
+                challenges.querySelector(".howto_recheck_auth_python_sig").setAttribute("id", "howto_" + auth_b64 + "_recheck_auth_python_sig");
+                challenges.querySelector(".howto_recheck_auth_python_sig_label").setAttribute("for", "howto_" + auth_b64 + "_recheck_auth_python_sig");
+                challenges.querySelector(".howto_file").setAttribute("id", "howto_" + auth_b64 + "_file");
+                challenges.querySelector(".howto_file_label").setAttribute("for", "howto_" + auth_b64 + "_file");
+                challenges.querySelector(".howto_file_sig").setAttribute("id", "howto_" + auth_b64 + "_file_sig");
+                challenges.querySelector(".howto_file_sig_label").setAttribute("for", "howto_" + auth_b64 + "_file_sig");
+                challenges.querySelector(".howto_recheck_auth_file_sig").setAttribute("id", "howto_" + auth_b64 + "_recheck_auth_file_sig");
+                challenges.querySelector(".howto_recheck_auth_file_sig_label").setAttribute("for", "howto_" + auth_b64 + "_recheck_auth_file_sig");
+                challenges.querySelector(".howto_dns").setAttribute("id", "howto_" + auth_b64 + "_dns");
+                challenges.querySelector(".howto_dns_label").setAttribute("for", "howto_" + auth_b64 + "_dns");
+                challenges.querySelector(".howto_dns_sig").setAttribute("id", "howto_" + auth_b64 + "_dns_sig");
+                challenges.querySelector(".howto_dns_sig_label").setAttribute("for", "howto_" + auth_b64 + "_dns_sig");
+                challenges.querySelector(".howto_recheck_auth_dns_sig").setAttribute("id", "howto_" + auth_b64 + "_recheck_auth_dns_sig");
+                challenges.querySelector(".howto_recheck_auth_dns_sig_label").setAttribute("for", "howto_" + auth_b64 + "_recheck_auth_dns_sig");
+
+                // event listeners
+                challenges.querySelector(".confirm_python").addEventListener("submit", confirmChallenge);
+                challenges.querySelector(".confirm_file").addEventListener("submit", confirmChallenge);
+                challenges.querySelector(".confirm_dns").addEventListener("submit", confirmChallenge);
+                challenges.querySelector(".validate_python_sig").addEventListener("submit", validateChallenge);
+                challenges.querySelector(".validate_file_sig").addEventListener("submit", validateChallenge);
+                challenges.querySelector(".validate_dns_sig").addEventListener("submit", validateChallenge);
+                challenges.querySelector(".validate_recheck_auth_python_sig").addEventListener("submit", checkAuthorization);
+                challenges.querySelector(".validate_recheck_auth_file_sig").addEventListener("submit", checkAuthorization);
+                challenges.querySelector(".validate_recheck_auth_dns_sig").addEventListener("submit", checkAuthorization);
+
+                // python option data
+                if(AUTHORIZATIONS[auth_url]['python_challenge_object'] !== undefined){
+
+                    // populate values
+                    var token = AUTHORIZATIONS[auth_url]['python_challenge_object']['token'];
+                    var keyauth = token + "." + ACCOUNT['thumbprint'];
+                    var link = "http://" + domain + "/.well-known/acme-challenge/" + token;
+                    challenges.querySelector(".python_link").innerHTML = "";
+                    challenges.querySelector(".python_link").appendChild(document.createTextNode(link));
+                    challenges.querySelector(".python_link").setAttribute("href", link);
+                    challenges.querySelector(".python_domain").innerHTML = "";
+                    challenges.querySelector(".python_domain").appendChild(document.createTextNode(domain));
+                    challenges.querySelector(".python_server").value = "" +
+                        "sudo python2 -c \"import BaseHTTPServer; \\\n" +
+                        "    h = BaseHTTPServer.BaseHTTPRequestHandler; \\\n" +
+                        "    h.do_GET = lambda r: r.send_response(200) or r.end_headers() " +
+                                "or r.wfile.write('" + keyauth + "'); \\\n" +
+                        "    s = BaseHTTPServer.HTTPServer(('0.0.0.0', 80), h); \\\n" +
+                        "    s.serve_forever()\"";
+                    challenges.querySelector(".confirm_python_submit").value = "I'm now running this command on " + domain;
+                    challenges.querySelector(".validate_python_sig_submit").value = "Submit challenge for " + domain;
+                    challenges.querySelector("label.challenge_python").style.display = "inline-block";
+
+                    // set data attributes
+                    var challenge_url = AUTHORIZATIONS[auth_url]['python_challenge_object']['url'];
+                    challenges.querySelector(".confirm_python").dataset.option = "python";
+                    challenges.querySelector(".confirm_python").dataset.section = section_id;
+                    challenges.querySelector(".confirm_python").dataset.auth = auth_url;
+                    challenges.querySelector(".confirm_python").dataset.challenge = challenge_url;
+                }
+
+                // file-based option data
+                if(AUTHORIZATIONS[auth_url]['file_challenge_object'] !== undefined){
+
+                    // populate values
+                    var token = AUTHORIZATIONS[auth_url]['file_challenge_object']['token'];
+
+                    var keyauth = token + "." + ACCOUNT['thumbprint'];
+                    var link = "http://" + domain + "/.well-known/acme-challenge/" + token;
+                    var server_config = "" +
+                        "#nginx example\n" +
+                        "location /.well-known/acme-challenge/ {\n" +
+                        "    alias /path/to/www/;\n" +
+                        "    try_files $uri =404;\n" +
+                        "}\n\n" +
+                        "#apache example\n" +
+                        "Alias /.well-known/acme-challenge /path/to/www/.well-known/acme-challenge";
+                    var echo = "echo -n \"" + keyauth + "\" > /path/to/www/.well-known/acme-challenge/" + token;
+                    challenges.querySelector(".file_config").innerHTML = "";
+                    challenges.querySelector(".file_config").appendChild(document.createTextNode(server_config));
+                    challenges.querySelector(".file_echo").innerHTML = "";
+                    challenges.querySelector(".file_echo").appendChild(document.createTextNode(echo));
+                    challenges.querySelector(".file_link").innerHTML = "";
+                    challenges.querySelector(".file_link").appendChild(document.createTextNode(link));
+                    challenges.querySelector(".file_link").setAttribute("href", link);
+                    challenges.querySelector(".file_url").value = link;
+                    challenges.querySelector(".file_data").value = keyauth;
+                    challenges.querySelector(".confirm_file_submit").value = "I'm now serving this file on " + domain;
+                    challenges.querySelector(".validate_file_sig_submit").value = "Submit challenge for " + domain;
+                    challenges.querySelector("label.challenge_file").style.display = "inline-block";
+
+                    // set data attributes
+                    var challenge_url = AUTHORIZATIONS[auth_url]['file_challenge_object']['url'];
+                    challenges.querySelector(".confirm_file").dataset.option = "file";
+                    challenges.querySelector(".confirm_file").dataset.section = section_id;
+                    challenges.querySelector(".confirm_file").dataset.auth = auth_url;
+                    challenges.querySelector(".confirm_file").dataset.challenge = challenge_url;
+                }
+
+                // DNS option data
+                if(AUTHORIZATIONS[auth_url]['dns_challenge_object'] !== undefined){
+
+                    // SHA-256 digest of keyauth
+                    var token = AUTHORIZATIONS[auth_url]['dns_challenge_object']['token'];
+                    var keyauth = token + "." + ACCOUNT['thumbprint'];
+                    var keyauth_bytes = [];
+                    for(var i = 0; i < keyauth.length; i++){
+                        keyauth_bytes.push(keyauth.charCodeAt(i));
+                    }
+                    sha256(new Uint8Array(keyauth_bytes), function(hash, err){
+                        if(err){
+                            return fail(status, "Generating DNS data failed: " + err.message);
+                        }
+                        var dns_data = b64(hash);
+
+                        // populate dns option
+                        var dig = "dig +short @ns.yournameserver.com _acme-challenge." + domain + " TXT";
+                        challenges.querySelector(".dns_dig").innerHTML = "";
+                        challenges.querySelector(".dns_dig").appendChild(document.createTextNode(dig));
+                        challenges.querySelector(".dns_domain").innerHTML = "";
+                        challenges.querySelector(".dns_domain").appendChild(document.createTextNode(domain));
+                        challenges.querySelector(".dns_value").innerHTML = "";
+                        challenges.querySelector(".dns_value").appendChild(document.createTextNode(dns_data));
+                        challenges.querySelector(".dns_subdomain").value = "_acme-challenge." + domain;
+                        challenges.querySelector(".dns_data").value = dns_data;
+                        challenges.querySelector(".confirm_dns_submit").value = "I can see the TXT record for " + domain;
+                        challenges.querySelector(".validate_dns_sig_submit").value = "Submit challenge for " + domain;
+                        challenges.querySelector("label.challenge_dns").style.display = "inline-block";
+
+                        // data attributes
+                        var challenge_url = AUTHORIZATIONS[auth_url]['dns_challenge_object']['url'];
+                        challenges.querySelector(".confirm_dns").dataset.option = "dns";
+                        challenges.querySelector(".confirm_dns").dataset.section = section_id;
+                        challenges.querySelector(".confirm_dns").dataset.auth = auth_url;
+                        challenges.querySelector(".confirm_dns").dataset.challenge = challenge_url;
+
+                        // auto-select Option 3 if no other options
+                        if(AUTHORIZATIONS[auth_url]['python_challenge_object'] === undefined
+                        && AUTHORIZATIONS[auth_url]['file_challenge_object'] === undefined){
+                            challenges.querySelector("input.challenge_python").removeAttribute("checked");
+                            challenges.querySelector("input.challenge_dns").setAttribute("checked", "");
+                            challenges.querySelector("label.challenge_dns").innerHTML = "Option 1 - DNS record (wildcard)";
+                        }
+
+                        // show the challenges
+                        status.innerHTML = "Challenges loaded! Choose a challenge option below.";
+                        challenges.style.display = "block";
+                        auth_section.querySelector(".challenges-status").style.display = "none";
+                    });
+                }
+
+                // no DNS option, so show the challenges without hashing anything
+                else{
+                    // show the challenges
+                    status.innerHTML = "Challenges loaded! Choose a challenge option below.";
+                    challenges.style.display = "block";
+                    auth_section.querySelector(".challenges-status").style.display = "none";
+                }
+            }
+
+            // error loading authorization
+            else{
+                return fail(status, "Loading challenges failed. Please start back at Step 1. " + auth_xhr.responseText);
+            }
+        }
+    };
+    auth_xhr.send(JSON.stringify({
+        "protected": AUTHORIZATIONS[auth_url]['auth_protected_b64'],
+        "payload": AUTHORIZATIONS[auth_url]['auth_payload_b64'],
+        "signature": AUTHORIZATIONS[auth_url]['auth_sig'],
+    }));
+}
+
+
+/*
+ * Step 4c: Confirm Challenge
  */
 function confirmChallenge(e){
     e.preventDefault();
 
     // find the relevant resources
-    var section_id = e.target.dataset.section // challenge_examplecom
+    var section_id = e.target.dataset.section; // auth_...
     var option = e.target.dataset.option; // "python", "file", or "dns"
     var auth_url = e.target.dataset.auth;
-    var d = AUTHORIZATIONS[auth_url]['authorization']['identifier']['value'];
+    var domain = AUTHORIZATIONS[auth_url]['auth_response']['identifier']['value'];
     var challenge_url = e.target.dataset.challenge;
     var section = document.getElementById(section_id);
     var status = section.querySelector(".confirm_" + option + "_status");
@@ -1099,6 +1392,18 @@ function confirmChallenge(e){
     validate_status.className = validate_status_class;
     validate_status.innerHTML = "";
 
+    // reset authorization check signature
+    section.querySelector(".recheck_auth_" + option + "_sig_cmd").value = "waiting until you submit the challenge above...";
+    section.querySelector(".recheck_auth_" + option + "_sig_cmd").removeAttribute("readonly");
+    section.querySelector(".recheck_auth_" + option + "_sig_cmd").setAttribute("disabled", "");
+    section.querySelector(".recheck_auth_" + option + "_sig").value = "";
+    section.querySelector(".recheck_auth_" + option + "_sig").setAttribute("placeholder", "waiting until challenges are done...");
+    section.querySelector(".recheck_auth_" + option + "_sig").setAttribute("disabled", "");
+    section.querySelector(".validate_recheck_auth_" + option + "_sig_submit").setAttribute("disabled", "");
+    section.querySelector(".validate_recheck_auth_" + option + "_sig_status").style.display = "none";
+    section.querySelector(".validate_recheck_auth_" + option + "_sig_status").className = "validate_recheck_auth_" + option + "_sig_status";
+    section.querySelector(".validate_recheck_auth_" + option + "_sig_status").innerHTML = "";
+
     // reset finalize signature
     document.getElementById("finalize_sig_cmd").value = "waiting until challenges are done...";
     document.getElementById("finalize_sig_cmd").removeAttribute("readonly");
@@ -1111,10 +1416,34 @@ function confirmChallenge(e){
     document.getElementById("validate_finalize_sig_status").className = "";
     document.getElementById("validate_finalize_sig_status").innerHTML = "";
 
+    // reset recheck_order signature
+    document.getElementById("recheck_order_sig_cmd").value = "waiting until order is finalized...";
+    document.getElementById("recheck_order_sig_cmd").removeAttribute("readonly");
+    document.getElementById("recheck_order_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("recheck_order_sig").value = "";
+    document.getElementById("recheck_order_sig").setAttribute("placeholder", "waiting until order is finalized...");
+    document.getElementById("recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig_status").style.display = "none";
+    document.getElementById("validate_recheck_order_sig_status").className = "";
+    document.getElementById("validate_recheck_order_sig_status").innerHTML = "";
+
+    // reset get cert signature
+    document.getElementById("cert_sig_cmd").value = "waiting until certificate is generated...";
+    document.getElementById("cert_sig_cmd").removeAttribute("readonly");
+    document.getElementById("cert_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("cert_sig").value = "";
+    document.getElementById("cert_sig").setAttribute("placeholder", "waiting until certificate is generated...");
+    document.getElementById("cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig_status").style.display = "none";
+    document.getElementById("validate_cert_sig_status").className = "";
+    document.getElementById("validate_cert_sig_status").innerHTML = "";
+
     // get nonce for challenge
     getNonce(function(nonce, err){
         if(err){
-            return fail(status, "Failed challenge nonce request (domain: " + d + ") (code: " + err.status + "). " + err.responseText);
+            return fail(status, "Failed challenge nonce request (domain: " + domain + ") (code: " + err.status + "). " + err.responseText);
         }
 
         // populate challenge signature (payload is empty {})
@@ -1150,21 +1479,27 @@ function confirmChallenge(e){
 }
 
 /*
- * Step 4b: Verify Ownership (POST /challenge['url'], ...)
+ * Step 4d: Verify Ownership (POST /challenge['url'], ...)
  */
 function validateChallenge(e){
     e.preventDefault();
 
     // find the relevant resources
-    var section_id = e.target.dataset.section; // challenge_examplecom
+    var section_id = e.target.dataset.section; // auth_...
     var option = e.target.dataset.option; // "python", "file", or "dns"
     var auth_url = e.target.dataset.auth;
-    var d = AUTHORIZATIONS[auth_url]['authorization']['identifier']['value'];
+    var domain = AUTHORIZATIONS[auth_url]['auth_response']['identifier']['value'];
     var challenge_url = e.target.dataset.challenge;
     var section = document.getElementById(section_id);
     var status_class = option + "_sig_status";
     var status = section.querySelector("." + status_class);
     var sig_input = section.querySelector("." + option + "_sig");
+    var recheck_form = section.querySelector(".validate_recheck_auth_" + option + "_sig");
+    var recheck_submit = section.querySelector(".validate_recheck_auth_" + option + "_sig_submit");
+    var recheck_cmd = section.querySelector(".recheck_auth_" + option + "_sig_cmd");
+    var recheck_input = section.querySelector(".recheck_auth_" + option + "_sig");
+    var recheck_status_class = "validate_recheck_auth_" + option + "_sig_status";
+    var recheck_status = section.querySelector("." + recheck_status_class);
 
     // clear previous status
     status.style.display = "inline";
@@ -1174,6 +1509,18 @@ function validateChallenge(e){
     // hide following steps
     document.getElementById("step5").style.display = "none";
     document.getElementById("step5_pending").style.display = "inline";
+
+    // reset authorization check signature
+    section.querySelector(".recheck_auth_" + option + "_sig_cmd").value = "waiting until you submit the challenge above...";
+    section.querySelector(".recheck_auth_" + option + "_sig_cmd").removeAttribute("readonly");
+    section.querySelector(".recheck_auth_" + option + "_sig_cmd").setAttribute("disabled", "");
+    section.querySelector(".recheck_auth_" + option + "_sig").value = "";
+    section.querySelector(".recheck_auth_" + option + "_sig").setAttribute("placeholder", "waiting until challenges are done...");
+    section.querySelector(".recheck_auth_" + option + "_sig").setAttribute("disabled", "");
+    section.querySelector(".validate_recheck_auth_" + option + "_sig_submit").setAttribute("disabled", "");
+    section.querySelector(".validate_recheck_auth_" + option + "_sig_status").style.display = "none";
+    section.querySelector(".validate_recheck_auth_" + option + "_sig_status").className = recheck_status_class;
+    section.querySelector(".validate_recheck_auth_" + option + "_sig_status").innerHTML = "";
 
     // reset finalize signature
     document.getElementById("finalize_sig_cmd").value = "waiting until challenges are done...";
@@ -1186,6 +1533,30 @@ function validateChallenge(e){
     document.getElementById("validate_finalize_sig_status").style.display = "none";
     document.getElementById("validate_finalize_sig_status").className = "";
     document.getElementById("validate_finalize_sig_status").innerHTML = "";
+
+    // reset recheck_order signature
+    document.getElementById("recheck_order_sig_cmd").value = "waiting until order is finalized...";
+    document.getElementById("recheck_order_sig_cmd").removeAttribute("readonly");
+    document.getElementById("recheck_order_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("recheck_order_sig").value = "";
+    document.getElementById("recheck_order_sig").setAttribute("placeholder", "waiting until order is finalized...");
+    document.getElementById("recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig_status").style.display = "none";
+    document.getElementById("validate_recheck_order_sig_status").className = "";
+    document.getElementById("validate_recheck_order_sig_status").innerHTML = "";
+
+    // reset get cert signature
+    document.getElementById("cert_sig_cmd").value = "waiting until certificate is generated...";
+    document.getElementById("cert_sig_cmd").removeAttribute("readonly");
+    document.getElementById("cert_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("cert_sig").value = "";
+    document.getElementById("cert_sig").setAttribute("placeholder", "waiting until certificate is generated...");
+    document.getElementById("cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig_status").style.display = "none";
+    document.getElementById("validate_cert_sig_status").className = "";
+    document.getElementById("validate_cert_sig_status").innerHTML = "";
 
     // validate challenge protected exists
     if(AUTHORIZATIONS[auth_url][option + '_protected_b64'] === undefined){
@@ -1212,80 +1583,44 @@ function validateChallenge(e){
                 // set challenge response
                 AUTHORIZATIONS[auth_url][option + '_challenge_response'] = JSON.parse(challenge_xhr.responseText);
 
-                // poll to watch the authorization for status === "valid"
-                function checkAuthorization(){
-                    status.innerHTML = "checking...";
+                // update status message before loading nonce
+                status.innerHTML = "Submitted! Loading next step...";
 
-                    // poll authorization
-                    getAuthorization(auth_url, function(auth_obj, err){
+                // get nonce for checking the authorization status
+                getNonce(function(nonce, err){
+                    if(err){
+                        return fail(status, "Failed challenge verify nonce request (domain: " + domain + ") (code: " + err.status + "). " + err.responseText);
+                    }
 
-                        // authorization failed
-                        if(err){
-                            return fail(status, "Authorization failed. Please start back at Step 1. " + err.responseText);
-                        }
+                    // populate authorization request signature (payload is empty "")
+                    var protected_json = {
+                        "url": auth_url,
+                        "alg": ACCOUNT['alg'],
+                        "nonce": nonce,
+                        "kid": ACCOUNT['account_uri'],
+                    };
+                    var protected_b64 = b64(JSON.stringify(protected_json));
+                    AUTHORIZATIONS[auth_url]['recheck_auth_protected_json'] = protected_json
+                    AUTHORIZATIONS[auth_url]['recheck_auth_protected_b64'] = protected_b64;
+                    recheck_cmd.value = "" +
+                        "PRIV_KEY=./account.key; " +
+                        "echo -n \"" + protected_b64 + "." + AUTHORIZATIONS[auth_url]['recheck_auth_payload_b64'] + "\" | " +
+                        "openssl dgst -sha256 -hex -sign $PRIV_KEY";
+                    recheck_cmd.setAttribute("readonly", "");
+                    recheck_cmd.removeAttribute("disabled");
+                    recheck_input.value = "";
+                    recheck_input.setAttribute("placeholder", RESULT_PLACEHOLDER);
+                    recheck_input.removeAttribute("disabled");
+                    recheck_submit.removeAttribute("disabled");
 
-                        // authorization still pending, so wait a second and check again
-                        if(auth_obj['status'] === "pending"){
-                            status.innerHTML = "waiting...";
-                            window.setTimeout(checkAuthorization, 1000);
-                        }
+                    // set data properties so checkAuthorization() knows which auth this is
+                    recheck_form.dataset.option = option;
+                    recheck_form.dataset.section = section_id;
+                    recheck_form.dataset.auth = auth_url;
 
-                        // authorization valid
-                        else if(auth_obj['status'] === "valid"){
-
-                            // see if all the authorizations are valid
-                            var all_valid = true;
-                            for(var a_url in AUTHORIZATIONS){
-                                if(AUTHORIZATIONS[a_url]['authorization']['status'] !== "valid"){
-                                    all_valid = false;
-                                }
-                            }
-                            if(all_valid){
-
-                                // get nonce for finalizing
-                                getNonce(function(nonce, err){
-                                    if(err){
-                                        return fail(status, "Failed finalize nonce request (code: " + err.status + "). " + err.responseText);
-                                    }
-
-                                    // populate order finalize signature (payload populated in validateCSR())
-                                    ORDER['finalize_protected_json'] = {
-                                        "url": ORDER['finalize_uri'],
-                                        "alg": ACCOUNT['alg'],
-                                        "nonce": nonce,
-                                        "kid": ACCOUNT['account_uri'],
-                                    }
-                                    ORDER['finalize_protected_b64'] = b64(JSON.stringify(ORDER['finalize_protected_json']));
-                                    document.getElementById("finalize_sig_cmd").value = "" +
-                                        "PRIV_KEY=./account.key; " +
-                                        "echo -n \"" + ORDER['finalize_protected_b64'] + "." + ORDER['finalize_payload_b64'] + "\" | " +
-                                        "openssl dgst -sha256 -hex -sign $PRIV_KEY";
-                                    document.getElementById("finalize_sig_cmd").setAttribute("readonly", "");
-                                    document.getElementById("finalize_sig_cmd").removeAttribute("disabled");
-                                    document.getElementById("finalize_sig").value = "";
-                                    document.getElementById("finalize_sig").setAttribute("placeholder", RESULT_PLACEHOLDER);
-                                    document.getElementById("finalize_sig").removeAttribute("disabled");
-                                    document.getElementById("validate_finalize_sig").removeAttribute("disabled");
-
-                                    // proceed finalize order
-                                    status.innerHTML = "Domain verified! Go to next command.";
-                                });
-                            }
-
-                            // proceed to next authorization
-                            else{
-                                status.innerHTML = "Domain verified! Go to next command.";
-                            }
-                        }
-
-                        // authorization failed
-                        else{
-                            return fail(status, "Domain challenge failed. Please start back at Step 1. " + JSON.stringify(auth_obj));
-                        }
-                    });
-                }
-                // start polling authorization
-                checkAuthorization();
+                    // update status
+                    status.innerHTML = "Challenge submitted! Proceed to next command below.";
+                });
             }
 
             // error submitting challenge
@@ -1302,7 +1637,208 @@ function validateChallenge(e){
 }
 
 /*
- * Step 4c: Issue Certificate (POST /order['finalize'])
+ * Step 4e: Check authorization status after submitting the challenge (GET-as-POST /auth['url'])
+ */
+function checkAuthorization(e){
+    e.preventDefault();
+
+    // find the relevant resources
+    var section_id = e.target.dataset.section; // auth_...
+    var option = e.target.dataset.option; // "python", "file", or "dns"
+    var auth_url = e.target.dataset.auth;
+    var domain = AUTHORIZATIONS[auth_url]['auth_response']['identifier']['value'];
+    var section = document.getElementById(section_id);
+    var status_class = "validate_recheck_auth_" + option + "_sig_status";
+    var status = section.querySelector("." + status_class);
+    var sig_input = section.querySelector(".recheck_auth_" + option + "_sig");
+
+    // clear previous status
+    status.style.display = "inline";
+    status.className = status_class;
+    status.innerHTML = "checking...";
+
+    // hide following steps
+    document.getElementById("step5").style.display = "none";
+    document.getElementById("step5_pending").style.display = "inline";
+
+    // reset finalize signature
+    document.getElementById("finalize_sig_cmd").value = "waiting until challenges are done...";
+    document.getElementById("finalize_sig_cmd").removeAttribute("readonly");
+    document.getElementById("finalize_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("finalize_sig").value = "";
+    document.getElementById("finalize_sig").setAttribute("placeholder", "waiting until challenges are done...");
+    document.getElementById("finalize_sig").setAttribute("disabled", "");
+    document.getElementById("validate_finalize_sig").setAttribute("disabled", "");
+    document.getElementById("validate_finalize_sig_status").style.display = "none";
+    document.getElementById("validate_finalize_sig_status").className = "";
+    document.getElementById("validate_finalize_sig_status").innerHTML = "";
+
+    // reset recheck_order signature
+    document.getElementById("recheck_order_sig_cmd").value = "waiting until order is finalized...";
+    document.getElementById("recheck_order_sig_cmd").removeAttribute("readonly");
+    document.getElementById("recheck_order_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("recheck_order_sig").value = "";
+    document.getElementById("recheck_order_sig").setAttribute("placeholder", "waiting until order is finalized...");
+    document.getElementById("recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig_status").style.display = "none";
+    document.getElementById("validate_recheck_order_sig_status").className = "";
+    document.getElementById("validate_recheck_order_sig_status").innerHTML = "";
+
+    // reset get cert signature
+    document.getElementById("cert_sig_cmd").value = "waiting until certificate is generated...";
+    document.getElementById("cert_sig_cmd").removeAttribute("readonly");
+    document.getElementById("cert_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("cert_sig").value = "";
+    document.getElementById("cert_sig").setAttribute("placeholder", "waiting until certificate is generated...");
+    document.getElementById("cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig_status").style.display = "none";
+    document.getElementById("validate_cert_sig_status").className = "";
+    document.getElementById("validate_cert_sig_status").innerHTML = "";
+
+    // validate recheck_auth protected exists
+    if(AUTHORIZATIONS[auth_url]['recheck_auth_protected_b64'] === undefined){
+        return fail(status, "Status check payload not found. Please go back to Step 1.");
+    }
+
+    // validate the signature
+    var recheck_auth_sig = hex2b64(sig_input.value);
+    if(recheck_auth_sig === null){
+        return fail(status, "You need to run the above commands and paste the output in the text boxes below each command.");
+    }
+    AUTHORIZATIONS[auth_url]['recheck_auth_sig'] = recheck_auth_sig;
+
+    // send request to CA to get the authorization
+    var recheck_auth_xhr = new XMLHttpRequest();
+    recheck_auth_xhr.open("POST", auth_url);
+    recheck_auth_xhr.setRequestHeader("Content-Type", "application/jose+json");
+    recheck_auth_xhr.onreadystatechange = function(){
+        if(recheck_auth_xhr.readyState === 4){
+
+            // successful load
+            if(recheck_auth_xhr.status === 200){
+
+                // set recheck_auth response
+                var auth_obj = JSON.parse(recheck_auth_xhr.responseText);
+                AUTHORIZATIONS[auth_url]['recheck_auth_response'] = auth_obj;
+
+                // authorization pending, so ask the user to check again
+                if(auth_obj['status'] === "pending"){
+
+                    // update the status before getting another nonce
+                    status.innerHTML = "loading...";
+
+                    // clear the existing signature
+                    AUTHORIZATIONS[auth_url]['recheck_auth_sig'] = undefined;
+
+                    // get nonce for checking the authorization status, again
+                    getNonce(function(nonce, err){
+                        if(err){
+                            return fail(status, "Failed status nonce request (domain: " + domain + ") (code: " + err.status + "). " + err.responseText);
+                        }
+
+                        // populate authorization request signature (payload is empty "")
+                        var protected_json = {
+                            "url": auth_url,
+                            "alg": ACCOUNT['alg'],
+                            "nonce": nonce,
+                            "kid": ACCOUNT['account_uri'],
+                        };
+                        var protected_b64 = b64(JSON.stringify(protected_json));
+                        AUTHORIZATIONS[auth_url]['recheck_auth_protected_json'] = protected_json
+                        AUTHORIZATIONS[auth_url]['recheck_auth_protected_b64'] = protected_b64;
+                        recheck_cmd.value = "" +
+                            "PRIV_KEY=./account.key; " +
+                            "echo -n \"" + protected_b64 + "." + AUTHORIZATIONS[auth_url]['recheck_auth_payload_b64'] + "\" | " +
+                            "openssl dgst -sha256 -hex -sign $PRIV_KEY";
+                        recheck_cmd.setAttribute("readonly", "");
+                        recheck_cmd.removeAttribute("disabled");
+                        recheck_input.value = "";
+                        recheck_input.setAttribute("placeholder", RESULT_PLACEHOLDER);
+                        recheck_input.removeAttribute("disabled");
+                        recheck_submit.removeAttribute("disabled");
+
+                        // update status
+                        status.innerHTML = "Challenge still pending. Copy and run the command again to check again.";
+                    });
+                }
+
+                // authorization valid, so proceed to next set of challenges or finalize
+                else if(auth_obj['status'] === "valid"){
+
+                    // find the next authorization that doesn't have a recheck status
+                    var next_auth_i = undefined;
+                    for(var i = 0; i < ORDER['order_response']['authorizations'].length; i++){
+                        var a_url = ORDER['order_response']['authorizations'][i];
+                        if(AUTHORIZATIONS[a_url]['recheck_auth_response'] === undefined){
+                            next_auth_i = i;
+                        }
+                    }
+
+                    // load the next authorization command
+                    if(next_auth_i !== undefined){
+                        buildAuthorization(next_auth_i, status, function(){
+                            status.innerHTML = "Challenge complete! Proceed to load next set of challenges.";
+                        });
+                    }
+
+                    // all authorizations done! so finalize the order
+                    else{
+                        status.innerHTML = "loading nonce...";
+
+                        // get nonce for finalizing
+                        getNonce(function(nonce, err){
+                            if(err){
+                                return fail(status, "Failed finalize nonce request (code: " + err.status + "). " + err.responseText);
+                            }
+
+                            // populate order finalize signature (payload populated in validateCSR())
+                            ORDER['finalize_protected_json'] = {
+                                "url": ORDER['finalize_uri'],
+                                "alg": ACCOUNT['alg'],
+                                "nonce": nonce,
+                                "kid": ACCOUNT['account_uri'],
+                            }
+                            ORDER['finalize_protected_b64'] = b64(JSON.stringify(ORDER['finalize_protected_json']));
+                            document.getElementById("finalize_sig_cmd").value = "" +
+                                "PRIV_KEY=./account.key; " +
+                                "echo -n \"" + ORDER['finalize_protected_b64'] + "." + ORDER['finalize_payload_b64'] + "\" | " +
+                                "openssl dgst -sha256 -hex -sign $PRIV_KEY";
+                            document.getElementById("finalize_sig_cmd").setAttribute("readonly", "");
+                            document.getElementById("finalize_sig_cmd").removeAttribute("disabled");
+                            document.getElementById("finalize_sig").value = "";
+                            document.getElementById("finalize_sig").setAttribute("placeholder", RESULT_PLACEHOLDER);
+                            document.getElementById("finalize_sig").removeAttribute("disabled");
+                            document.getElementById("validate_finalize_sig").removeAttribute("disabled");
+
+                            // proceed finalize order
+                            status.innerHTML = "Challenge complete! Proceed to finalize certificate order.";
+                        });
+                    }
+                }
+
+                // authorization failed, so show an error
+                else{
+                    return fail(status, "Domain challenge failed. Please start back at Step 1. " + JSON.stringify(auth_obj));
+                }
+            }
+            // error loading authorization
+            else{
+                return fail(status, "Loading challenge status failed. Please start back at Step 1. " + recheck_auth_xhr.responseText);
+            }
+        }
+    };
+    recheck_auth_xhr.send(JSON.stringify({
+        "protected": AUTHORIZATIONS[auth_url]['recheck_auth_protected_b64'],
+        "payload": AUTHORIZATIONS[auth_url]['recheck_auth_payload_b64'],
+        "signature": AUTHORIZATIONS[auth_url]['recheck_auth_sig'],
+    }));
+
+}
+
+/*
+ * Step 4f: Issue Certificate (POST /order['finalize'])
  */
 function validateFinalize(e){
     e.preventDefault();
@@ -1317,8 +1853,32 @@ function validateFinalize(e){
     document.getElementById("step5").style.display = "none";
     document.getElementById("step5_pending").style.display = "inline";
 
-    // validate update payload exists
-    if(ORDER['finalize_protected_b64'] === undefined){
+    // reset recheck_order signature
+    document.getElementById("recheck_order_sig_cmd").value = "waiting until order is finalized...";
+    document.getElementById("recheck_order_sig_cmd").removeAttribute("readonly");
+    document.getElementById("recheck_order_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("recheck_order_sig").value = "";
+    document.getElementById("recheck_order_sig").setAttribute("placeholder", "waiting until order is finalized...");
+    document.getElementById("recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig").setAttribute("disabled", "");
+    document.getElementById("validate_recheck_order_sig_status").style.display = "none";
+    document.getElementById("validate_recheck_order_sig_status").className = "";
+    document.getElementById("validate_recheck_order_sig_status").innerHTML = "";
+
+    // reset get cert signature
+    document.getElementById("cert_sig_cmd").value = "waiting until certificate is generated...";
+    document.getElementById("cert_sig_cmd").removeAttribute("readonly");
+    document.getElementById("cert_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("cert_sig").value = "";
+    document.getElementById("cert_sig").setAttribute("placeholder", "waiting until certificate is generated...");
+    document.getElementById("cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig_status").style.display = "none";
+    document.getElementById("validate_cert_sig_status").className = "";
+    document.getElementById("validate_cert_sig_status").innerHTML = "";
+
+    // validate registration payload exists
+    if(ORDER['finalize_payload_b64'] === undefined){
         return fail(status, "Finalize payload not found. Please go back to Step 1.");
     }
 
@@ -1329,90 +1889,50 @@ function validateFinalize(e){
     }
     ORDER['finalize_sig'] = finalize_sig;
 
-    // send update request to CA account_uri
+    // send update request to CA finalize_uri
     var finalize_xhr = new XMLHttpRequest();
     finalize_xhr.open("POST", ORDER['finalize_uri']);
     finalize_xhr.setRequestHeader("Content-Type", "application/jose+json");
     finalize_xhr.onreadystatechange = function(){
         if(finalize_xhr.readyState === 4){
 
-            // successful update
+            // successful finalizing the order
             if(finalize_xhr.status === 200){
 
                 // set finalize response
                 ORDER['finalize_response'] = JSON.parse(finalize_xhr.responseText);
 
-                // poll to watch the order for status === "valid"
-                function checkForCert(){
-                    status.innerHTML = "checking...";
+                // get nonce for rechecking the order
+                getNonce(function(nonce, err){
+                    if(err){
+                        return fail(status, "Failed order checking nonce request (code: " + err.status + "). " + err.responseText);
+                    }
 
-                    // poll order for certificate
-                    var poll_cert_xhr = new XMLHttpRequest();
-                    poll_cert_xhr.open("GET", ORDER['order_uri'] + "?" + cachebuster());
-                    poll_cert_xhr.onload = function(){
-                        var order = JSON.parse(poll_cert_xhr.responseText)
-                        ORDER['order_response'] = order;
+                    // populate recheck_order signature
+                    ORDER['recheck_order_protected_json'] = {
+                        "url": ORDER['order_uri'],
+                        "alg": ACCOUNT['alg'],
+                        "nonce": nonce,
+                        "kid": ACCOUNT['account_uri'],
+                    }
+                    ORDER['recheck_order_protected_b64'] = b64(JSON.stringify(ORDER['recheck_order_protected_json']));
+                    document.getElementById("recheck_order_sig_cmd").value = "" +
+                        "PRIV_KEY=./account.key; " +
+                        "echo -n \"" + ORDER['recheck_order_protected_b64'] + "." + ORDER['recheck_order_payload_b64'] + "\" | " +
+                        "openssl dgst -sha256 -hex -sign $PRIV_KEY";
+                    document.getElementById("recheck_order_sig_cmd").setAttribute("readonly", "");
+                    document.getElementById("recheck_order_sig_cmd").removeAttribute("disabled");
+                    document.getElementById("recheck_order_sig").value = "";
+                    document.getElementById("recheck_order_sig").setAttribute("placeholder", RESULT_PLACEHOLDER);
+                    document.getElementById("recheck_order_sig").removeAttribute("disabled");
+                    document.getElementById("validate_recheck_order_sig").removeAttribute("disabled");
 
-                        // order still processing
-                        if(order['status'] === "pending" || order['status'] === "processing" || order['status'] === "ready"){
-                            status.innerHTML = "processing...";
-                            window.setTimeout(checkForCert, 1000);
-                        }
-
-                        // order is ready for finalizing
-                        else if(order['status'] === "valid"){
-
-                            // no certificate url
-                            if(order['certificate'] === undefined){
-                                return fail(status, "Certificate not provided. Please start back at Step 1. " + poll_cert_xhr.responseText);
-                            }
-
-                            // get certificate
-                            var cert_xhr = new XMLHttpRequest();
-                            cert_xhr.open("GET", order['certificate']);
-                            cert_xhr.onload = function(){
-
-                                // format cert into PEM format
-                                document.getElementById("crt").value = cert_xhr.responseText;
-
-                                // proceed step 5
-                                document.getElementById("step5").style.display = "block";
-                                document.getElementById("step5_pending").style.display = "none";
-                                status.innerHTML = "Certificate signed! Proceed to next step.";
-
-                                // alert when navigating away
-                                window.onbeforeunload = function(){
-                                    return "Be sure to save your signed certificate! " +
-                                           "It will be lost if you navigate away from this " +
-                                           "page before saving it, and you might not be able " +
-                                           "to get another one issued!";
-                                };
-                            };
-
-                            // certificate download error
-                            cert_xhr.onerror = function(){
-                                return fail(status, "Order request failed. Please start back at Step 1. " + cert_xhr.responseText);
-                            };
-                            cert_xhr.send();
-                        }
-
-                        // order invalid
-                        else{
-                            return fail(status, "Order processing failed. Please start back at Step 1. " + poll_cert_xhr.responseText);
-                        }
-                    };
-
-                    // order poll error
-                    poll_cert_xhr.onerror = function(){
-                        return fail(status, "Order request failed. Please start back at Step 1. " + poll_cert_xhr.responseText);
-                    };
-                    poll_cert_xhr.send();
-                }
-                // start polling order
-                checkForCert();
+                    // complete step 4f
+                    status.innerHTML = "Finalized! Proceed to next command below.";
+                });
             }
 
-            // error finalizing
+            // error registering
             else{
                 return fail(status, "Finalizing failed. Please start back at Step 1. " + finalize_xhr.responseText);
             }
@@ -1422,6 +1942,225 @@ function validateFinalize(e){
         "protected": ORDER['finalize_protected_b64'],
         "payload": ORDER['finalize_payload_b64'],
         "signature": ORDER['finalize_sig'],
+    }));
+}
+
+/*
+ * Step 4g: Check Order Status (GET-as-POST /order['order_uri'])
+ */
+function recheckOrder(e){
+    e.preventDefault();
+
+    // clear previous status
+    var status = document.getElementById("validate_recheck_order_sig_status");
+    status.style.display = "inline";
+    status.className = "";
+    status.innerHTML = "checking status...";
+
+    // hide following steps
+    document.getElementById("step5").style.display = "none";
+    document.getElementById("step5_pending").style.display = "inline";
+
+    // reset get cert signature
+    document.getElementById("cert_sig_cmd").value = "waiting until certificate is generated...";
+    document.getElementById("cert_sig_cmd").removeAttribute("readonly");
+    document.getElementById("cert_sig_cmd").setAttribute("disabled", "");
+    document.getElementById("cert_sig").value = "";
+    document.getElementById("cert_sig").setAttribute("placeholder", "waiting until certificate is generated...");
+    document.getElementById("cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig").setAttribute("disabled", "");
+    document.getElementById("validate_cert_sig_status").style.display = "none";
+    document.getElementById("validate_cert_sig_status").className = "";
+    document.getElementById("validate_cert_sig_status").innerHTML = "";
+
+    // validate registration payload exists
+    if(ORDER['recheck_order_payload_b64'] === undefined){
+        return fail(status, "Order checking payload not found. Please go back to Step 1.");
+    }
+
+    // validate the signature
+    var recheck_order_sig = hex2b64(document.getElementById("recheck_order_sig").value);
+    if(recheck_order_sig === null){
+        return fail(status, "You need to run the above commands and paste the output in the text boxes below each command.");
+    }
+    ORDER['recheck_order_sig'] = recheck_order_sig;
+
+    // send update request to CA finalize_uri
+    var recheck_order_xhr = new XMLHttpRequest();
+    recheck_order_xhr.open("POST", ORDER['order_uri']);
+    recheck_order_xhr.setRequestHeader("Content-Type", "application/jose+json");
+    recheck_order_xhr.onreadystatechange = function(){
+        if(recheck_order_xhr.readyState === 4){
+
+            // successful finalizing the order
+            if(recheck_order_xhr.status === 200){
+
+                // set recheck_order response
+                var order = JSON.parse(recheck_order_xhr.responseText)
+                ORDER['recheck_order_response'] = order;
+
+                // order still processing
+                if(order['status'] === "pending" || order['status'] === "processing" || order['status'] === "ready"){
+
+                    // update the status before getting another nonce
+                    status.innerHTML = "processing...";
+
+                    // clear the existing signature
+                    ORDER['recheck_order_sig'] = undefined;
+
+                    // get nonce for checking the order status, again
+                    getNonce(function(nonce, err){
+                        if(err){
+                            return fail(status, "Failed order status nonce request (code: " + err.status + "). " + err.responseText);
+                        }
+
+                        // populate recheck_order signature
+                        ORDER['recheck_order_protected_json'] = {
+                            "url": ORDER['order_uri'],
+                            "alg": ACCOUNT['alg'],
+                            "nonce": nonce,
+                            "kid": ACCOUNT['account_uri'],
+                        }
+                        ORDER['recheck_order_protected_b64'] = b64(JSON.stringify(ORDER['recheck_order_protected_json']));
+                        document.getElementById("recheck_order_sig_cmd").value = "" +
+                            "PRIV_KEY=./account.key; " +
+                            "echo -n \"" + ORDER['recheck_order_protected_b64'] + "." + ORDER['recheck_order_payload_b64'] + "\" | " +
+                            "openssl dgst -sha256 -hex -sign $PRIV_KEY";
+                        document.getElementById("recheck_order_sig_cmd").setAttribute("readonly", "");
+                        document.getElementById("recheck_order_sig_cmd").removeAttribute("disabled");
+                        document.getElementById("recheck_order_sig").value = "";
+                        document.getElementById("recheck_order_sig").setAttribute("placeholder", RESULT_PLACEHOLDER);
+                        document.getElementById("recheck_order_sig").removeAttribute("disabled");
+                        document.getElementById("validate_recheck_order_sig").removeAttribute("disabled");
+
+                        // update status
+                        status.innerHTML = "Order still processing. Copy and run the command again to check again.";
+                    });
+                }
+
+                // order is ready for finalizing
+                else if(order['status'] === "valid"){
+
+                    // set the certificate uri
+                    ORDER['cert_uri'] = order['certificate'];
+
+                    // update the status before getting another nonce
+                    status.innerHTML = "loading nonce...";
+
+                    // get nonce for getting the certificate
+                    getNonce(function(nonce, err){
+                        if(err){
+                            return fail(status, "Failed certificate nonce request (code: " + err.status + "). " + err.responseText);
+                        }
+
+                        // populate cert retrieval signature
+                        ORDER['cert_protected_json'] = {
+                            "url": ORDER['cert_uri'],
+                            "alg": ACCOUNT['alg'],
+                            "nonce": nonce,
+                            "kid": ACCOUNT['account_uri'],
+                        }
+                        ORDER['cert_protected_b64'] = b64(JSON.stringify(ORDER['cert_protected_json']));
+                        document.getElementById("cert_sig_cmd").value = "" +
+                            "PRIV_KEY=./account.key; " +
+                            "echo -n \"" + ORDER['cert_protected_b64'] + "." + ORDER['cert_payload_b64'] + "\" | " +
+                            "openssl dgst -sha256 -hex -sign $PRIV_KEY";
+                        document.getElementById("cert_sig_cmd").setAttribute("readonly", "");
+                        document.getElementById("cert_sig_cmd").removeAttribute("disabled");
+                        document.getElementById("cert_sig").value = "";
+                        document.getElementById("cert_sig").setAttribute("placeholder", RESULT_PLACEHOLDER);
+                        document.getElementById("cert_sig").removeAttribute("disabled");
+                        document.getElementById("validate_cert_sig").removeAttribute("disabled");
+
+                        // complete step 4g
+                        status.innerHTML = "Certificate ready! Proceed to next command below.";
+                    });
+                }
+
+                // order invalid
+                else{
+                    return fail(status, "Order processing failed. Please start back at Step 1. " + recheck_order_xhr.responseText);
+                }
+            }
+
+            // error checking order
+            else{
+                return fail(status, "Account registration failed. Please start back at Step 1. " + recheck_order_xhr.responseText);
+            }
+        }
+    };
+    recheck_order_xhr.send(JSON.stringify({
+        "protected": ORDER['recheck_order_protected_b64'],
+        "payload": ORDER['recheck_order_payload_b64'],
+        "signature": ORDER['recheck_order_sig'],
+    }));
+}
+
+/*
+ * Step 4h: Get Certificate (GET-as-POST /order['cert_uri'])
+ */
+function getCertificate(e){
+    e.preventDefault();
+
+    // clear previous status
+    var status = document.getElementById("validate_cert_sig_status");
+    status.style.display = "inline";
+    status.className = "";
+    status.innerHTML = "retrieving certificate...";
+
+    // hide following steps
+    document.getElementById("step5").style.display = "none";
+    document.getElementById("step5_pending").style.display = "inline";
+
+    // validate registration payload exists
+    if(ORDER['cert_payload_b64'] === undefined){
+        return fail(status, "Certificate payload not found. Please go back to Step 1.");
+    }
+
+    // validate the signature
+    var cert_sig = hex2b64(document.getElementById("cert_sig").value);
+    if(cert_sig === null){
+        return fail(status, "You need to run the above commands and paste the output in the text boxes below each command.");
+    }
+    ORDER['cert_sig'] = cert_sig;
+
+    // send update request to CA finalize_uri
+    var cert_xhr = new XMLHttpRequest();
+    cert_xhr.open("POST", ORDER['cert_uri']);
+    cert_xhr.setRequestHeader("Content-Type", "application/jose+json");
+    cert_xhr.onreadystatechange = function(){
+        if(cert_xhr.readyState === 4){
+
+            // successful finalizing the order
+            if(cert_xhr.status === 200){
+
+                // format cert into PEM format
+                document.getElementById("crt").value = cert_xhr.responseText;
+
+                // proceed step 5
+                document.getElementById("step5").style.display = "block";
+                document.getElementById("step5_pending").style.display = "none";
+                status.innerHTML = "Certificate retrieved! Proceed to next step.";
+
+                // alert when navigating away
+                window.onbeforeunload = function(){
+                    return "Be sure to save your signed certificate! " +
+                           "It will be lost if you navigate away from this " +
+                           "page before saving it, and you might not be able " +
+                           "to get another one issued!";
+                };
+            }
+
+            // error geting certificate
+            else{
+                return fail(status, "Certificate retrieval failed. Please start back at Step 1. " + cert_xhr.responseText);
+            }
+        }
+    };
+    cert_xhr.send(JSON.stringify({
+        "protected": ORDER['cert_protected_b64'],
+        "payload": ORDER['cert_payload_b64'],
+        "signature": ORDER['cert_sig'],
     }));
 }
 
