@@ -1651,6 +1651,9 @@ function checkAuthorization(e){
     var status_class = "validate_recheck_auth_" + option + "_sig_status";
     var status = section.querySelector("." + status_class);
     var sig_input = section.querySelector(".recheck_auth_" + option + "_sig");
+    var recheck_submit = section.querySelector(".validate_recheck_auth_" + option + "_sig_submit");
+    var recheck_cmd = section.querySelector(".recheck_auth_" + option + "_sig_cmd");
+    var recheck_input = section.querySelector(".recheck_auth_" + option + "_sig");
 
     // clear previous status
     status.style.display = "inline";
