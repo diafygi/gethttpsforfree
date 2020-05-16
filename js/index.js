@@ -1776,6 +1776,7 @@ function checkAuthorization(e){
                         var a_url = ORDER['order_response']['authorizations'][i];
                         if(AUTHORIZATIONS[a_url]['recheck_auth_response'] === undefined){
                             next_auth_i = i;
+                            break;
                         }
                     }
 
