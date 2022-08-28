@@ -881,13 +881,13 @@ Released under MIT License. Enjoy!
                     <li>
                         Copy "chained.pem" and "dhparam.pem" to /etc/ssl/certs/.<br/>
                         <pre>
-scp chained.pem root@foo.com:/etc/ssl/certs/chained.pem
-scp dhparam.pem root@foo.com:/etc/ssl/certs/dhparam.pem
+scp chained.pem /etc/ssl/certs/chained.pem
+scp dhparam.pem /etc/ssl/certs/dhparam.pem
 </pre>
                     </li>
                     <li>
                         Copy "domain.key" /etc/ssl/private/.<br/>
-                        <code>scp domain.key root@foo.com:/etc/ssl/private/domain.key</code><br/>
+                        <code>scp domain.key /etc/ssl/private/domain.key</code><br/>
                     </li>
                     <li>
                         Update your webserver config to use https (examples below).<br/>
@@ -928,13 +928,13 @@ server {
                     <li>
                         Copy "domain.crt" and "intermediate.pem" to /etc/ssl/certs/.<br/>
                         <pre>
-scp domain.crt root@foo.com:/etc/ssl/certs/domain.crt
-scp intermediate.pem root@foo.com:/etc/ssl/certs/intermediate.pem
+scp domain.crt /etc/ssl/certs/domain.crt
+scp intermediate.pem /etc/ssl/certs/intermediate.pem
 </pre>
                     </li>
                     <li>
                         Copy "domain.key" /etc/ssl/private/.<br/>
-                        <code>scp domain.key root@foo.com:/etc/ssl/private/domain.key</code><br/>
+                        <code>scp domain.key /etc/ssl/private/domain.key</code><br/>
                     </li>
                     <li>
                         Update your webserver config to use https (examples below).<br/>
