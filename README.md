@@ -44,11 +44,9 @@ pop open your browser's debugger to see the ajax requests that are going on. Ple
 
 ### Step 1: Account Info
 
-First, the ACME protocol requires you register a public key and contact information
-so you can sign all the requests you make to the API. In this step, you need to
-put in an email and a public key. The javascript for this section then converts the
-public key to a JSON Web Key ([JWK](https://tools.ietf.org/html/rfc7517)). NOTE:
-currently only RSA 2048 and 4096 bit public keys are accepted by Let's Encrypt.
+First, the ACME protocol requires you register a public key so you can sign all the requests
+you make to the API. In this step, you need to put in a public key. The javascript for this
+section then converts the public key to a JSON Web Key ([JWK](https://tools.ietf.org/html/rfc7517)).
 
 So if you paste it in this public key:
 ```
@@ -98,7 +96,6 @@ you need to fulfill.
 Here's the list of requests that need to be made to the API:
 
 * `/acme/new-acct` - Register the account public key and accept the terms (discarded if already registered)
-* `/acme/acct/...` - Update the account with your email address
 * `/acme/new-order` - Creates a new order for a certificate for your domains in your CSR
 
 NOTE: Each request also requires an anti-replay nonce, so the javascript gets
