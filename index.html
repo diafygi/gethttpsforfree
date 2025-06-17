@@ -108,19 +108,13 @@ Released under MIT License. Enjoy!
     <!--############################-->
     <h2>Step 1: Account Info</h2>
     <div>
-        Let's Encrypt requires that you register an account email and public key before
-        issuing a certificate. The email is so that they can contact you if needed, and
-        the public key is so you can securely sign your requests to issue/revoke/renew
-        your certificates. <i><b>Keep your account private key secret!</b> Anyone who has it
-        can impersonate you when making requests to Let's Encrypt!</i>
+        Let's Encrypt requires that you register an account public key before issuing a certificate.
+        The public key is so you can securely sign your requests to issue/revoke/renew your certificates.
+        <i><b>Keep your account private key secret!</b>
+        Anyone who has it can impersonate you when making requests to Let's Encrypt!</i>
     </div>
 
     <form id="validate_account">
-        <div class="field">
-            <label for="email">Account Email:</label><br/>
-            <input id="email" type="text" placeholder="(e.g. webmaster@yourdomain.com)"/>
-        </div>
-
         <div class="field">
             <label for="howto_pubkey" class="help">(how do I generate this?)</label>
             <input id="howto_pubkey" type="checkbox" class="help-checkbox"/>
@@ -258,40 +252,6 @@ Released under MIT License. Enjoy!
             </div>
         </form>
 
-        <!-- Account Update Contact Email -->
-        <form id="validate_update">
-            <div class="field">
-                <label for="howto_update" class="help">(how do I do this?)</label>
-                <input id="howto_update" type="checkbox" class="help-checkbox"/>
-                <div class="help-content">
-                    This command sets your account contact email to what you put
-                    in Step 1. If you had already set this email when you ran these
-                    commands previously, this command will simply set the same email
-                    again.<br/>
-                    <br/>
-                    How to generate this signature:<br/>
-                    <ol>
-                        <li>
-                            Copy and paste the command below into your terminal (if your
-                            account private key isn't at "./account.key", change "./account.key"
-                            in the command to wherever it exists).
-                        </li>
-                        <li>
-                            Copy and paste the hex encoded signature output from the command
-                            into the text field below that command.
-                        </li>
-                    </ol>
-                </div>
-                <label>Update your account email (<span id="account_email">foo@foo.com</span>):</label><br/>
-                <input id="update_sig_cmd" type="text" value="waiting until terms are accepted..." disabled/><br/>
-                <input id="update_sig" type="text" placeholder="waiting until terms are accepted..." disabled/><br/>
-            </div>
-            <div class="field">
-                <input id="validate_update_sig" type="submit" value="Update Account" disabled/>
-                <span id="validate_update_sig_status"></span>
-            </div>
-        </form>
-
         <!-- New Order Creation -->
         <form id="validate_order">
             <div class="field">
@@ -315,8 +275,8 @@ Released under MIT License. Enjoy!
                     </ol>
                 </div>
                 <label>Create your certificate order:</label><br/>
-                <input id="order_sig_cmd" type="text" value="waiting until account contact is updated..." disabled/><br/>
-                <input id="order_sig" type="text" placeholder="waiting until account contact is updated..." disabled/><br/>
+                <input id="order_sig_cmd" type="text" value="waiting until account is registered..." disabled/><br/>
+                <input id="order_sig" type="text" placeholder="waiting until account is registered..." disabled/><br/>
             </div>
             <div class="field">
                 <input id="validate_order_sig" type="submit" value="Create Order" disabled/>

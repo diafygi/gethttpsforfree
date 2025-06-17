@@ -29,14 +29,6 @@ var ACCOUNT = {
 //  "registration_protected_b64": "deadbeef...",
 //  "registration_sig": "deadbeef...",
 //  "registration_response": {"status": "valid", "contact": [..], "termsOfServiceAgreed": true, "orders": "..."},
-//
-//  // account contact update
-//  "update_payload_json": {"contact": ["mailto:..."]},
-//  "update_payload_b64": "deadbeef...",
-//  "update_protected_json": {"url": "...", "alg": "...", "nonce": "...", "kid": "..."},
-//  "update_protected_b64": "deadbeef...",
-//  "update_sig": "deadbeef...",
-//  "update_response": {"status": "valid", "contact": [..], "termsOfServiceAgreed": true, "orders": "..."},
 };
 var ORDER = {
 //  "csr_pem": "-----BEGIN CERTIFICATE REQUEST...",
@@ -244,7 +236,6 @@ function populateDirectory(){
         document.getElementById("validate_csr").addEventListener("submit", validateCSR);
         document.getElementById("validate_csr_submit").removeAttribute("disabled");
         document.getElementById("validate_registration").addEventListener("submit", validateRegistration);
-        document.getElementById("validate_update").addEventListener("submit", validateUpdate);
         document.getElementById("validate_order").addEventListener("submit", validateOrder);
         document.getElementById("validate_finalize").addEventListener("submit", validateFinalize);
         document.getElementById("validate_recheck_order").addEventListener("submit", recheckOrder);
@@ -270,17 +261,6 @@ function validateAccount(e){
     status.style.display = "inline";
     status.className = "";
     status.innerHTML = "validating...";
-
-    // validate email
-    var email_re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-    var email = document.getElementById("email").value;
-    if(!email_re.test(email)){
-        return fail(status, "Account email doesn't look valid.");
-    }
-
-    // update email in interface
-    document.getElementById("account_email").innerHTML = "";
-    document.getElementById("account_email").appendChild(document.createTextNode(email));
 
     // parse account public key
     var pubkey = document.getElementById("pubkey").value;
@@ -330,7 +310,6 @@ function validateAccount(e){
 
         // update the global account object
         var registration_payload = {"termsOfServiceAgreed": true};
-        var account_payload = {"contact": ["mailto:" + email]};
         ACCOUNT = {
             "pubkey": pubkey,
             "alg": "RS256",
@@ -345,14 +324,6 @@ function validateAccount(e){
             "registration_protected_b64": undefined,
             "registration_sig": undefined,
             "registration_response": undefined,
-
-            // account contact update
-            "update_payload_json": account_payload,
-            "update_payload_b64": b64(JSON.stringify(account_payload)),
-            "update_protected_json": undefined,
-            "update_protected_b64": undefined,
-            "update_sig": undefined,
-            "update_response": undefined,
         };
 
         // show the success text (simulate a delay so it looks like we thought hard)
@@ -392,24 +363,12 @@ function validateCSR(e){
     document.getElementById("validate_registration_sig_status").className = "";
     document.getElementById("validate_registration_sig_status").innerHTML = "";
 
-    // reset account update signature
-    document.getElementById("update_sig_cmd").value = "waiting until terms are accepted...";
-    document.getElementById("update_sig_cmd").removeAttribute("readonly");
-    document.getElementById("update_sig_cmd").setAttribute("disabled", "");
-    document.getElementById("update_sig").value = "";
-    document.getElementById("update_sig").setAttribute("placeholder", "waiting until terms are accepted...");
-    document.getElementById("update_sig").setAttribute("disabled", "");
-    document.getElementById("validate_update_sig").setAttribute("disabled", "");
-    document.getElementById("validate_update_sig_status").style.display = "none";
-    document.getElementById("validate_update_sig_status").className = "";
-    document.getElementById("validate_update_sig_status").innerHTML = "";
-
     // reset new order signature
-    document.getElementById("order_sig_cmd").value = "waiting until account contact is updated...";
+    document.getElementById("order_sig_cmd").value = "waiting until account is registered...";
     document.getElementById("order_sig_cmd").removeAttribute("readonly");
     document.getElementById("order_sig_cmd").setAttribute("disabled", "");
     document.getElementById("order_sig").value = "";
-    document.getElementById("order_sig").setAttribute("placeholder", "waiting until account contact is updated...");
+    document.getElementById("order_sig").setAttribute("placeholder", "waiting until account is registered...");
     document.getElementById("order_sig").setAttribute("disabled", "");
     document.getElementById("validate_order_sig").setAttribute("disabled", "");
     document.getElementById("validate_order_sig_status").style.display = "none";
@@ -608,24 +567,12 @@ function validateRegistration(e){
     document.getElementById("step5").style.display = "none";
     document.getElementById("step5_pending").style.display = "inline";
 
-    // reset account update signature
-    document.getElementById("update_sig_cmd").value = "waiting until terms are accepted...";
-    document.getElementById("update_sig_cmd").removeAttribute("readonly");
-    document.getElementById("update_sig_cmd").setAttribute("disabled", "");
-    document.getElementById("update_sig").value = "";
-    document.getElementById("update_sig").setAttribute("placeholder", "waiting until terms are accepted...");
-    document.getElementById("update_sig").setAttribute("disabled", "");
-    document.getElementById("validate_update_sig").setAttribute("disabled", "");
-    document.getElementById("validate_update_sig_status").style.display = "none";
-    document.getElementById("validate_update_sig_status").className = "";
-    document.getElementById("validate_update_sig_status").innerHTML = "";
-
     // reset new order signature
-    document.getElementById("order_sig_cmd").value = "waiting until account contact is updated...";
+    document.getElementById("order_sig_cmd").value = "waiting until account is registered...";
     document.getElementById("order_sig_cmd").removeAttribute("readonly");
     document.getElementById("order_sig_cmd").setAttribute("disabled", "");
     document.getElementById("order_sig").value = "";
-    document.getElementById("order_sig").setAttribute("placeholder", "waiting until account contact is updated...");
+    document.getElementById("order_sig").setAttribute("placeholder", "waiting until account is registered...");
     document.getElementById("order_sig").setAttribute("disabled", "");
     document.getElementById("validate_order_sig").setAttribute("disabled", "");
     document.getElementById("validate_order_sig_status").style.display = "none";
@@ -663,101 +610,6 @@ function validateRegistration(e){
                         return fail(status, "Failed update nonce request (code: " + err.status + "). " + err.responseText);
                     }
 
-                    // populate update signature (payload populated in validateAccount())
-                    ACCOUNT['update_protected_json'] = {
-                        "url": ACCOUNT['account_uri'],
-                        "alg": ACCOUNT['alg'],
-                        "nonce": nonce,
-                        "kid": ACCOUNT['account_uri'],
-                    }
-                    ACCOUNT['update_protected_b64'] = b64(JSON.stringify(ACCOUNT['update_protected_json']));
-                    document.getElementById("update_sig_cmd").value = "" +
-                        "PRIV_KEY=./account.key; " +
-                        "echo -n \"" + ACCOUNT['update_protected_b64'] + "." + ACCOUNT['update_payload_b64'] + "\" | " +
-                        "openssl dgst -sha256 -hex -sign $PRIV_KEY";
-                    document.getElementById("update_sig_cmd").setAttribute("readonly", "");
-                    document.getElementById("update_sig_cmd").removeAttribute("disabled");
-                    document.getElementById("update_sig").value = "";
-                    document.getElementById("update_sig").setAttribute("placeholder", RESULT_PLACEHOLDER);
-                    document.getElementById("update_sig").removeAttribute("disabled");
-                    document.getElementById("validate_update_sig").removeAttribute("disabled");
-
-                    // complete step 3a
-                    status.innerHTML = "Accepted! Proceed to next command below.";
-                });
-            }
-
-            // error registering
-            else{
-                return fail(status, "Account registration failed. Please start back at Step 1. " + registration_xhr.responseText);
-            }
-        }
-    };
-    registration_xhr.send(JSON.stringify({
-        "protected": ACCOUNT['registration_protected_b64'],
-        "payload": ACCOUNT['registration_payload_b64'],
-        "signature": ACCOUNT['registration_sig'],
-    }));
-}
-
-/*
- * Step 3b: Update Account Contact (POST /ACCOUNT['account_uri'])
- */
-function validateUpdate(e){
-    e.preventDefault();
-
-    // clear previous status
-    var status = document.getElementById("validate_update_sig_status");
-    status.style.display = "inline";
-    status.className = "";
-    status.innerHTML = "updating...";
-
-    // hide following steps
-    document.getElementById("step4").style.display = "none";
-    document.getElementById("step4_pending").style.display = "inline";
-    document.getElementById("step5").style.display = "none";
-    document.getElementById("step5_pending").style.display = "inline";
-
-    // reset new order signature
-    document.getElementById("order_sig_cmd").value = "waiting until account contact is updated...";
-    document.getElementById("order_sig_cmd").removeAttribute("readonly");
-    document.getElementById("order_sig_cmd").setAttribute("disabled", "");
-    document.getElementById("order_sig").value = "";
-    document.getElementById("order_sig").setAttribute("placeholder", "waiting until account contact is updated...");
-    document.getElementById("order_sig").setAttribute("disabled", "");
-    document.getElementById("validate_order_sig").setAttribute("disabled", "");
-    document.getElementById("validate_order_sig_status").style.display = "none";
-    document.getElementById("validate_order_sig_status").className = "";
-    document.getElementById("validate_order_sig_status").innerHTML = "";
-
-    // validate update payload exists
-    if(ACCOUNT['update_payload_b64'] === undefined){
-        return fail(status, "Update payload not found. Please go back to Step 1.");
-    }
-
-    // validate the signature
-    var update_sig = hex2b64(document.getElementById("update_sig").value);
-    if(update_sig === null){
-        return fail(status, "You need to run the above commands and paste the output in the text boxes below each command.");
-    }
-    ACCOUNT['update_sig'] = update_sig;
-
-    // send update request to CA account_uri
-    var update_xhr = new XMLHttpRequest();
-    update_xhr.open("POST", ACCOUNT['account_uri']);
-    update_xhr.setRequestHeader("Content-Type", "application/jose+json");
-    update_xhr.onreadystatechange = function(){
-        if(update_xhr.readyState === 4){
-
-            // successful update
-            if(update_xhr.status === 200){
-
-                // get nonce for new order
-                getNonce(function(nonce, err){
-                    if(err){
-                        return fail(status, "Failed order nonce request (code: " + err.status + "). " + err.responseText);
-                    }
-
                     // populate order signature (payload populated in validateCSR())
                     ORDER['order_protected_json'] = {
                         "url": DIRECTORY['newOrder'],
@@ -777,26 +629,26 @@ function validateUpdate(e){
                     document.getElementById("order_sig").removeAttribute("disabled");
                     document.getElementById("validate_order_sig").removeAttribute("disabled");
 
-                    // complete step 3b
+                    // complete step 3a
                     status.innerHTML = "Updated! Proceed to next command below.";
                 });
             }
 
             // error registering
             else{
-                return fail(status, "Account contact update failed. Please start back at Step 1. " + update_xhr.responseText);
+                return fail(status, "Account registration failed. Please start back at Step 1. " + registration_xhr.responseText);
             }
         }
     };
-    update_xhr.send(JSON.stringify({
-        "protected": ACCOUNT['update_protected_b64'],
-        "payload": ACCOUNT['update_payload_b64'],
-        "signature": ACCOUNT['update_sig'],
+    registration_xhr.send(JSON.stringify({
+        "protected": ACCOUNT['registration_protected_b64'],
+        "payload": ACCOUNT['registration_payload_b64'],
+        "signature": ACCOUNT['registration_sig'],
     }));
 }
 
 /*
- * Step 3c: Create New Order (POST /newOrder)
+ * Step 3b: Create New Order (POST /newOrder)
  */
 function validateOrder(e){
     e.preventDefault();
@@ -922,7 +774,7 @@ function validateOrder(e){
                     document.getElementById("step4").style.display = "block";
                     document.getElementById("step4_pending").style.display = "none";
 
-                    // complete step 3c
+                    // complete step 3b
                     status.innerHTML = "Ordered! Proceed to Step 4!";
                 });
 
